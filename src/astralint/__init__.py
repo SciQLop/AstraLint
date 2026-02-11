@@ -1,0 +1,1 @@
+from .astralint import app
