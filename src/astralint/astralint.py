@@ -1,6 +1,7 @@
 from cyclopts import App
+from typing import Optional
 from .base import *
-from .ISTP import ISTP
+from .codecs import load_file
 from rich.console import Console
 from rich.table import Table
 
@@ -26,11 +27,15 @@ app = App()
 
 
 @app.command()
-def lint(path: str):
+def lint(path: str, suite: str = "ISTP"):
     """Lint the given file or directory."""
-    istp: ConformanceSuite = ISTP()
-    results = istp.validate(path)
-    report(results)
+    checker: Optional[ConformanceSuite] = get_suite(suite)
+    if checker:
+        if file:= load_file(path):
+            results = checker.validate(file)
+            report(results)
+    else:
+        raise ValueError(f"Unknown conformance suite '{suite}'. Available suites: {', '.join(list_suites())}")
 
 
 if __name__ == "__main__":

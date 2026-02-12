@@ -41,6 +41,7 @@ classifiers = [
 dependencies = [
     "cyclopts>=4.5.2",
     "pycdfpp>=0.8.6",
+    "pydantic>=2.12.5",
     "rich>=14.3.2",
 ]
 

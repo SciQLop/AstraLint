@@ -1,10 +1,7 @@
-import pycdfpp
-
-from ....base import Rule, ValidationResult, Severity
-from ..istp_rules import register_istp_rule
+from .....base import Rule, ValidationResult, Severity, RegisterRule, File
 
 
-@register_istp_rule
+@RegisterRule(suite="ISTP")
 class MandatoryVariablesAttributes(Rule):
     @property
     def description(self) -> str:
@@ -26,15 +23,14 @@ class MandatoryVariablesAttributes(Rule):
     def severity(self) -> Severity:
         return Severity.ERROR
 
-    def check(self, file) -> list[ValidationResult]:
+    def check(self, file:File) -> list[ValidationResult]:
         required_attributes = {
             "CATDESC",
             "DEPEND_0",
             "DISPLAY_TYPE"
         }
         results = []
-        cdf = pycdfpp.load(file)
-        for name, var in cdf.items():
+        for name, var in file.variables.items():
             missing_attributes = required_attributes - set(var.attributes.keys())
             if missing_attributes:
                 for attr in missing_attributes:

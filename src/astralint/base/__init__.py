@@ -1,5 +1,10 @@
-from .conformance_suite import ConformanceSuite, build_suite
-from .rule import Rule
+from .conformance_suite import ConformanceSuite, register_suite, get_suite, list_suites
+from .rule import Rule, RegisterRule
 from .validation_result import Severity, ValidationResult
+from .loader import load_rules_from_dir
+from .file import File, Variable, VariableBits, Attribute, DataType
+from .codec import Codec, classproperty
 
-__all__ = ["ConformanceSuite", "Rule", "Severity", "ValidationResult", "build_suite"]
+__all__ = ["ConformanceSuite", "Rule", "Severity", "ValidationResult", "register_suite", "load_rules_from_dir",
+           "RegisterRule", "get_suite", "list_suites", "File", "Variable", "VariableBits", "Attribute", "DataType",
+           "Codec", "classproperty"]

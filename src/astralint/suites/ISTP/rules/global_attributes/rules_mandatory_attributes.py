@@ -1,10 +1,7 @@
-import pycdfpp
-
-from ....base import Rule, ValidationResult, Severity
-from ..istp_rules import register_istp_rule
+from .....base import Rule, ValidationResult, Severity, RegisterRule,File
 
 
-@register_istp_rule
+@RegisterRule(suite="ISTP")
 class MandatoryAttributes(Rule):
     @property
     def description(self) -> str:
@@ -26,7 +23,7 @@ class MandatoryAttributes(Rule):
     def severity(self) -> Severity:
         return Severity.ERROR
 
-    def check(self, file) -> list[ValidationResult]:
+    def check(self, file:File) -> list[ValidationResult]:
         required_attributes = {
             "Data_type",
             "Data_version",
@@ -42,8 +39,7 @@ class MandatoryAttributes(Rule):
             "TEXT"
         }
         results = []
-        cdf = pycdfpp.load(file)
-        missing_attributes = required_attributes - set(cdf.attributes.keys())
+        missing_attributes = required_attributes - set(file.attributes.keys())
         if missing_attributes:
             for attr in missing_attributes:
                 results.append(self._format_result(
