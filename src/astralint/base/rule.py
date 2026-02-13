@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
-from .validation_result import ValidationResult, Severity
+from .validation_result import ValidationResult, ValidationResultGroup, Severity
 from .file import File
 
 
@@ -12,7 +12,7 @@ class Rule(BaseModel):
     reference: str
     severity: Severity
 
-    def check(self, file: File) -> list[ValidationResult]: ...
+    def check(self, file: File) -> ValidationResult | ValidationResultGroup: ...
 
     def _format_result(self, valid: bool, message: str) -> ValidationResult:
         return ValidationResult(
@@ -23,11 +23,12 @@ class Rule(BaseModel):
         )
 
 
-RULES: dict[str,list[Rule]] = {}
+RULES: dict[str, list[Rule]] = {}
 
 
 class RegisterRule(BaseModel):
     suite: str
+
     def __call__(self, cls):
         if self.suite not in RULES:
             RULES[self.suite] = []

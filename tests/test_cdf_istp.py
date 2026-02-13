@@ -5,7 +5,6 @@ from astralint.base import get_suite
 __HERE__ = os.path.dirname(os.path.abspath(__file__))
 
 
-
 def test_can_run_istp_suite():
     suite = get_suite("ISTP")
     assert suite is not None, "ISTP suite should be registered and retrievable."

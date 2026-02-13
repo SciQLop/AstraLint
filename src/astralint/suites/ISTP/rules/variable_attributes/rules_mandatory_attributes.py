@@ -1,15 +1,15 @@
-from .....base import Rule, ValidationResult, Severity, RegisterRule, File
+from .....base import Rule, ValidationResult, ValidationResultGroup, Severity, RegisterRule, File
 
 
 @RegisterRule(suite="ISTP")
 class MandatoryVariablesAttributes(Rule):
-    name : str = "Mandatory Global Attributes"
-    description : str = "Mandatory Global Attributes"
-    url : str = "https://github.com/IHDE-Alliance/ISTP_metadata/blob/main/ISTP_metadata_guidelines/docs/05_metadata-variable-attributes.md#istp-variable-attributes"
-    reference : str = "ISTP-MD-002"
-    severity : Severity = Severity.ERROR
+    name: str = "Mandatory Global Attributes"
+    description: str = "Mandatory Global Attributes"
+    url: str = "https://github.com/IHDE-Alliance/ISTP_metadata/blob/main/ISTP_metadata_guidelines/docs/05_metadata-variable-attributes.md#istp-variable-attributes"
+    reference: str = "ISTP-MD-002"
+    severity: Severity = Severity.ERROR
 
-    def check(self, file:File) -> list[ValidationResult]:
+    def check(self, file: File) -> ValidationResult | ValidationResultGroup:
         required_attributes = {
             "CATDESC",
             "DEPEND_0",
@@ -29,4 +29,9 @@ class MandatoryVariablesAttributes(Rule):
                     valid=True,
                     message=f"All mandatory global attributes are present in variable '{name}'."
                 ))
-        return results
+        return ValidationResultGroup(
+            name=self.name,
+            rule_reference=self.reference,
+            results=results,
+            severity=self.severity,
+        )

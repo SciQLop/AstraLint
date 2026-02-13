@@ -4,7 +4,7 @@ from typing import Any
 import yaml
 
 from ..file import File
-from ..validation_result import ValidationResult, Severity
+from ..validation_result import ValidationResult, ValidationResultGroup, Severity
 from ..rule import RULES, Rule
 from .assertions.registry import get_assertion_union
 from .assertions.base import BaseAssertion
@@ -34,12 +34,17 @@ class YamlRule(Rule):
         return ValidationResult(valid=valid, reference=self.reference, severity=self.severity, message=message,
                                 target=target)
 
-    def check(self, file: File) -> list[ValidationResult]:
+    def check(self, file: File) -> ValidationResult | ValidationResultGroup:
         results = []
         for assertion in self.assertions:
             assert isinstance(assertion, BaseAssertion)
             results.append(assertion.evaluate(file))
-        return results
+        return ValidationResultGroup(
+            name=self.name,
+            rule_reference=self.reference,
+            results=results,
+            severity=self.severity,
+        )
 
 
 def load_yaml_rule(yaml_path: Path) -> YamlRule:

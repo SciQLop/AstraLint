@@ -43,7 +43,7 @@ url: {suite.url}
         results = []
         for rule in self.rules:
             log.info(f"Validating rule {rule.name}")
-            results.extend(rule.check(file))
+            results.append(rule.check(file))
         return ValidationResultGroup(
             name=self.name,
             rule_reference="",
