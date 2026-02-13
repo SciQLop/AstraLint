@@ -1,0 +1,29 @@
+name: MandatoryGlobalAttributes
+description: "All mandatory global attributes must be present"
+url: "https://..."
+reference: "ISTP-MD-003"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  - path: "attributes"
+    check: contains_keys
+    keys:
+      - Data_type
+      - Data_version
+      - Descriptor
+      - Instrument_type
+      - Logical_file_id
+      - Logical_source
+      - Logical_source_description
+      - Mission_group
+      - PI_affiliation
+      - PI_name
+      - Source_name
+      - TEXT
+    message: "Missing mandatory global attribute: {key}"
+
+  - path: "variables/.*/attributes"
+    check: contains_keys
+    keys: [CATDESC, FIELDNAM, FILLVAL]
+    message: "Variable '{parent}' missing attribute: {key}"

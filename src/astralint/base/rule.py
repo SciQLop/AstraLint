@@ -1,25 +1,16 @@
-from typing import Any, Protocol
-from dataclasses import dataclass
+from pydantic import BaseModel, ConfigDict
 
 from .validation_result import ValidationResult, Severity
 from .file import File
 
 
-class Rule(Protocol):
-    @property
-    def description(self) -> str: ...
-
-    @property
-    def url(self) -> str: ...
-
-    @property
-    def reference(self) -> str: ...
-
-    @property
-    def name(self) -> str: ...
-
-    @property
-    def severity(self) -> Severity: ...
+class Rule(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    name: str
+    description: str
+    url: str
+    reference: str
+    severity: Severity
 
     def check(self, file: File) -> list[ValidationResult]: ...
 
@@ -35,8 +26,7 @@ class Rule(Protocol):
 RULES: dict[str,list[Rule]] = {}
 
 
-@dataclass
-class RegisterRule:
+class RegisterRule(BaseModel):
     suite: str
     def __call__(self, cls):
         if self.suite not in RULES:

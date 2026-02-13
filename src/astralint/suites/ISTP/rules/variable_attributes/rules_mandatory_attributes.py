@@ -3,25 +3,11 @@ from .....base import Rule, ValidationResult, Severity, RegisterRule, File
 
 @RegisterRule(suite="ISTP")
 class MandatoryVariablesAttributes(Rule):
-    @property
-    def description(self) -> str:
-        return "All global attributes must be present."
-
-    @property
-    def url(self) -> str:
-        return "https://github.com/IHDE-Alliance/ISTP_metadata/blob/main/ISTP_metadata_guidelines/docs/05_metadata-variable-attributes.md#istp-variable-attributes"
-
-    @property
-    def reference(self) -> str:
-        return "ISTP-MD-002"
-
-    @property
-    def name(self) -> str:
-        return "Mandatory Global Attributes"
-
-    @property
-    def severity(self) -> Severity:
-        return Severity.ERROR
+    name : str = "Mandatory Global Attributes"
+    description : str = "Mandatory Global Attributes"
+    url : str = "https://github.com/IHDE-Alliance/ISTP_metadata/blob/main/ISTP_metadata_guidelines/docs/05_metadata-variable-attributes.md#istp-variable-attributes"
+    reference : str = "ISTP-MD-002"
+    severity : Severity = Severity.ERROR
 
     def check(self, file:File) -> list[ValidationResult]:
         required_attributes = {

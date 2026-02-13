@@ -1,0 +1,4 @@
+name: ISTP
+url: "https://github.com/IHDE-Alliance/ISTP_metadata/blob/main/ISTP_metadata_guidelines/README.md"
+rules_lookup_dir: "rules"
+description: "ISTP metadata validation suite"

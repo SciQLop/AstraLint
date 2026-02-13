@@ -1,0 +1,20 @@
+name: MandatoryGlobalAttributes
+description: "All mandatory global attributes must be present"
+url: "https://..."
+reference: "ISTP-MD-004"
+severity: ERROR
+suite: ISTP
+
+
+assertions:
+  # Check nested variable attributes
+  - path: "variables/.*/attributes"
+    check: contains_keys
+    keys: [FIELDNAM, CATDESC]
+    message: "Variable '{parent}' missing attribute: {key}"
+
+  # Check value matches pattern
+  - path: "attributes/Logical_source/name"
+    check: matches
+    pattern: "^[a-z0-9_]+$"
+    message: "Logical_source must be lowercase alphanumeric"

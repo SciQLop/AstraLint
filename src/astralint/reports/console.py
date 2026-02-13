@@ -1,0 +1,64 @@
+from functools import singledispatch
+from rich.console import Console, RenderableType
+from rich.tree import Tree
+from rich.text import Text
+from rich.panel import Panel
+from ..base import ValidationResult, ValidationResultGroup, Severity
+
+
+@singledispatch
+def _render(obj) -> RenderableType:
+    raise ValueError(f"Cannot render object of type {type(obj)}. Expected ValidationResult or ValidationResultGroup.")
+
+
+@_render.register(ValidationResult)
+def _render_result(res: ValidationResult) -> Text:
+    """Renders a single leaf (ValidationResult)."""
+    icon = "[bold green]✔[/]" if res.valid else "[bold red]✘[/]"
+
+    # Severity color mapping
+    color = "red" if res.severity == Severity.ERROR else "yellow" if res.severity == Severity.WARNING else "blue"
+
+    text = Text.from_markup(f"{icon} [bold]{res.reference}[/]: {res.message}")
+    text.append(f" ({res.severity.value})", style=f"bold {color}")
+
+    # Show target if it's not the generic 'Global'
+    if res.target != "Global":
+        text.append(f" @ {res.target}", style="italic cyan")
+
+    return text
+
+
+@_render.register(ValidationResultGroup)
+def _render_group(group: ValidationResultGroup) -> Tree:
+    """Renders a branch (ValidationResultGroup) and recurses."""
+    # Logic for group header style based on validity
+    all_valid = all(getattr(r, 'valid', True) for r in group.results)
+    header_style = "bold green" if all_valid else "bold yellow"
+
+    header = Text.assemble(
+        (f" {group.name} ", header_style),
+        (f"[{group.rule_reference}]", "italic dim")
+    )
+
+    tree = Tree(header)
+    for item in group.results:
+        # This recursive call handles the nesting automatically
+        tree.add(_render(item))
+    return tree
+
+
+def report(results: ValidationResultGroup):
+    """The main entry point called by the CLI."""
+    console = Console()
+
+    # Wrap everything in a Panel for the 'tool' aesthetic
+    report_tree = _render(results)
+
+    console.print("\n")
+    console.print(Panel(
+        report_tree,
+        title="[bold]AstraLint Conformance Report[/]",
+        border_style="blue",
+        padding=(1, 2)
+    ))
