@@ -1,7 +1,6 @@
 import os
 
-from astralint.base import get_suite
-from astralint.codecs import load_file
+from astralint.base import get_suite, load_file
 
 __HERE__ = os.path.dirname(os.path.abspath(__file__))
 

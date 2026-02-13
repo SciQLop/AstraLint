@@ -1,10 +1,8 @@
-
 from cyclopts import App
 from rich.console import Console, Group
 from rich.panel import Panel
 
 from .base import *
-from .codecs import load_file
 from .reports.console import report
 
 app = App()

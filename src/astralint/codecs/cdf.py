@@ -7,7 +7,7 @@ from pycdfpp import VariableAttribute as CDFVariableAttribute
 from pycdfpp import load
 
 from ..base import Attribute, Codec, DataType, File, Variable, VariableBits, classproperty
-from .codecs import register_codec
+
 
 type_mapping = {CDFDataType.CDF_CHAR: DataType.CHAR, CDFDataType.CDF_UCHAR: DataType.CHAR,
                 CDFDataType.CDF_UINT1: DataType.UINT8, CDFDataType.CDF_UINT2: DataType.UINT16,
@@ -28,6 +28,7 @@ def _to_data_type(cdf_dtype: CDFDataType) -> DataType:
 def _parse_attribute(attr) -> Attribute:
     raise NotImplementedError(f"Unsupported attribute type: {type(attr)}")
 
+
 @_parse_attribute.register(CDFAttribute)
 def _(attr: CDFAttribute) -> Attribute:
     if len(attr):
@@ -35,6 +36,7 @@ def _(attr: CDFAttribute) -> Attribute:
     else:
         data_type = DataType.NONE
     return Attribute(name=attr.name, data_type=data_type)
+
 
 @_parse_attribute.register(CDFVariableAttribute)
 def _(attr: CDFVariableAttribute) -> Attribute:
@@ -55,7 +57,6 @@ def _parse_variable(var: CDFVariable) -> Variable:
     )
 
 
-@register_codec
 class CdfCodec(Codec):
 
     @classproperty

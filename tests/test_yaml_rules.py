@@ -1,7 +1,7 @@
 import os
 
 from astralint.base.yaml_rules.assertions.base import flatten_object, resolve_path
-from astralint.codecs import load_file
+from astralint.base import load_file
 
 __HERE__ = os.path.dirname(os.path.abspath(__file__))
 
