@@ -55,9 +55,11 @@ url: {suite.url}
             rules=self.rules + suite.rules
         )
 
-    def run(self, file: File, select: Optional[list[str]], ignore: Optional[list[str]]) -> ValidationResultGroup:
+    def run(self, file: File, select: Optional[list[str]] = None,
+            ignore: Optional[list[str]] = None) -> ValidationResultGroup:
         results = []
-        for rule in self.rules:
+        rules = filter_rules(self.rules, select, ignore)
+        for rule in rules:
             log.debug(f"Validating rule {rule.name}")
             results.append(rule.check(file))
         return ValidationResultGroup(
