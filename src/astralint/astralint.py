@@ -1,16 +1,17 @@
+
 from cyclopts import App
-from typing import Optional
+from rich.console import Console, Group
+from rich.panel import Panel
+
 from .base import *
 from .codecs import load_file
 from .reports.console import report
-from rich.console import Console, Group
-from rich.panel import Panel
 
 app = App()
 
 
 @app.command()
-def lint(path: str, suite: str = "ISTP", select: Optional[list[str]] = None, ignore: Optional[list[str]] = None):
+def lint(path: str, suite: str = "ISTP", select: list[str] | None = None, ignore: list[str] | None = None):
     """Lint the given file or directory against the specified conformance suite.
 
     Parameters
@@ -25,7 +26,7 @@ def lint(path: str, suite: str = "ISTP", select: Optional[list[str]] = None, ign
         A list of rule names to exclude from the linting process. If not provided, no rules will be excluded.
 
     """
-    checker: Optional[ConformanceSuite] = get_suite(suite)
+    checker: ConformanceSuite | None = get_suite(suite)
     if checker:
         if file := load_file(path):
             results = checker.run(file, select=select, ignore=ignore)

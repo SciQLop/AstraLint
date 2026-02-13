@@ -1,8 +1,9 @@
-from ...file import File
-from ...validation_result import ValidationResult, Severity
-from .base import BaseAssertion, flatten_object, resolve_path
-from .registry import register_assertion
 from typing import Literal
+
+from ...file import File
+from ...validation_result import Severity, ValidationResult
+from .base import BaseAssertion, resolve_path
+from .registry import register_assertion
 
 
 @register_assertion

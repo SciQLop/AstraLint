@@ -1,13 +1,13 @@
 import os
-from typing import Optional
 import re
+
 from pydantic import BaseModel, ConfigDict, Field
 
-from .rule import Rule, get_rules_for_suite
-from .validation_result import ValidationResultGroup, Severity
-from .loader import load_rules_from_dir, load_suite_from_dir
-from .file import File
 from ..logger import get_logger
+from .file import File
+from .loader import load_rules_from_dir, load_suite_from_dir
+from .rule import Rule, get_rules_for_suite
+from .validation_result import Severity, ValidationResultGroup
 
 __HERE__ = os.path.dirname(__file__)
 __SUITES_DIR__ = os.path.abspath(os.path.join(__HERE__, '../suites'))
@@ -22,7 +22,7 @@ def _matches_any_pattern(name: str, patterns: list[str]) -> bool:
     return False
 
 
-def filter_rules(rules: list[Rule], select: Optional[list[str]], ignore: Optional[list[str]]) -> list[Rule]:
+def filter_rules(rules: list[Rule], select: list[str] | None, ignore: list[str] | None) -> list[Rule]:
     assert not (select and ignore), "Cannot use both select and ignore at the same time"
     if select:
         rules = [rule for rule in rules if _matches_any_pattern(rule.name, select)]
@@ -55,8 +55,8 @@ url: {suite.url}
             rules=self.rules + suite.rules
         )
 
-    def run(self, file: File, select: Optional[list[str]] = None,
-            ignore: Optional[list[str]] = None) -> ValidationResultGroup:
+    def run(self, file: File, select: list[str] | None = None,
+            ignore: list[str] | None = None) -> ValidationResultGroup:
         results = []
         rules = filter_rules(self.rules, select, ignore)
         for rule in rules:
@@ -114,7 +114,7 @@ def register_suite(description: str, url: str, name: str, rules_lookup_dir: str,
     return ctor
 
 
-def get_suite(name: str) -> Optional[ConformanceSuite]:
+def get_suite(name: str) -> ConformanceSuite | None:
     if name not in SUITES:
         load_suite_from_dir(__SUITES_DIR__, name)
     if ctor := SUITES.get(name):

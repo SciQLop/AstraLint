@@ -1,1 +1,1 @@
-from .astralint import app
+from .astralint import app as app

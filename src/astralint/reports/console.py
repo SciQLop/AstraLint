@@ -1,9 +1,11 @@
 from functools import singledispatch
+
 from rich.console import Console, RenderableType
-from rich.tree import Tree
-from rich.text import Text
 from rich.panel import Panel
-from ..base import ValidationResult, ValidationResultGroup, Severity
+from rich.text import Text
+from rich.tree import Tree
+
+from ..base import Severity, ValidationResult, ValidationResultGroup
 
 
 @singledispatch

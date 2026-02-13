@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 
-from .validation_result import ValidationResult, ValidationResultGroup, Severity
 from .file import File
+from .validation_result import Severity, ValidationResult, ValidationResultGroup
 
 
 class Rule(BaseModel):

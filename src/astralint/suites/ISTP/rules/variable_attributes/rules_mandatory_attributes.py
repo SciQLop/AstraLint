@@ -1,4 +1,4 @@
-from .....base import Rule, ValidationResult, ValidationResultGroup, Severity, RegisterRule, File
+from .....base import File, RegisterRule, Rule, Severity, ValidationResult, ValidationResultGroup
 
 
 @RegisterRule(suite="ISTP")

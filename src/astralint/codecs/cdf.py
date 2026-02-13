@@ -1,8 +1,12 @@
-from typing import Optional
 from functools import singledispatch
-from pycdfpp import load, Attribute as CDFAttribute, Variable as CDFVariable, VariableAttribute as CDFVariableAttribute, \
-    DataType as CDFDataType
-from ..base import Codec, File, Variable, Attribute, VariableBits, DataType,classproperty
+
+from pycdfpp import Attribute as CDFAttribute
+from pycdfpp import DataType as CDFDataType
+from pycdfpp import Variable as CDFVariable
+from pycdfpp import VariableAttribute as CDFVariableAttribute
+from pycdfpp import load
+
+from ..base import Attribute, Codec, DataType, File, Variable, VariableBits, classproperty
 from .codecs import register_codec
 
 type_mapping = {CDFDataType.CDF_CHAR: DataType.CHAR, CDFDataType.CDF_UCHAR: DataType.CHAR,
@@ -59,7 +63,7 @@ class CdfCodec(Codec):
         return ["cdf"]
 
     @staticmethod
-    def load(file: str) -> Optional[File]:
+    def load(file: str) -> File | None:
         if cdf := load(file):
             return File(
                 compression=cdf.compression.name,

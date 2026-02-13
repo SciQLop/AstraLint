@@ -1,6 +1,6 @@
-import os
 import importlib
 import inspect
+import os
 from glob import glob
 from pathlib import Path
 
@@ -48,8 +48,8 @@ def load_suite_from_dir(path: str, suite_name: str):
         except ModuleNotFoundError:
             log.error(f"Suite {suite_name} not found in {path}")
     elif len(yaml_suite) == 1:
-        from .conformance_suite import load_suite_from_yaml
         from . import register_suite
+        from .conformance_suite import load_suite_from_yaml
         log.debug(f"Loading suite from {yaml_suite[0]}")
         suite = load_suite_from_yaml(yaml_suite[0])
         register_suite(description=suite.description, url=suite.url, rules_lookup_dir=os.path.join(suite_dir, "rules"),

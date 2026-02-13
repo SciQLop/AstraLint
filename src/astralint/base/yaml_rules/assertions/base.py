@@ -1,6 +1,7 @@
-from pydantic import BaseModel, ConfigDict
-from typing import Any
 import re
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict
 
 from ...file import File
 from ...validation_result import ValidationResult

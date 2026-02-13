@@ -1,5 +1,7 @@
-from typing import Protocol, Optional
+from typing import Protocol
+
 from .file import File
+
 
 # https://stackoverflow.com/a/13624858
 class classproperty(property):
@@ -13,5 +15,5 @@ class Codec(Protocol):
         ...
 
     @staticmethod
-    def load(path: str) -> Optional[File]:
+    def load(path: str) -> File | None:
         ...

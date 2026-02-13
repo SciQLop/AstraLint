@@ -1,8 +1,8 @@
-from typing import Literal
 import re
+from typing import Literal
 
 from ...file import File
-from ...validation_result import ValidationResult, Severity
+from ...validation_result import Severity, ValidationResult
 from .base import BaseAssertion, resolve_path
 from .registry import register_assertion
 
