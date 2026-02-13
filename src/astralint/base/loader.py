@@ -25,20 +25,20 @@ def _make_relative_import_path(module_path: str, package_path: str) -> str:
 def load_rules_from_dir(path: str):
     modules = glob(os.path.join(path, "**/rules_*.py"))
     for module in modules:
-        log.info(f"Loading rule from {module}")
+        log.debug(f"Loading rule from {module}")
         relative_import_path = _make_relative_import_path(module[:-3], os.path.dirname(__file__))
         importlib.import_module(relative_import_path, package=__package__)
 
     yaml_rules = glob(os.path.join(path, "**/*.yaml")) + glob(os.path.join(path, "**/*.yml"))
-    log.info(f"Found {len(yaml_rules)} YAML rule files in {path}")
+    log.debug(f"Found {len(yaml_rules)} YAML rule files in {path}")
     for yaml_rule in yaml_rules:
         from .yaml_rules import register_yaml_rule
-        log.info(f"Loading YAML rule from {yaml_rule}")
+        log.debug(f"Loading YAML rule from {yaml_rule}")
         register_yaml_rule(Path(yaml_rule))
 
 
 def load_suite_from_dir(path: str, suite_name: str):
-    log.info(f"Looking for suite {suite_name} in {path}")
+    log.debug(f"Looking for suite {suite_name} in {path}")
     suite_dir = os.path.join(path, suite_name)
     yaml_suite = glob(os.path.join(suite_dir, "*.yaml")) + glob(os.path.join(suite_dir, "*.yml"))
     if len(yaml_suite) == 0 and os.path.exists(os.path.join(path, "__init__.py")):
@@ -50,7 +50,7 @@ def load_suite_from_dir(path: str, suite_name: str):
     elif len(yaml_suite) == 1:
         from .conformance_suite import load_suite_from_yaml
         from . import register_suite
-        log.info(f"Loading suite from {yaml_suite[0]}")
+        log.debug(f"Loading suite from {yaml_suite[0]}")
         suite = load_suite_from_yaml(yaml_suite[0])
         register_suite(description=suite.description, url=suite.url, rules_lookup_dir=os.path.join(suite_dir, "rules"),
                        name=suite.name, inherit_from=suite.inherit_from)

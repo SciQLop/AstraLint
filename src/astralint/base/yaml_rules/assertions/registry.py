@@ -14,7 +14,7 @@ def register_assertion(cls: type[BaseAssertion]) -> type[BaseAssertion]:
     check_field = cls.model_fields.get("check")
     if check_field and check_field.default:
         ASSERTION_TYPES[check_field.default] = cls
-        log.info(f"Registered assertion type: {check_field.default} -> {cls.__name__}")
+        log.debug(f"Registered assertion type: {check_field.default} -> {cls.__name__}")
     return cls
 
 

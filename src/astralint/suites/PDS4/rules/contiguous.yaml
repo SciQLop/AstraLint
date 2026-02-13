@@ -1,0 +1,12 @@
+name: MandatoryGlobalAttributes
+description: "All mandatory global attributes must be present"
+url: "https://..."
+reference: "PDS4-MD-001"
+severity: ERROR
+suite: PDS4
+
+assertions:
+  - path: "variables/.*/attributes"
+    check: contains_keys
+    keys: [ CATDESC, FIELDNAM, FILLVAL ]
+    message: "Variable '{parent}' missing attribute: {key}"

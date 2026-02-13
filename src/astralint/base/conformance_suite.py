@@ -1,6 +1,6 @@
 import os
 from typing import Optional
-
+import re
 from pydantic import BaseModel, ConfigDict, Field
 
 from .rule import Rule, get_rules_for_suite
@@ -13,6 +13,22 @@ __HERE__ = os.path.dirname(__file__)
 __SUITES_DIR__ = os.path.abspath(os.path.join(__HERE__, '../suites'))
 
 log = get_logger(__name__)
+
+
+def _matches_any_pattern(name: str, patterns: list[str]) -> bool:
+    for pattern in patterns:
+        if re.fullmatch(pattern, name):
+            return True
+    return False
+
+
+def filter_rules(rules: list[Rule], select: Optional[list[str]], ignore: Optional[list[str]]) -> list[Rule]:
+    assert not (select and ignore), "Cannot use both select and ignore at the same time"
+    if select:
+        rules = [rule for rule in rules if _matches_any_pattern(rule.name, select)]
+    if ignore:
+        rules = [rule for rule in rules if not _matches_any_pattern(rule.name, ignore)]
+    return rules
 
 
 class ConformanceSuite(BaseModel):
@@ -39,10 +55,10 @@ url: {suite.url}
             rules=self.rules + suite.rules
         )
 
-    def validate(self, file: File) -> ValidationResultGroup:
+    def run(self, file: File, select: Optional[list[str]], ignore: Optional[list[str]]) -> ValidationResultGroup:
         results = []
         for rule in self.rules:
-            log.info(f"Validating rule {rule.name}")
+            log.debug(f"Validating rule {rule.name}")
             results.append(rule.check(file))
         return ValidationResultGroup(
             name=self.name,
@@ -104,5 +120,11 @@ def get_suite(name: str) -> Optional[ConformanceSuite]:
     return None
 
 
-def list_suites() -> list[str]:
+def list_loaded_suites() -> list[str]:
     return list(SUITES.keys())
+
+
+def list_all_suites() -> list[str]:
+    suites = os.listdir(__SUITES_DIR__)
+    return [suite for suite in suites if
+            os.path.isdir(os.path.join(__SUITES_DIR__, suite)) and not suite.startswith("_")]
