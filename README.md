@@ -100,20 +100,20 @@ File
     ├── "Epoch" → Variable
     │   ├── name: str                    # "Epoch"
     │   ├── shape: [int]                 # e.g., [1440]
-    │   ├── attributes: {name → Attribute}
-    │   │   ├── "CATDESC"  → Attribute
-    │   │   ├── "FILLVAL"  → Attribute
-    │   │   └── ...
-    │   └── config: VariableBits
-    │       ├── compression: str         # "gzip", "none"
-    │       ├── data_type: DataType      # TT2000, FLOAT64, ...
-    │       └── record_variance: bool
+    │   ├── compression: str             # "gzip", "none"
+    │   ├── data_type: DataType          # TT2000, FLOAT64, ...
+    │   ├── record_variance: bool
+    │   └── attributes: {name → Attribute}
+    │       ├── "CATDESC"  → Attribute
+    │       ├── "FILLVAL"  → Attribute
+    │       └── ...
     ├── "Temperature" → Variable
     └── ...
 
 Attribute
 ├── name: str
-└── data_type: DataType
+├── data_type: [DataType]                # List of data types
+└── shape: [int]                         # Attribute dimensions
 
 DataType = CHAR | UINT8 | UINT16 | UINT32 | UINT64
          | INT8 | INT16 | INT32 | INT64
@@ -132,7 +132,7 @@ Rules use `/`-separated paths with regex support to navigate the model:
 | `variables` | All variables dictionary |
 | `variables/Epoch` | Specific variable |
 | `variables/.*/attributes` | Attributes of all variables |
-| `variables/Epoch/config/data_type` | Data type of a specific variable |
+| `variables/Epoch/data_type` | Data type of a specific variable |
 
 ## Defining Rules in YAML
 
@@ -162,13 +162,18 @@ assertions:
     message: "Variable missing required attribute: {key}"
 ```
 
-### Available Assertion Types
+### Available Assertions
 
-| Check           | Description                                |
-|-----------------|--------------------------------------------|
-| `contains_keys` | Verifies an object contains required keys  |
-| `matches`       | Validates a string matches a regex pattern |
-| `is_type`       | Checks a value has the expected data type  |
+| Category | Checks |
+|----------|--------|
+| **Existence** | `exists`, `not_exists` |
+| **Value** | `comparison`, `range`, `is_type` |
+| **String** | `matches` |
+| **Collection** | `contains_keys`, `in`, `not_in`, `length`, `not_empty`, `requires`, `array_shape` |
+| **Relationship** | `reference_variable` |
+| **Combinators** | `all_of`, `any_of`, `not` |
+
+📖 **[Full Assertions Reference →](docs/assertions.md)**
 
 ## Supported File Formats
 

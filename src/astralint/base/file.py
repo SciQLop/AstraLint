@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class DataType(str, Enum):
     NONE = "NONE"
-    CHAR= "CHAR"
+    CHAR = "CHAR"
     UINT8 = "UINT8"
     UINT16 = "UINT16"
     UINT32 = "UINT32"
@@ -23,18 +23,17 @@ class DataType(str, Enum):
 
 class Attribute(BaseModel):
     name: str
-    data_type: DataType
+    data_type: list[DataType]
+    shape: list[int]
 
-class VariableBits(BaseModel):
-    compression:str
-    data_type: DataType
-    record_variance: bool
 
 class Variable(BaseModel):
     name: str
-    shape: list[int]
     attributes: dict[str, Attribute]
-    config: VariableBits
+    compression: str
+    data_type: DataType
+    record_variance: bool
+    shape: list[int]
 
 
 class File(BaseModel):

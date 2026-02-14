@@ -1,45 +1,65 @@
+import pytest
 from astralint.base.conformance_suite import filter_rules
 
 
 class MockRule:
-    def __init__(self, name):
+    def __init__(self, name, reference=None):
         self.name = name
-        self.reference = f"ref-{name}"
+        self.reference = reference or f"REF-{name.upper()}"
 
 
-def test_filter_rules():
-    rules = [MockRule("rule1"), MockRule("rule2"), MockRule("rule3")]
+@pytest.fixture
+def rules():
+    return [
+        MockRule("GlobalAttributes", "ISTP-001"),
+        MockRule("VariableAttributes", "ISTP-002"),
+        MockRule("DataTypes", "ISTP-003"),
+        MockRule("Compression", "PDS4-001"),
+    ]
 
-    # Test select
-    selected = filter_rules(rules, select=["rule1", "rule3"], ignore=None)
-    assert len(selected) == 2
-    assert selected[0].name == "rule1"
-    assert selected[1].name == "rule3"
 
-    # Test ignore
-    ignored = filter_rules(rules, select=None, ignore=["rule2"])
-    assert len(ignored) == 2
-    assert ignored[0].name == "rule1"
-    assert ignored[1].name == "rule3"
+@pytest.mark.parametrize("select,ignore,expected_names", [
+    # Select by exact name
+    (["GlobalAttributes"], None, ["GlobalAttributes"]),
+    (["GlobalAttributes", "DataTypes"], None, ["GlobalAttributes", "DataTypes"]),
 
-    # Test both select and ignore (should raise an assertion error)
-    try:
+    # Ignore by exact name
+    (None, ["Compression"], ["GlobalAttributes", "VariableAttributes", "DataTypes"]),
+    (None, ["GlobalAttributes", "VariableAttributes"], ["DataTypes", "Compression"]),
+
+    # Select by regex on name
+    ([".*Attributes"], None, ["GlobalAttributes", "VariableAttributes"]),
+    (["Global.*", "Data.*"], None, ["GlobalAttributes", "DataTypes"]),
+
+    # Ignore by regex on name
+    (None, [".*Attributes"], ["DataTypes", "Compression"]),
+
+    # Select by reference
+    (["ISTP-001"], None, ["GlobalAttributes"]),
+    (["ISTP-.*"], None, ["GlobalAttributes", "VariableAttributes", "DataTypes"]),
+
+    # Ignore by reference
+    (None, ["PDS4-.*"], ["GlobalAttributes", "VariableAttributes", "DataTypes"]),
+    (None, ["ISTP-00[12]"], ["DataTypes", "Compression"]),
+
+    # No filter returns all
+    (None, None, ["GlobalAttributes", "VariableAttributes", "DataTypes", "Compression"]),
+
+    # Empty lists are falsy, so no filtering occurs
+    ([], None, ["GlobalAttributes", "VariableAttributes", "DataTypes", "Compression"]),
+    (None, [], ["GlobalAttributes", "VariableAttributes", "DataTypes", "Compression"]),
+
+    # No matches
+    (["NonExistent"], None, []),
+    (None, [".*"], []),
+])
+def test_filter_rules(rules, select, ignore, expected_names):
+    result = filter_rules(rules, select=select, ignore=ignore)
+    assert [r.name for r in result] == expected_names
+
+
+def test_filter_rules_select_and_ignore_raises(rules):
+    """Cannot use both select and ignore at the same time."""
+    with pytest.raises(AssertionError):
         filter_rules(rules, select=["rule1"], ignore=["rule2"])
-        assert False, "Should have raised an assertion error when both select and ignore are provided."
-    except AssertionError:
-        pass
 
-
-def test_filter_rules_with_regex():
-    rules = [MockRule("rule1"), MockRule("rule2"), MockRule("rule3")]
-
-    # Test select with regex
-    selected = filter_rules(rules, select=["rule[13]"], ignore=None)
-    assert len(selected) == 2
-    assert selected[0].name == "rule1"
-    assert selected[1].name == "rule3"
-
-    # Test ignore with regex
-    ignored = filter_rules(rules, select=None, ignore=["rule[23]"])
-    assert len(ignored) == 1
-    assert ignored[0].name == "rule1"

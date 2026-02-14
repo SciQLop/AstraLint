@@ -14,17 +14,21 @@ def flatten_object(obj: Any) -> list[tuple[str, Any]]:
         for k, v in obj.items():
             if not callable(v):
                 results.append((k, v))
-                results.extend([(f"{k}/{sub_k}", sub_v) for sub_k, sub_v in flatten_object(v)])
+                results.extend(
+                    [(f"{k}/{sub_k}", sub_v) for sub_k, sub_v in flatten_object(v) if not sub_k.startswith("_")])
     elif isinstance(obj, list):
         for i, v in enumerate(obj):
             if not callable(v):
-                results.append((f"[{i}]", v))
-                results.extend([(f"[{i}]/{sub_k}", sub_v) for sub_k, sub_v in flatten_object(v)])
+                results.append((f"{i}", v))
+                results.extend(
+                    [(f"{i}/{sub_k}", sub_v) for sub_k, sub_v in flatten_object(v) if not sub_k.startswith("_")])
     elif hasattr(obj, "__dict__"):
         for k, v in vars(obj).items():
             if not callable(v):
                 results.append((k, v))
-                results.extend([(f"{k}/{sub_k}", sub_v) for sub_k, sub_v in flatten_object(v)])
+                results.extend(
+                    [(f"{k}/{sub_k}", sub_v) for sub_k, sub_v in flatten_object(v)
+                     if not sub_k.startswith("_")])
     return results
 
 
@@ -43,7 +47,7 @@ class BaseAssertion(BaseModel):
     check: str
     path: str
     error_if_no_match: bool = Field(default=True)
-    message: str
+    message: str = Field(default="")
 
     def __init_subclass__(cls):
         super().__init_subclass__()

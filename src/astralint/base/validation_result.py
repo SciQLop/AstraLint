@@ -33,6 +33,8 @@ class ValidationResultGroup(BaseModel):
     def __iter__(self):
         return self.results.__iter__()
 
+    def __getitem__(self, index):
+        return self.results[index]
+
     def __len__(self):
         return len(self.results)
-

@@ -6,8 +6,7 @@ from pycdfpp import Variable as CDFVariable
 from pycdfpp import VariableAttribute as CDFVariableAttribute
 from pycdfpp import load
 
-from ..base import Attribute, Codec, DataType, File, Variable, VariableBits, classproperty
-
+from ..base import Attribute, Codec, DataType, File, Variable, classproperty
 
 type_mapping = {CDFDataType.CDF_CHAR: DataType.CHAR, CDFDataType.CDF_UCHAR: DataType.CHAR,
                 CDFDataType.CDF_UINT1: DataType.UINT8, CDFDataType.CDF_UINT2: DataType.UINT16,
@@ -32,19 +31,19 @@ def _parse_attribute(attr) -> Attribute:
 @_parse_attribute.register(CDFAttribute)
 def _(attr: CDFAttribute) -> Attribute:
     if len(attr):
-        data_type = _to_data_type(attr.type(0))
+        data_type = [_to_data_type(attr.type(i)) for i in range(len(attr))]
     else:
-        data_type = DataType.NONE
-    return Attribute(name=attr.name, data_type=data_type)
+        data_type = [DataType.NONE]
+    return Attribute(name=attr.name, data_type=data_type, shape=[len(attr)])
 
 
 @_parse_attribute.register(CDFVariableAttribute)
 def _(attr: CDFVariableAttribute) -> Attribute:
     if len(attr):
-        data_type = _to_data_type(attr.type())
+        data_type = [_to_data_type(attr.type())]
     else:
-        data_type = DataType.NONE
-    return Attribute(name=attr.name, data_type=data_type)
+        data_type = [DataType.NONE]
+    return Attribute(name=attr.name, data_type=data_type, shape=[len(attr)])
 
 
 def _parse_variable(var: CDFVariable) -> Variable:
@@ -52,8 +51,9 @@ def _parse_variable(var: CDFVariable) -> Variable:
         name=var.name,
         shape=list(var.shape),
         attributes={name: _parse_attribute(attr) for name, attr in var.attributes.items()},
-        config=VariableBits(compression=var.compression.name, record_variance=not var.is_nrv,
-                            data_type=_to_data_type(var.type))
+        compression=var.compression.name,
+        record_variance=not var.is_nrv,
+        data_type=_to_data_type(var.type)
     )
 
 
