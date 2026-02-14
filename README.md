@@ -133,6 +133,10 @@ Rules use `/`-separated paths with regex support to navigate the model:
 | `variables/Epoch` | Specific variable |
 | `variables/.*/attributes` | Attributes of all variables |
 | `variables/Epoch/data_type` | Data type of a specific variable |
+| `variables/Epoch/shape/0` | First dimension of variable shape |
+| `attributes/Project/data_type/0` | First data type of attribute |
+
+Lists are accessed using numeric indices: `path/to/list/0`, `path/to/list/1`, etc.
 
 ## Defining Rules in YAML
 

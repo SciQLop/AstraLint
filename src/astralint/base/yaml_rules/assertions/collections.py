@@ -7,30 +7,31 @@ from .base import BaseAssertion
 
 class ContainsAssertion(BaseAssertion):
     check: Literal["in"] = "in"
-    value: Any
+    values: list[Any]
 
     def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
-        if self.value in value:
+        if value in self.values:
             return ValidationResult(valid=True, reference="", severity=Severity.INFO,
-                                    message=f"Value at path '{path}' contains '{self.value}'.", target=self.path)
+                                    message=f"Value at path '{path}' is in the expected list of values.",
+                                    target=self.path)
         else:
             return ValidationResult(valid=False, reference="", severity=Severity.ERROR,
-                                    message=f"Value at path '{path}' does not contain '{self.value}'.",
+                                    message=f"Value at path '{path}' is not in the expected list of values.",
                                     target=self.path)
 
 
 class NotContainsAssertion(BaseAssertion):
     check: Literal["not_in"] = "not_in"
-    value: Any
+    values: list[Any]
 
     def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
-        if self.value not in value:
+        if value not in self.values:
             return ValidationResult(valid=True, reference="", severity=Severity.INFO,
-                                    message=f"Value at path '{path}' does not contain '{self.value}', as expected.",
+                                    message=f"Value at path '{path}' is not in the list of disallowed values, as expected.",
                                     target=self.path)
         else:
             return ValidationResult(valid=False, reference="", severity=Severity.ERROR,
-                                    message=f"Value at path '{path}' contains '{self.value}', which is not expected.",
+                                    message=f"Value at path '{path}' is in the list of disallowed values, which is not expected.",
                                     target=self.path)
 
 

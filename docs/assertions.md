@@ -94,13 +94,19 @@ Check the data type of a value or variable.
 
 ```yaml
 # Epoch variable should use TT2000
-- path: "variables/Epoch/config/data_type"
+- path: "variables/Epoch/data_type"
   check: is_type
   type: TT2000
   message: "Epoch variable should use TT2000 data type"
 
-# Check attribute is a string type
-- path: "attributes/Project/data_type"
+# Check all variables' data types
+- path: "variables/.*/data_type"
+  check: is_type
+  type: FLOAT64
+  message: "Data variables should use FLOAT64"
+
+# Check first data type of an attribute (data_type is now a list)
+- path: "attributes/Project/data_type/0"
   check: is_type
   type: CHAR
   message: "Project attribute must be a string"
@@ -342,7 +348,7 @@ assertions:
   # VAR_TYPE must be valid
   - path: "variables/.*/attributes/VAR_TYPE"
     check: in
-    value: ["data", "support_data", "metadata", "ignore_data"]
+    values: ["data", "support_data", "metadata", "ignore_data"]
     message: "Invalid VAR_TYPE value"
 
   # DEPEND_0 must reference existing variable
@@ -355,7 +361,9 @@ assertions:
 
 ## Path Patterns
 
-Assertions use `/`-separated paths with regex support to target values in the file model:
+Assertions use `/`-separated paths with regex support to target values in the file model.
+
+### Basic Paths
 
 | Pattern | Matches |
 |---------|---------|
@@ -366,8 +374,54 @@ Assertions use `/`-separated paths with regex support to target values in the fi
 | `variables/.*` | All variables (regex) |
 | `variables/.*/attributes` | Attributes of all variables |
 | `variables/.*/attributes/CATDESC` | CATDESC attribute on all variables |
-| `variables/Epoch/config/data_type` | Data type of specific variable |
-| `variables/.*/config/data_type` | Data type of all variables |
+| `variables/Epoch/data_type` | Data type of specific variable |
+| `variables/.*/data_type` | Data type of all variables |
 
-The path system uses Python's `re.fullmatch()`, so patterns like `.*`, `[A-Z]+`, and `data_.*` work as expected.
+### Accessing List Elements
+
+Lists are indexed using numeric paths (0-based):
+
+| Pattern | Matches |
+|---------|---------|
+| `variables/Epoch/shape/0` | First dimension of Epoch's shape |
+| `variables/Epoch/shape/1` | Second dimension |
+| `variables/.*/shape/0` | First dimension of all variables |
+| `attributes/Project/data_type/0` | First data type of Project attribute |
+| `attributes/.*/data_type/.*` | All data types of all attributes |
+
+**Examples:**
+
+```yaml
+# Check first dimension of variable shape is > 0
+- path: "variables/.*/shape/0"
+  check: comparison
+  operator: ">"
+  value: 0
+  message: "First dimension must be positive"
+
+# Check attribute has at least one data type entry
+- path: "attributes/.*/data_type/0"
+  check: exists
+  message: "Attribute must have at least one data type"
+
+# Match any element in shape array using regex
+- path: "variables/Epoch/shape/[0-9]+"
+  check: comparison
+  operator: ">"
+  value: 0
+  message: "All dimensions must be positive"
+```
+
+### Regex Support
+
+The path system uses Python's `re.fullmatch()`, so regex patterns work:
+
+| Pattern | Description |
+|---------|-------------|
+| `.*` | Match any single path segment |
+| `[A-Z]+` | Match uppercase letters only |
+| `data_.*` | Match paths starting with "data_" |
+| `[0-9]+` | Match any numeric index |
+| `(Epoch\|Time)` | Match "Epoch" or "Time" |
+
 
