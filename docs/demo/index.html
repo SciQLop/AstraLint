@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AstraLint - Online Demo</title>
+    <style>
+        :root {
+            --color-success: #22c55e;
+            --color-error: #ef4444;
+            --color-warning: #f59e0b;
+            --color-info: #3b82f6;
+            --color-bg: #f8fafc;
+            --color-card: #ffffff;
+            --color-border: #e2e8f0;
+            --color-text: #1e293b;
+            --color-text-muted: #64748b;
+            --color-primary: #6366f1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+
+        header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        header p { opacity: 0.8; }
+
+        .upload-zone {
+            background: var(--color-card);
+            border: 2px dashed var(--color-border);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            margin: 2rem 0;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--color-primary);
+            background: #f0f0ff;
+        }
+
+        .upload-zone input { display: none; }
+
+        .upload-zone .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .upload-zone h3 { margin-bottom: 0.5rem; }
+        .upload-zone p { color: var(--color-text-muted); font-size: 0.875rem; }
+
+        .status {
+            background: var(--color-card);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status.loading { border-left: 4px solid var(--color-primary); }
+        .status.error { border-left: 4px solid var(--color-error); }
+        .status.success { border-left: 4px solid var(--color-success); }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--color-border);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .suite-select {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .suite-select label {
+            background: var(--color-card);
+            border: 2px solid var(--color-border);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .suite-select label:hover { border-color: var(--color-primary); }
+        .suite-select input:checked + label {
+            border-color: var(--color-primary);
+            background: #f0f0ff;
+        }
+
+        .suite-select input { display: none; }
+
+        #results {
+            margin-top: 2rem;
+        }
+
+        /* Report styles */
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat {
+            background: var(--color-card);
+            border-radius: 8px;
+            padding: 1.25rem;
+            text-align: center;
+            border: 1px solid var(--color-border);
+        }
+
+        .stat .count { font-size: 2rem; font-weight: 700; }
+        .stat .label { font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted); }
+        .stat.passed .count { color: var(--color-success); }
+        .stat.failed .count { color: var(--color-error); }
+        .stat.warnings .count { color: var(--color-warning); }
+
+        .results-container { background: var(--color-card); border-radius: 12px; border: 1px solid var(--color-border); }
+
+        .group { border-bottom: 1px solid var(--color-border); }
+        .group:last-child { border-bottom: none; }
+
+        .group-header {
+            padding: 1rem 1.5rem;
+            background: #f1f5f9;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            user-select: none;
+        }
+
+        .group-header:hover { background: #e2e8f0; }
+        .group-header .arrow { transition: transform 0.2s; color: var(--color-text-muted); }
+        .group.collapsed .arrow { transform: rotate(-90deg); }
+        .group.collapsed .group-content { display: none; }
+        .group-header .name { font-weight: 600; }
+        .group-header .ref { color: var(--color-text-muted); font-size: 0.875rem; }
+
+        .group-header .badge {
+            margin-left: auto;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge.pass { background: #dcfce7; color: #166534; }
+        .badge.fail { background: #fee2e2; color: #991b1b; }
+
+        .group-content { padding-left: 1.5rem; }
+
+        .result {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .result:last-child { border-bottom: none; }
+        .result .icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+        .result.valid .icon { color: var(--color-success); }
+        .result.invalid .icon { color: var(--color-error); }
+        .result .content { flex: 1; min-width: 0; }
+        .result .message { word-break: break-word; }
+        .result .reference { font-weight: 600; }
+        .result .target { font-size: 0.875rem; color: var(--color-info); font-family: monospace; }
+
+        .severity {
+            font-size: 0.625rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .severity.ERROR { background: #fee2e2; color: #991b1b; }
+        .severity.WARNING { background: #fef3c7; color: #92400e; }
+        .severity.INFO { background: #dbeafe; color: #1e40af; }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--color-text-muted);
+            font-size: 0.875rem;
+        }
+
+        footer a { color: var(--color-primary); }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔬 AstraLint</h1>
+        <p>Space Physics Data Conformance Checker — Online Demo</p>
+    </header>
+
+    <div class="container">
+        <div id="loading-status" class="status loading">
+            <div class="spinner"></div>
+            <span>Loading Pyodide and AstraLint... This may take a moment on first load.</span>
+        </div>
+
+        <div id="app" style="display: none;">
+            <h3>Select Conformance Suite</h3>
+            <div class="suite-select">
+                <input type="radio" name="suite" id="suite-istp" value="ISTP" checked>
+                <label for="suite-istp">
+                    <strong>ISTP</strong><br>
+                    <small>NASA ISTP Guidelines</small>
+                </label>
+
+                <input type="radio" name="suite" id="suite-pds4" value="PDS4">
+                <label for="suite-pds4">
+                    <strong>PDS4</strong><br>
+                    <small>Planetary Data System</small>
+                </label>
+            </div>
+
+            <div class="upload-zone" id="upload-zone">
+                <input type="file" id="file-input" accept=".cdf">
+                <div class="icon">📁</div>
+                <h3>Drop your CDF file here</h3>
+                <p>or click to browse</p>
+            </div>
+
+            <div id="results"></div>
+        </div>
+
+        <footer>
+            <p>
+                Powered by <a href="https://pyodide.org" target="_blank">Pyodide</a> |
+                <a href="https://github.com/SciQLop/AstraLint" target="_blank">GitHub</a> |
+                All processing happens in your browser — no data is uploaded
+            </p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodide.js"></script>
+    <script>
+        let pyodide = null;
+
+        async function initPyodide() {
+            const status = document.getElementById('loading-status');
+
+            try {
+                status.innerHTML = '<div class="spinner"></div><span>Loading Pyodide...</span>';
+                pyodide = await loadPyodide();
+
+                status.innerHTML = '<div class="spinner"></div><span>Installing AstraLint...</span>';
+                await pyodide.loadPackage('micropip');
+                const micropip = pyodide.pyimport('micropip');
+                await micropip.install('astralint');
+
+                status.innerHTML = '<div class="spinner"></div><span>Initializing...</span>';
+
+                // Setup the validation function
+                await pyodide.runPythonAsync(`
+import pycdfpp
+from astralint.base import get_suite, list_all_suites
+from astralint.base.file import File, Attribute, Variable, VariableBits, DataType
+from astralint.codecs.cdf import CdfCodec, _parse_attribute, _parse_variable
+from astralint.reports.html import generate_html
+
+def validate_cdf_bytes(data: bytes, filename: str, suite_name: str = "ISTP") -> str:
+    """Main entry point for the web demo."""
+    try:
+        # Load CDF from bytes
+        cdf = pycdfpp.load(bytes(data))
+        if cdf is None:
+            raise ValueError("Failed to parse CDF file")
+
+        # Create File model from CDF
+        file = File(
+            compression=cdf.compression.name,
+            attributes={name: _parse_attribute(attr) for name, attr in cdf.attributes.items()},
+            variables={name: _parse_variable(var) for name, var in cdf.items()}
+        )
+
+        # Get the suite and run validation
+        suite = get_suite(suite_name)
+        if suite is None:
+            return f'<div class="status error">Suite "{suite_name}" not found. Available: {list_all_suites()}</div>'
+
+        results = suite.run(file)
+        return generate_html(results)
+
+    except Exception as e:
+        import traceback
+        tb = traceback.format_exc()
+        return f'<div class="status error">Error processing {filename}: {str(e)}<pre style="font-size:0.75rem;margin-top:1rem;text-align:left;overflow-x:auto;">{tb}</pre></div>'
+                `);
+
+                status.className = 'status success';
+                status.innerHTML = '✓ Ready! Upload a CDF file to validate.';
+                document.getElementById('app').style.display = 'block';
+
+            } catch (error) {
+                status.className = 'status error';
+                status.innerHTML = '✗ Failed to initialize: ' + error.message;
+                console.error(error);
+            }
+        }
+
+        async function processFile(file) {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="status loading"><div class="spinner"></div><span>Validating...</span></div>';
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const uint8Array = new Uint8Array(arrayBuffer);
+
+                // Pass file to Python
+                pyodide.globals.set('file_bytes', uint8Array);
+                pyodide.globals.set('file_name', file.name);
+                pyodide.globals.set('selected_suite', document.querySelector('input[name="suite"]:checked').value);
+
+                const html = await pyodide.runPythonAsync(`
+validate_cdf_bytes(file_bytes.to_py(), file_name, selected_suite)
+                `);
+
+                results.innerHTML = html;
+
+                // Add click handlers for collapsible groups
+                document.querySelectorAll('.group-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        header.parentElement.classList.toggle('collapsed');
+                    });
+                });
+
+            } catch (error) {
+                results.innerHTML = '<div class="status error">✗ Error: ' + error.message + '</div>';
+                console.error(error);
+            }
+        }
+
+        // File upload handling
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadZone = document.getElementById('upload-zone');
+            const fileInput = document.getElementById('file-input');
+
+            uploadZone.addEventListener('click', () => fileInput.click());
+
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length && pyodide) {
+                    processFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length && pyodide) {
+                    processFile(fileInput.files[0]);
+                }
+            });
+
+            initPyodide();
+        });
+    </script>
+</body>
+</html>
+

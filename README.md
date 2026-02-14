@@ -7,6 +7,10 @@
 AstraLint is a Python linter for Space Physics data files, validating conformance to standards such
 as [ISTP](https://spdf.gsfc.nasa.gov/istp_guide/) and [PDS4](https://pds.nasa.gov/datastandards/documents/).
 
+<p align="center">
+  <a href="https://sciqlop.github.io/AstraLint/"><strong>🚀 Try it online — no installation required!</strong></a>
+</p>
+
 ## Overview
 
 AstraLint validates data files against conformance suites using a **codec-agnostic architecture**:
