@@ -23,6 +23,9 @@ upgrade:
 build:
 	uv build
 
+demo:
+	uv run python -m http.server 8000 --directory docs/demo
+
 clean:
 	-rm -rf dist/
 	-rm -rf *.egg-info/
