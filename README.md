@@ -39,6 +39,66 @@ astralint lint myfile.cdf --suite ISTP --ignore "ISTP-MD-00[0-9]" --ignore "Mand
 astralint list-suites
 ```
 
+## Configuration
+
+AstraLint can be configured via `pyproject.toml` or `.astralint.yaml`. Configuration is loaded with the following precedence (highest to lowest):
+
+1. CLI arguments
+2. `.astralint.yaml` (project root)
+3. `pyproject.toml` `[tool.astralint]`
+4. Built-in defaults
+
+### Quick Start
+
+```bash
+# Generate a starter config file
+astralint config init
+
+# Validate your config file
+astralint config validate
+
+# Show resolved configuration (merged from all sources)
+astralint config show
+```
+
+### Example `.astralint.yaml`
+
+```yaml
+suite: ISTP
+
+select:
+  - "MandatoryGlobalAttributes"
+  - "ISTP-VAR-.*"
+
+ignore:
+  - "DeprecatedRule"
+
+severity_overrides:
+  ISTP-VAR-001: WARNING
+
+extra_rules:
+  - "./custom_rules/"
+
+output:
+  format: console
+  verbose: false
+  show_passed: true
+```
+
+### Example `pyproject.toml`
+
+```toml
+[tool.astralint]
+suite = "ISTP"
+select = ["MandatoryGlobalAttributes"]
+
+[tool.astralint.output]
+format = "html"
+verbose = true
+```
+
+📖 **[Full Configuration Reference →](docs/config.md)**
+
 ## Architecture
 
 ```mermaid

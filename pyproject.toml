@@ -43,6 +43,7 @@ dependencies = [
     "jinja2>=3.1.0",
     "pycdfpp>=0.8.5",
     "pydantic>=2.12.5",
+    "pyyaml>=6.0",
     "rich>=14.3.2",
 ]
 
@@ -62,7 +63,7 @@ dev = [
 
 [project.scripts]
 # Add script entry points here:
-AstraLint = "astralint:app"
+astralint = "astralint.astralint:main"
 
 # ---- Build system ----
 
