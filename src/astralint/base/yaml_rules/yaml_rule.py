@@ -7,8 +7,7 @@ from pydantic import BaseModel, ConfigDict, model_validator
 from ..file import File
 from ..rule import RULES, Rule
 from ..validation_result import ValidationResult, ValidationResultGroup
-from .assertions.base import BaseAssertion
-from .assertions.registry import get_assertion_union
+from .assertions.base import BaseAssertion, get_assertion_union
 
 
 class YamlRuleAssertion(BaseModel):

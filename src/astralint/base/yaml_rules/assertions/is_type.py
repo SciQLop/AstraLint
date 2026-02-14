@@ -1,0 +1,23 @@
+from typing import Literal, Any
+
+from ...file import File
+from ...validation_result import Severity, ValidationResult, ValidationResultGroup
+from .base import BaseAssertion, resolve_path
+from ...file import DataType
+
+
+class IsTypeAssertion(BaseAssertion):
+    check: Literal["is_type"] = "is_type"
+    type: str
+
+    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
+        assert isinstance(value, DataType)
+        expected_type = DataType(self.type)
+        if value != expected_type:
+            return ValidationResult(valid=False, reference="", severity=Severity.ERROR,
+                                    message=f"Value at path '{path}' is of type '{value}', expected '{expected_type}'.",
+                                    target=path)
+        else:
+            return ValidationResult(valid=True, reference="", severity=Severity.INFO,
+                                    message=f"Value at path '{path}' is of expected type '{expected_type}'.",
+                                    target=path)
