@@ -1,4 +1,5 @@
 from functools import singledispatch
+from pathlib import Path
 
 from rich.console import Console, RenderableType
 from rich.panel import Panel
@@ -50,13 +51,9 @@ def _render_group(group: ValidationResultGroup) -> Tree:
     return tree
 
 
-def report(results: ValidationResultGroup):
-    """The main entry point called by the CLI."""
-    console = Console()
-
-    # Wrap everything in a Panel for the 'tool' aesthetic
+def console_report(results: ValidationResultGroup, console: Console):
+    """Helper function to print the report to a given Console instance."""
     report_tree = _render(results)
-
     console.print("\n")
     console.print(Panel(
         report_tree,
@@ -64,3 +61,10 @@ def report(results: ValidationResultGroup):
         border_style="blue",
         padding=(1, 2)
     ))
+    return console
+
+
+def report(results: ValidationResultGroup, dest: Path|None = None):
+    """The main entry point called by the CLI."""
+    console = Console()
+    console_report(results, console)

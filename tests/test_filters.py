@@ -1,11 +1,13 @@
 from astralint.base.conformance_suite import filter_rules
 
 
-def test_filter_rules():
-    class MockRule:
-        def __init__(self, name):
-            self.name = name
+class MockRule:
+    def __init__(self, name):
+        self.name = name
+        self.reference = f"ref-{name}"
 
+
+def test_filter_rules():
     rules = [MockRule("rule1"), MockRule("rule2"), MockRule("rule3")]
 
     # Test select
@@ -29,10 +31,6 @@ def test_filter_rules():
 
 
 def test_filter_rules_with_regex():
-    class MockRule:
-        def __init__(self, name):
-            self.name = name
-
     rules = [MockRule("rule1"), MockRule("rule2"), MockRule("rule3")]
 
     # Test select with regex
