@@ -25,11 +25,11 @@ astralint lint myfile.cdf
 # Lint against a specific suite
 astralint lint myfile.cdf --suite PDS4
 
-# Select specific rules
-astralint lint myfile.cdf --select "MandatoryGlobalAttributes"
+# Select specific rules to run filtering by reference ID or name, regex supported
+astralint lint myfile.cdf --suite ISTP --select "ISTP-MD-003" --select ".*GlobalAttributes"
 
-# Ignore specific rules
-astralint lint myfile.cdf --ignore "MandatoryGlobalAttributes"
+# Ignore specific rules by reference ID or name, regex supported
+astralint lint myfile.cdf --suite ISTP --ignore "ISTP-MD-00[0-9]" --ignore "MandatoryGlobalAttributes"
 
 # List available suites
 astralint list-suites

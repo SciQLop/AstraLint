@@ -15,9 +15,9 @@ __SUITES_DIR__ = os.path.abspath(os.path.join(__HERE__, '../suites'))
 log = get_logger(__name__)
 
 
-def _matches_any_pattern(name: str, patterns: list[str]) -> bool:
+def _matches_any_pattern(rule: Rule, patterns: list[str]) -> bool:
     for pattern in patterns:
-        if re.fullmatch(pattern, name):
+        if re.fullmatch(pattern, rule.name) or re.fullmatch(pattern, rule.reference):
             return True
     return False
 
@@ -25,9 +25,9 @@ def _matches_any_pattern(name: str, patterns: list[str]) -> bool:
 def filter_rules(rules: list[Rule], select: list[str] | None, ignore: list[str] | None) -> list[Rule]:
     assert not (select and ignore), "Cannot use both select and ignore at the same time"
     if select:
-        rules = [rule for rule in rules if _matches_any_pattern(rule.name, select)]
+        rules = [rule for rule in rules if _matches_any_pattern(rule, select)]
     if ignore:
-        rules = [rule for rule in rules if not _matches_any_pattern(rule.name, ignore)]
+        rules = [rule for rule in rules if not _matches_any_pattern(rule, ignore)]
     return rules
 
 
