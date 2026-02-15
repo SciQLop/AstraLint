@@ -23,13 +23,14 @@ def _make_relative_import_path(module_path: str, package_path: str) -> str:
 
 
 def load_rules_from_dir(path: str):
-    modules = glob(os.path.join(path, "**/rules_*.py"))
+    modules = glob(os.path.join(path, "**/rules_*.py"), recursive=True)
     for module in modules:
         log.debug(f"Loading rule from {module}")
         relative_import_path = _make_relative_import_path(module[:-3], os.path.dirname(__file__))
         importlib.import_module(relative_import_path, package=__package__)
 
-    yaml_rules = glob(os.path.join(path, "**/*.yaml")) + glob(os.path.join(path, "**/*.yml"))
+    yaml_rules = glob(os.path.join(path, "**/*.yaml"), recursive=True) + glob(os.path.join(path, "**/*.yml"),
+                                                                              recursive=True)
     log.debug(f"Found {len(yaml_rules)} YAML rule files in {path}")
     for yaml_rule in yaml_rules:
         from .yaml_rules import register_yaml_rule

@@ -78,7 +78,7 @@ class ConformanceSuiteYaml(BaseModel):
     url: str
     rules_lookup_dir: str
     inherit_from: list[str] = Field(default_factory=list,
-                                    description="List of suite names to inherit rules from. Not implemented yet.")
+                                    description="List of suite names to inherit rules from.")
 
 
 def load_suite_from_yaml(path: str) -> ConformanceSuiteYaml:
@@ -88,15 +88,33 @@ def load_suite_from_yaml(path: str) -> ConformanceSuiteYaml:
     return ConformanceSuiteYaml(**data)
 
 
+def parents_rules(parents: list[str]) -> list[Rule]:
+    rules = []
+    for parent_suite_name in parents:
+        parent_suite = get_suite(parent_suite_name)
+        if parent_suite is None:
+            raise ValueError(f"Cannot inherit from suite '{parent_suite_name}': suite not found")
+        log.debug(f"Inheriting {len(parent_suite.rules)} rules from suite '{parent_suite_name}'")
+        if isinstance(parent_suite, ConformanceSuiteYaml):
+            rules.extend(parents_rules(parent_suite.inherit_from))
+        rules.extend(parent_suite.rules)
+    return rules
+
+
 class _ConformanceSuiteProtocolCtor:
-    def __init__(self, name: str, rules_lookup_dir: str, **kwargs):
+    def __init__(self, name: str, rules_lookup_dir: str, inherit_from: list[str] = None, **kwargs):
         self.kwargs = kwargs
         self.name = name
         self.rules_lookup_dir = rules_lookup_dir
+        self.inherit_from = inherit_from or []
 
     def __call__(self) -> ConformanceSuite:
+        inherited_rules = parents_rules(self.inherit_from)
+
         load_rules_from_dir(self.rules_lookup_dir)
-        return ConformanceSuite(**self.kwargs, name=self.name, rules=get_rules_for_suite(self.name))
+        own_rules = get_rules_for_suite(self.name)
+
+        return ConformanceSuite(**self.kwargs, name=self.name, rules=inherited_rules + own_rules)
 
 
 SUITES = {}
@@ -104,9 +122,13 @@ SUITES = {}
 
 def register_suite(description: str, url: str, name: str, rules_lookup_dir: str, alternative_names: list[str] = None,
                    inherit_from: list[str] = None) -> _ConformanceSuiteProtocolCtor:
-    if inherit_from:
-        raise NotImplementedError("Inherit from other suites is not implemented yet")
-    ctor = _ConformanceSuiteProtocolCtor(description=description, url=url, name=name, rules_lookup_dir=rules_lookup_dir)
+    ctor = _ConformanceSuiteProtocolCtor(
+        description=description,
+        url=url,
+        name=name,
+        rules_lookup_dir=rules_lookup_dir,
+        inherit_from=inherit_from
+    )
     SUITES[name] = ctor
     if alternative_names:
         for alt_name in alternative_names:
