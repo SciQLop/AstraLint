@@ -285,7 +285,7 @@
                 await pyodide.runPythonAsync(`
 import pycdfpp
 from astralint.base import get_suite, list_all_suites
-from astralint.base.file import File, Attribute, Variable, VariableBits, DataType
+from astralint.base.file import File, Attribute, Variable, DataType
 from astralint.codecs.cdf import CdfCodec, _parse_attribute, _parse_variable
 from astralint.reports.html import generate_html
 
@@ -293,16 +293,9 @@ def validate_cdf_bytes(data: bytes, filename: str, suite_name: str = "ISTP") -> 
     """Main entry point for the web demo."""
     try:
         # Load CDF from bytes
-        cdf = pycdfpp.load(bytes(data))
-        if cdf is None:
+        file = CdfCodec.load(bytes(data))
+        if file is None:
             raise ValueError("Failed to parse CDF file")
-
-        # Create File model from CDF
-        file = File(
-            compression=cdf.compression.name,
-            attributes={name: _parse_attribute(attr) for name, attr in cdf.attributes.items()},
-            variables={name: _parse_variable(var) for name, var in cdf.items()}
-        )
 
         # Get the suite and run validation
         suite = get_suite(suite_name)

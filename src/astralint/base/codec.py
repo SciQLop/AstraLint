@@ -31,7 +31,7 @@ class Codec(Protocol):
         ...
 
     @staticmethod
-    def load(path: str) -> File | None:
+    def load(path: str | bytes) -> File | None:
         ...
 
 

@@ -64,7 +64,7 @@ class CdfCodec(Codec):
         return ["cdf"]
 
     @staticmethod
-    def load(file: str) -> File | None:
+    def load(file: str|bytes) -> File | None:
         if cdf := load(file):
             return File(
                 compression=cdf.compression.name,
