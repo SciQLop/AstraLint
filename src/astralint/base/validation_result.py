@@ -67,3 +67,9 @@ class ValidationResultGroup(BaseModel):
     def is_passing(self) -> bool:
         """Check if all validations passed."""
         return self.count_by_severity()["failed"] == 0
+
+    @property
+    def valid(self) -> bool:
+        """Check if all validations passed (compatibility with ValidationResult)."""
+        return self.is_passing()
+

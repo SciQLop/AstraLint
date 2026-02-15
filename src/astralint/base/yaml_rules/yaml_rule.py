@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, model_validator
 from ..file import File
 from ..rule import RULES, Rule
 from ..validation_result import ValidationResult, ValidationResultGroup
-from .assertions.base import BaseAssertion, get_assertion_union
+from .assertions.base import BaseAssertion, BaseEvaluable, get_assertion_union
 
 
 class YamlRuleAssertion(BaseModel):
@@ -37,7 +37,7 @@ class YamlRule(Rule):
     def check(self, file: File) -> ValidationResult | ValidationResultGroup:
         results = []
         for assertion in self.assertions:
-            assert isinstance(assertion, BaseAssertion)
+            assert isinstance(assertion, BaseEvaluable)
             results.append(assertion.evaluate(file))
         return ValidationResultGroup(
             name=self.name,

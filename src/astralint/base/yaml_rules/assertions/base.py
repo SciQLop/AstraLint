@@ -1,7 +1,7 @@
 import re
 from typing import Any, Union, Annotated
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ...file import File
 from ...validation_result import ValidationResult, ValidationResultGroup, Severity
@@ -42,19 +42,26 @@ def resolve_path(obj: Any, path: str) -> list[tuple[str, Any]]:
 _registry: dict[str, type["BaseAssertion"]] = {}
 
 
-class BaseAssertion(BaseModel):
+class BaseEvaluable(BaseModel):
     model_config = ConfigDict(frozen=True)
     check: str
-    path: str
-    error_if_no_match: bool = Field(default=True)
-    message: str = Field(default="")
 
     def __init_subclass__(cls):
         super().__init_subclass__()
         if hasattr(cls, "check"):
             if cls.check in _registry:
-                raise ValueError(f"Duplicate assertion check: {cls.check}")
+                raise ValueError(f"Duplicate check: {cls.check}")
             _registry[cls.check] = cls
+
+    def evaluate(self, file: File) -> ValidationResult | ValidationResultGroup:
+        ...
+
+
+class BaseAssertion(BaseEvaluable):
+    model_config = ConfigDict(frozen=True)
+    path: str
+    error_if_no_match: bool = Field(default=True)
+    message: str = Field(default="")
 
     def evaluate(self, file: File) -> ValidationResult | ValidationResultGroup:
         matches = resolve_path(file, self.path)
@@ -79,6 +86,21 @@ class BaseAssertion(BaseModel):
 
     def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
         ...
+
+
+class BaseAssertionGroup(BaseEvaluable):
+    model_config = ConfigDict(frozen=True)
+    assertions: list[Any]
+
+    @model_validator(mode="before")
+    @classmethod
+    def parse_assertions(cls, data: dict) -> dict:
+        """Parse assertions using the discriminated union."""
+        assertion = get_assertion_union()
+        from pydantic import TypeAdapter
+        adapter = TypeAdapter(list[assertion])
+        data["assertions"] = adapter.validate_python(data.get("assertions", []))
+        return data
 
 
 def get_assertion_union():
