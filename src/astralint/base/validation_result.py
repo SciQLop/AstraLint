@@ -7,6 +7,7 @@ class Severity(Enum):
     ERROR = "ERROR"  # Mandatory ISTP requirement
     WARNING = "WARNING"  # Recommended practice
     INFO = "INFO"  # Optional or metadata info
+    SKIPPED = "SKIPPED"  # Condition not met, assertion skipped
 
 
 class ValidationResult(BaseModel):
@@ -41,10 +42,13 @@ class ValidationResultGroup(BaseModel):
 
     def count_by_severity(self) -> dict[str, int]:
         """Count results by severity level, recursively."""
-        counts = {"ERROR": 0, "WARNING": 0, "INFO": 0, "passed": 0, "failed": 0}
+        counts = {"ERROR": 0, "WARNING": 0, "INFO": 0, "SKIPPED": 0, "passed": 0, "failed": 0, "skipped": 0}
         for result in self.results:
             if isinstance(result, ValidationResult):
-                if result.valid:
+                if result.severity == Severity.SKIPPED:
+                    counts["skipped"] += 1
+                    counts["SKIPPED"] += 1
+                elif result.valid:
                     counts["passed"] += 1
                 else:
                     counts["failed"] += 1
@@ -72,4 +76,3 @@ class ValidationResultGroup(BaseModel):
     def valid(self) -> bool:
         """Check if all validations passed (compatibility with ValidationResult)."""
         return self.is_passing()
-

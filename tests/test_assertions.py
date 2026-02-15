@@ -747,3 +747,543 @@ assertions:
     result = rule.check(mock_file)
     assert result.results[0].valid == True
 
+
+# =============================================================================
+# Conditional assertion tests (if_then, if_then_else)
+# =============================================================================
+
+def test_if_then_condition_passes_then_passes(mock_file):
+    """Test if_then when condition passes and then passes."""
+    yaml_rule_txt = """
+name: TEST-IF-THEN-001
+description: "if_then both pass"
+url: "https://..."
+reference: "TEST-IF-THEN-001"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: if_then
+      if:
+        path: attributes/global_attr
+        check: exists
+      then:
+        path: attributes/global_attr/data_type/0
+        check: is_type
+        type: INT32
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    assert result.results[0].valid == True
+    assert result.results[0].severity.value == "INFO"
+
+
+def test_if_then_condition_passes_then_fails(mock_file):
+    """Test if_then when condition passes but then fails."""
+    yaml_rule_txt = """
+name: TEST-IF-THEN-002
+description: "if_then condition passes, then fails"
+url: "https://..."
+reference: "TEST-IF-THEN-002"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: if_then
+      if:
+        path: attributes/global_attr
+        check: exists
+      then:
+        path: attributes/global_attr/data_type/0
+        check: is_type
+        type: FLOAT64
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    assert result.results[0].valid == False
+
+
+def test_if_then_condition_fails_skipped(mock_file):
+    """Test if_then when condition fails - should be skipped."""
+    yaml_rule_txt = """
+name: TEST-IF-THEN-003
+description: "if_then condition fails, skipped"
+url: "https://..."
+reference: "TEST-IF-THEN-003"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: if_then
+      if:
+        path: nonexistent/path
+        check: exists
+      then:
+        path: attributes/global_attr/data_type/0
+        check: is_type
+        type: FLOAT64
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    assert result.results[0].valid == True
+    assert result.results[0].severity.value == "SKIPPED"
+
+
+def test_if_then_skipped_inside_all_of(mock_file):
+    """Test that skipped if_then is treated as passed in all_of."""
+    yaml_rule_txt = """
+name: TEST-IF-THEN-004
+description: "if_then skipped inside all_of"
+url: "https://..."
+reference: "TEST-IF-THEN-004"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: all_of
+      assertions:
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: INT32
+        - check: if_then
+          if:
+            path: nonexistent/path
+            check: exists
+          then:
+            path: attributes/global_attr/data_type/0
+            check: is_type
+            type: FLOAT64
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    # all_of should pass because skipped is considered valid
+    assert result.results[0].valid == True
+
+
+def test_if_then_else_condition_passes(mock_file):
+    """Test if_then_else when condition passes - runs then branch."""
+    yaml_rule_txt = """
+name: TEST-IF-THEN-ELSE-001
+description: "if_then_else condition passes"
+url: "https://..."
+reference: "TEST-IF-THEN-ELSE-001"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: if_then_else
+      if:
+        path: attributes/global_attr
+        check: exists
+      then:
+        path: attributes/global_attr/data_type/0
+        check: is_type
+        type: INT32
+      else:
+        path: attributes/global_attr/data_type/0
+        check: is_type
+        type: FLOAT64
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    assert result.results[0].valid == True
+
+
+def test_if_then_else_condition_fails_runs_else(mock_file):
+    """Test if_then_else when condition fails - runs else branch."""
+    yaml_rule_txt = """
+name: TEST-IF-THEN-ELSE-002
+description: "if_then_else condition fails, runs else"
+url: "https://..."
+reference: "TEST-IF-THEN-ELSE-002"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: if_then_else
+      if:
+        path: nonexistent/path
+        check: exists
+      then:
+        path: attributes/global_attr/data_type/0
+        check: is_type
+        type: FLOAT64
+      else:
+        path: attributes/global_attr/data_type/0
+        check: is_type
+        type: INT32
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    # else branch runs and passes (INT32 is correct)
+    assert result.results[0].valid == True
+
+
+def test_if_then_else_else_branch_fails(mock_file):
+    """Test if_then_else when else branch fails."""
+    yaml_rule_txt = """
+name: TEST-IF-THEN-ELSE-003
+description: "if_then_else else branch fails"
+url: "https://..."
+reference: "TEST-IF-THEN-ELSE-003"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: if_then_else
+      if:
+        path: nonexistent/path
+        check: exists
+      then:
+        path: attributes/global_attr/data_type/0
+        check: is_type
+        type: INT32
+      else:
+        path: attributes/global_attr/data_type/0
+        check: is_type
+        type: FLOAT64
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    # else branch runs and fails (FLOAT64 is wrong)
+    assert result.results[0].valid == False
+
+
+# =============================================================================
+# Counting assertion tests (one_of, at_least, at_most, exactly)
+# =============================================================================
+
+def test_one_of_exactly_one_passes(mock_file):
+    """Test one_of when exactly one assertion passes."""
+    yaml_rule_txt = """
+name: TEST-ONE-OF-001
+description: "one_of exactly one passes"
+url: "https://..."
+reference: "TEST-ONE-OF-001"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: one_of
+      assertions:
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: INT32
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: FLOAT64
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: CHAR
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    assert result.results[0].valid == True
+
+
+def test_one_of_none_passes(mock_file):
+    """Test one_of when no assertion passes."""
+    yaml_rule_txt = """
+name: TEST-ONE-OF-002
+description: "one_of none passes"
+url: "https://..."
+reference: "TEST-ONE-OF-002"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: one_of
+      assertions:
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: FLOAT64
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: CHAR
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    assert result.results[0].valid == False
+
+
+def test_one_of_multiple_pass(mock_file):
+    """Test one_of when multiple assertions pass - should fail."""
+    yaml_rule_txt = """
+name: TEST-ONE-OF-003
+description: "one_of multiple pass"
+url: "https://..."
+reference: "TEST-ONE-OF-003"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: one_of
+      assertions:
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: INT32
+        - path: attributes/global_attr
+          check: exists
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    # Both pass, so one_of should fail
+    assert result.results[0].valid == False
+
+
+def test_at_least_passes(mock_file):
+    """Test at_least when enough assertions pass."""
+    yaml_rule_txt = """
+name: TEST-AT-LEAST-001
+description: "at_least passes"
+url: "https://..."
+reference: "TEST-AT-LEAST-001"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: at_least
+      count: 2
+      assertions:
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: INT32
+        - path: attributes/global_attr
+          check: exists
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: FLOAT64
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    # 2 pass (INT32 and exists), meets threshold
+    assert result.results[0].valid == True
+
+
+def test_at_least_fails(mock_file):
+    """Test at_least when not enough assertions pass."""
+    yaml_rule_txt = """
+name: TEST-AT-LEAST-002
+description: "at_least fails"
+url: "https://..."
+reference: "TEST-AT-LEAST-002"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: at_least
+      count: 3
+      assertions:
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: INT32
+        - path: attributes/global_attr
+          check: exists
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: FLOAT64
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    # Only 2 pass, need 3
+    assert result.results[0].valid == False
+
+
+def test_at_most_passes(mock_file):
+    """Test at_most when few enough assertions pass."""
+    yaml_rule_txt = """
+name: TEST-AT-MOST-001
+description: "at_most passes"
+url: "https://..."
+reference: "TEST-AT-MOST-001"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: at_most
+      count: 2
+      assertions:
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: INT32
+        - path: attributes/global_attr
+          check: exists
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: FLOAT64
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    # 2 pass, at most 2 allowed
+    assert result.results[0].valid == True
+
+
+def test_at_most_fails(mock_file):
+    """Test at_most when too many assertions pass."""
+    yaml_rule_txt = """
+name: TEST-AT-MOST-002
+description: "at_most fails"
+url: "https://..."
+reference: "TEST-AT-MOST-002"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: at_most
+      count: 1
+      assertions:
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: INT32
+        - path: attributes/global_attr
+          check: exists
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    # 2 pass, only 1 allowed
+    assert result.results[0].valid == False
+
+
+def test_exactly_passes(mock_file):
+    """Test exactly when correct number of assertions pass."""
+    yaml_rule_txt = """
+name: TEST-EXACTLY-001
+description: "exactly passes"
+url: "https://..."
+reference: "TEST-EXACTLY-001"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: exactly
+      count: 2
+      assertions:
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: INT32
+        - path: attributes/global_attr
+          check: exists
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: FLOAT64
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    # Exactly 2 pass
+    assert result.results[0].valid == True
+
+
+def test_exactly_too_few(mock_file):
+    """Test exactly when too few assertions pass."""
+    yaml_rule_txt = """
+name: TEST-EXACTLY-002
+description: "exactly too few"
+url: "https://..."
+reference: "TEST-EXACTLY-002"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: exactly
+      count: 3
+      assertions:
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: INT32
+        - path: attributes/global_attr
+          check: exists
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: FLOAT64
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    # Only 2 pass, need exactly 3
+    assert result.results[0].valid == False
+
+
+def test_exactly_too_many(mock_file):
+    """Test exactly when too many assertions pass."""
+    yaml_rule_txt = """
+name: TEST-EXACTLY-003
+description: "exactly too many"
+url: "https://..."
+reference: "TEST-EXACTLY-003"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: exactly
+      count: 1
+      assertions:
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: INT32
+        - path: attributes/global_attr
+          check: exists
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    # 2 pass, need exactly 1
+    assert result.results[0].valid == False
+
+
+def test_nested_if_then_in_any_of(mock_file):
+    """Test if_then nested inside any_of."""
+    yaml_rule_txt = """
+name: TEST-NESTED-001
+description: "if_then in any_of"
+url: "https://..."
+reference: "TEST-NESTED-001"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: any_of
+      assertions:
+        - check: if_then
+          if:
+            path: nonexistent/path
+            check: exists
+          then:
+            path: attributes/global_attr/data_type/0
+            check: is_type
+            type: FLOAT64
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: CHAR
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    # if_then is skipped (valid=True), so any_of passes
+    assert result.results[0].valid == True
+
+
+def test_complex_conditional_scenario(mock_file):
+    """Test complex scenario with multiple conditionals."""
+    yaml_rule_txt = """
+name: TEST-COMPLEX-COND-001
+description: "Complex conditional scenario"
+url: "https://..."
+reference: "TEST-COMPLEX-COND-001"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: all_of
+      assertions:
+        # If variable exists, it must have correct type
+        - check: if_then
+          if:
+            path: variables/var1
+            check: exists
+          then:
+            path: variables/var1/data_type
+            check: is_type
+            type: FLOAT64
+        # At least one of these must be true
+        - check: at_least
+          count: 1
+          assertions:
+            - path: variables/var1/compression
+              check: comparison
+              operator: "="
+              value: "gzip"
+            - path: variables/var1/record_variance
+              check: comparison
+              operator: "="
+              value: true
+        # Exactly one type check should pass
+        - check: one_of
+          assertions:
+            - path: attributes/global_attr/data_type/0
+              check: is_type
+              type: INT32
+            - path: attributes/global_attr/data_type/0
+              check: is_type
+              type: FLOAT64
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    assert result.results[0].valid == True
