@@ -214,6 +214,93 @@
         }
 
         footer a { color: var(--color-primary); }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: var(--color-text-muted);
+            font-size: 0.875rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .divider::before { margin-right: 1rem; }
+        .divider::after { margin-left: 1rem; }
+
+        .url-section {
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .url-section h4 {
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+        }
+
+        .url-input-row {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-family: monospace;
+            transition: border-color 0.2s;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .url-button {
+            padding: 0.75rem 1.5rem;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .url-button:hover {
+            background: #4f46e5;
+        }
+
+        .url-button:disabled {
+            background: var(--color-border);
+            cursor: not-allowed;
+        }
+
+        .demo-hint {
+            margin-top: 0.75rem;
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        .demo-hint code {
+            background: #f1f5f9;
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
     </style>
 </head>
 <body>
@@ -249,6 +336,22 @@
                 <div class="icon">📁</div>
                 <h3>Drop your CDF file here</h3>
                 <p>or click to browse</p>
+            </div>
+
+            <div class="divider">or load from URL</div>
+
+            <div class="url-section">
+                <h4>🌐 Load CDF from URL</h4>
+                <div class="url-input-row">
+                    <input type="text" id="url-input" class="url-input"
+                           aria-label="URL to CDF file"
+                           value="https://cdaweb.gsfc.nasa.gov/pub/software/cdawlib/0MASTERS/mms1_fpi_brst_l1b_des-moms-aux_00000000_v01.cdf"
+                           placeholder="https://example.com/file.cdf">
+                    <button id="url-load-btn" class="url-button">Load</button>
+                </div>
+                <p class="demo-hint">
+                    💡 The URL above is a demo file from <code>NASA CDAWeb</code>. Click Load to try it out!
+                </p>
             </div>
 
             <div id="results"></div>
@@ -354,6 +457,64 @@ validate_cdf_bytes(file_bytes.to_py(), file_name, selected_suite)
             }
         }
 
+        async function processFileFromUrl(url) {
+            const results = document.getElementById('results');
+            const loadBtn = document.getElementById('url-load-btn');
+
+            if (!url || !url.trim()) {
+                results.innerHTML = '<div class="status error">✗ Please enter a valid URL</div>';
+                return;
+            }
+
+            // Extract filename from URL
+            const urlObj = new URL(url);
+            const filename = urlObj.pathname.split('/').pop() || 'file.cdf';
+
+            results.innerHTML = '<div class="status loading"><div class="spinner"></div><span>Downloading file from URL...</span></div>';
+            loadBtn.disabled = true;
+
+            try {
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                results.innerHTML = '<div class="status loading"><div class="spinner"></div><span>Validating...</span></div>';
+
+                const arrayBuffer = await response.arrayBuffer();
+                const uint8Array = new Uint8Array(arrayBuffer);
+
+                // Pass file to Python
+                pyodide.globals.set('file_bytes', uint8Array);
+                pyodide.globals.set('file_name', filename);
+                pyodide.globals.set('selected_suite', document.querySelector('input[name="suite"]:checked').value);
+
+                const html = await pyodide.runPythonAsync(`
+validate_cdf_bytes(file_bytes.to_py(), file_name, selected_suite)
+                `);
+
+                results.innerHTML = html;
+
+                // Add click handlers for collapsible groups
+                document.querySelectorAll('.group-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        header.parentElement.classList.toggle('collapsed');
+                    });
+                });
+
+            } catch (error) {
+                let errorMsg = error.message;
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    errorMsg = 'Failed to fetch file. This may be due to CORS restrictions. The server hosting the file must allow cross-origin requests.';
+                }
+                results.innerHTML = '<div class="status error">✗ Error loading from URL: ' + errorMsg + '</div>';
+                console.error(error);
+            } finally {
+                loadBtn.disabled = false;
+            }
+        }
+
         // File upload handling
         document.addEventListener('DOMContentLoaded', () => {
             const uploadZone = document.getElementById('upload-zone');
@@ -381,6 +542,22 @@ validate_cdf_bytes(file_bytes.to_py(), file_name, selected_suite)
             fileInput.addEventListener('change', () => {
                 if (fileInput.files.length && pyodide) {
                     processFile(fileInput.files[0]);
+                }
+            });
+
+            // URL load handling
+            const urlInput = document.getElementById('url-input');
+            const urlLoadBtn = document.getElementById('url-load-btn');
+
+            urlLoadBtn.addEventListener('click', () => {
+                if (pyodide) {
+                    processFileFromUrl(urlInput.value);
+                }
+            });
+
+            urlInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && pyodide) {
+                    processFileFromUrl(urlInput.value);
                 }
             });
 
