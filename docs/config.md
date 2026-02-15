@@ -373,3 +373,27 @@ astralint lint data/ --config-file .astralint.prod.yaml
 
 5. **Use `severity_overrides` for migration** - When adopting AstraLint on existing projects, demote errors to warnings initially.
 
+---
+
+## Exit Codes
+
+AstraLint returns appropriate exit codes for CI/CD integration:
+
+| Exit Code | Meaning |
+|-----------|---------|
+| 0 | All checks passed |
+| 1 | One or more ERROR-level failures |
+
+### Strict Mode
+
+By default, only ERROR-level failures cause a non-zero exit code. Use `--strict` to also fail on warnings:
+
+```bash
+# Normal mode: exit 1 only on errors
+astralint lint data.cdf
+
+# Strict mode: exit 1 on errors OR warnings
+astralint lint data.cdf --strict
+```
+
+This is useful in CI pipelines where you want to enforce all recommendations.

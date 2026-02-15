@@ -118,6 +118,7 @@ def lint(
         output: str | None = None,
         dest: Path | None = None,
         verbose: bool = False,
+        strict: bool = False,
 ):
     """Lint the given file or directory against the specified conformance suite.
 
@@ -139,6 +140,8 @@ def lint(
         Destination file path for the report.
     verbose : bool
         Show detailed output including config file used.
+    strict : bool
+        Exit with error code on warnings too, not just errors.
     """
     console = Console()
 
@@ -186,6 +189,12 @@ def lint(
                 ignore=cfg.ignore or None
             )
             report(results, output=cfg.output.format, dest=cfg.output.dest)
+
+            # Exit with error code if validation failed
+            if results.has_errors():
+                raise SystemExit(1)
+            elif strict and results.has_failures():
+                raise SystemExit(1)
     else:
         raise ValueError(
             f"Unknown conformance suite '{cfg.suite}'. "

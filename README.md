@@ -37,7 +37,12 @@ astralint lint myfile.cdf --suite ISTP --ignore "ISTP-MD-00[0-9]" --ignore "Mand
 
 # List available suites
 astralint list-suites
+
+# Strict mode: exit with error on warnings too
+astralint lint myfile.cdf --strict
 ```
+
+AstraLint returns exit code `1` on validation errors (or warnings with `--strict`), making it suitable for CI/CD pipelines.
 
 ## Configuration
 
