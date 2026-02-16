@@ -337,19 +337,19 @@
             </div>
 
             <div class="upload-zone" id="upload-zone">
-                <input type="file" id="file-input" accept=".cdf">
+                <input type="file" id="file-input">
                 <div class="icon">📁</div>
-                <h3>Drop your CDF file here</h3>
+                <h3>Drop your file here</h3>
                 <p>or click to browse</p>
             </div>
 
             <div class="divider">or load from URL</div>
 
             <div class="url-section">
-                <h4>🌐 Load CDF from URL</h4>
+                <h4>🌐 Load file from URL</h4>
                 <div class="url-input-row">
                     <input type="text" id="url-input" class="url-input"
-                           aria-label="URL to CDF file"
+                           aria-label="URL to file"
                            value="https://cdaweb.gsfc.nasa.gov/pub/software/cdawlib/0MASTERS/mms1_fpi_brst_l1b_des-moms-aux_00000000_v01.cdf"
                            placeholder="https://example.com/file.cdf">
                     <button id="url-load-btn" class="url-button">Load</button>
@@ -392,17 +392,18 @@
                 // Setup the validation function
                 await pyodide.runPythonAsync(`
 from astralint.base import get_suite, list_all_suites
-from astralint.base.codec import load_file
-from astralint.codecs.cdf import CdfCodec
+from astralint.base.codec import load_file, Codec
 from astralint.reports.html import generate_html
 
-def validate_cdf_bytes(data: bytes, filename: str, suite_name: str = "ISTP") -> str:
-    """Validate CDF from bytes (for local file uploads)."""
+def validate_file_bytes(data: bytes, filename: str, suite_name: str = "ISTP") -> str:
+    """Validate file from bytes (for local file uploads)."""
     try:
-        # Load CDF from bytes
-        file = CdfCodec.load(bytes(data))
+        # Get the appropriate codec based on file extension
+        extension = filename.split(".")[-1] if "." in filename else ""
+        codec = Codec.get_codec_for_extension(extension)
+        file = codec.load(bytes(data))
         if file is None:
-            raise ValueError("Failed to parse CDF file")
+            raise ValueError(f"Failed to parse file: {filename}")
 
         # Get the suite and run validation
         suite = get_suite(suite_name)
@@ -417,10 +418,10 @@ def validate_cdf_bytes(data: bytes, filename: str, suite_name: str = "ISTP") -> 
         tb = traceback.format_exc()
         return f'<div class="status error">Error processing {filename}: {str(e)}<pre style="font-size:0.75rem;margin-top:1rem;text-align:left;overflow-x:auto;">{tb}</pre></div>'
 
-def validate_cdf_url(url: str, suite_name: str = "ISTP") -> str:
-    """Validate CDF directly from URL using codec's native URL loading."""
+def validate_file_url(url: str, suite_name: str = "ISTP") -> str:
+    """Validate file directly from URL using codec's native URL loading."""
     try:
-        # Load file directly from URL using the codec
+        # Load file directly from URL using the generic codec interface
         file = load_file(url)
         if file is None:
             raise ValueError(f"Failed to load file from URL: {url}")
@@ -440,7 +441,7 @@ def validate_cdf_url(url: str, suite_name: str = "ISTP") -> str:
                 `);
 
                 status.className = 'status success';
-                status.innerHTML = '✓ Ready! Upload a CDF file to validate.';
+                status.innerHTML = '✓ Ready! Upload a file or load from URL to validate.';
                 document.getElementById('app').style.display = 'block';
 
             } catch (error) {
@@ -464,7 +465,7 @@ def validate_cdf_url(url: str, suite_name: str = "ISTP") -> str:
                 pyodide.globals.set('selected_suite', document.querySelector('input[name="suite"]:checked').value);
 
                 const html = await pyodide.runPythonAsync(`
-validate_cdf_bytes(file_bytes.to_py(), file_name, selected_suite)
+validate_file_bytes(file_bytes.to_py(), file_name, selected_suite)
                 `);
 
                 results.innerHTML = html;
@@ -500,7 +501,7 @@ validate_cdf_bytes(file_bytes.to_py(), file_name, selected_suite)
                 pyodide.globals.set('selected_suite', document.querySelector('input[name="suite"]:checked').value);
 
                 const html = await pyodide.runPythonAsync(`
-validate_cdf_url(file_url, selected_suite)
+validate_file_url(file_url, selected_suite)
                 `);
 
                 results.innerHTML = html;
