@@ -45,4 +45,3 @@ class AstraLintConfig(BaseModel):
     output: OutputConfig = Field(default_factory=OutputConfig)
 
     model_config = {"extra": "forbid"}  # Raise error on unknown fields
-

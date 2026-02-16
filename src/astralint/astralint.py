@@ -77,11 +77,11 @@ def show(path: Path | None = None):
     else:
         console.print("[dim]No config files found, using defaults[/]\n")
 
-    console.print(Panel(
-        Pretty(cfg.model_dump()),
-        title="[bold]Resolved Configuration[/]",
-        border_style="blue"
-    ))
+    console.print(
+        Panel(
+            Pretty(cfg.model_dump()), title="[bold]Resolved Configuration[/]", border_style="blue"
+        )
+    )
 
 
 @config_app.command()
@@ -110,15 +110,15 @@ def init(force: bool = False):
 
 @app.command()
 def lint(
-        path: str,
-        suite: str | None = None,
-        select: list[str] | None = None,
-        ignore: list[str] | None = None,
-        config_file: Path | None = None,
-        output: str | None = None,
-        dest: Path | None = None,
-        verbose: bool = False,
-        strict: bool = False,
+    path: str,
+    suite: str | None = None,
+    select: list[str] | None = None,
+    ignore: list[str] | None = None,
+    config_file: Path | None = None,
+    output: str | None = None,
+    dest: Path | None = None,
+    verbose: bool = False,
+    strict: bool = False,
 ):
     """Lint the given file or directory against the specified conformance suite.
 
@@ -164,8 +164,7 @@ def lint(
 
     # Load merged config
     cfg = load_config(
-        config_file=config_file,
-        cli_overrides=cli_overrides if cli_overrides else None
+        config_file=config_file, cli_overrides=cli_overrides if cli_overrides else None
     )
 
     if cfg.output.verbose:
@@ -183,11 +182,7 @@ def lint(
     checker: ConformanceSuite | None = get_suite(cfg.suite)
     if checker:
         if file := load_file(path):
-            results = checker.run(
-                file,
-                select=cfg.select or None,
-                ignore=cfg.ignore or None
-            )
+            results = checker.run(file, select=cfg.select or None, ignore=cfg.ignore or None)
             report(results, output=cfg.output.format, dest=cfg.output.dest)
 
             # Exit with error code if validation failed
@@ -217,11 +212,9 @@ def list_suites(details: bool = False):
     for suite in suites:
         s = get_suite(suite)
         if s:
-            suites_panels.append(Panel(Group(
-                f"[bold]{s.name}[/bold]",
-                s.description,
-                f"url: {s.url}"
-            ), title=suite))
+            suites_panels.append(
+                Panel(Group(f"[bold]{s.name}[/bold]", s.description, f"url: {s.url}"), title=suite)
+            )
 
     console.print(Panel(Group(*suites_panels), title="Available Conformance Suites"))
 

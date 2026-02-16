@@ -209,4 +209,3 @@ class TestIsPassing:
 
     def test_not_passing_nested(self, nested_results):
         assert nested_results.is_passing() is False
-

@@ -16,11 +16,14 @@ def get_remote_file(url: str) -> bytes:
     ValueError: If the file cannot be fetched from the given URL.
     """
     import requests
+
     with requests.get(url) as response:
         if response.status_code == 200:
             return response.content
         else:
-            raise ValueError(f"Failed to fetch file from URL '{url}'. Status code: {response.status_code}")
+            raise ValueError(
+                f"Failed to fetch file from URL '{url}'. Status code: {response.status_code}"
+            )
 
 
 def is_remote_file(url: str) -> bool:
@@ -35,7 +38,9 @@ class Codec(Protocol):
         super().__init_subclass__()
         for ext in cls.supported_extensions():
             if ext in cls._registry:
-                raise ValueError(f"Extension '{ext}' is already registered by {cls._registry[ext].__name__}.")
+                raise ValueError(
+                    f"Extension '{ext}' is already registered by {cls._registry[ext].__name__}."
+                )
             cls._registry[ext] = cls
 
     @classmethod
@@ -46,8 +51,7 @@ class Codec(Protocol):
             raise ValueError(f"No codec registered for extension '{extension}'.")
 
     @classmethod
-    def supported_extensions(cls) -> list[str]:
-        ...
+    def supported_extensions(cls) -> list[str]: ...
 
     @staticmethod
     def load(file_url_or_bytes: str | bytes) -> File | None:

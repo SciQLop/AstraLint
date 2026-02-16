@@ -270,11 +270,7 @@ def _render_item(item: ValidationResult | ValidationResultGroup) -> str:
         return template.render(result=item)
     else:
         template = Template(GROUP_TEMPLATE)
-        return template.render(
-            group=item,
-            all_valid=_is_all_valid(item),
-            render_item=_render_item
-        )
+        return template.render(group=item, all_valid=_is_all_valid(item), render_item=_render_item)
 
 
 def generate_html(results: ValidationResultGroup) -> str:
@@ -287,7 +283,7 @@ def generate_html(results: ValidationResultGroup) -> str:
         stats=stats,
         suite_name=results.name,
         timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        render_item=_render_item
+        render_item=_render_item,
     )
 
 
@@ -300,4 +296,3 @@ def report(results: ValidationResultGroup, dest: Path | None = None):
         print(f"HTML report saved to: {dest}")
     else:
         print(html_content)
-

@@ -15,20 +15,34 @@ def flatten_object(obj: Any) -> list[tuple[str, Any]]:
             if not callable(v):
                 results.append((k, v))
                 results.extend(
-                    [(f"{k}/{sub_k}", sub_v) for sub_k, sub_v in flatten_object(v) if not sub_k.startswith("_")])
+                    [
+                        (f"{k}/{sub_k}", sub_v)
+                        for sub_k, sub_v in flatten_object(v)
+                        if not sub_k.startswith("_")
+                    ]
+                )
     elif isinstance(obj, list):
         for i, v in enumerate(obj):
             if not callable(v):
                 results.append((f"{i}", v))
                 results.extend(
-                    [(f"{i}/{sub_k}", sub_v) for sub_k, sub_v in flatten_object(v) if not sub_k.startswith("_")])
+                    [
+                        (f"{i}/{sub_k}", sub_v)
+                        for sub_k, sub_v in flatten_object(v)
+                        if not sub_k.startswith("_")
+                    ]
+                )
     elif hasattr(obj, "__dict__"):
         for k, v in vars(obj).items():
             if not callable(v):
                 results.append((k, v))
                 results.extend(
-                    [(f"{k}/{sub_k}", sub_v) for sub_k, sub_v in flatten_object(v)
-                     if not sub_k.startswith("_")])
+                    [
+                        (f"{k}/{sub_k}", sub_v)
+                        for sub_k, sub_v in flatten_object(v)
+                        if not sub_k.startswith("_")
+                    ]
+                )
     return results
 
 
@@ -53,8 +67,7 @@ class BaseEvaluable(BaseModel):
                 raise ValueError(f"Duplicate check: {cls.check}")
             _registry[cls.check] = cls
 
-    def evaluate(self, file: File) -> ValidationResult | ValidationResultGroup:
-        ...
+    def evaluate(self, file: File) -> ValidationResult | ValidationResultGroup: ...
 
 
 class BaseAssertion(BaseEvaluable):
@@ -68,12 +81,21 @@ class BaseAssertion(BaseEvaluable):
         results: list[ValidationResult | ValidationResultGroup] = []
         if not matches:
             if self.error_if_no_match:
-                return ValidationResult(valid=False, reference="", severity=Severity.ERROR,
-                                        message=f"Path '{self.path}' did not match any values.", target=self.path)
+                return ValidationResult(
+                    valid=False,
+                    reference="",
+                    severity=Severity.ERROR,
+                    message=f"Path '{self.path}' did not match any values.",
+                    target=self.path,
+                )
             else:
-                return ValidationResult(valid=True, reference="", severity=Severity.INFO,
-                                        message=f"Path '{self.path}' did not match any values, but that's okay.",
-                                        target=self.path)
+                return ValidationResult(
+                    valid=True,
+                    reference="",
+                    severity=Severity.INFO,
+                    message=f"Path '{self.path}' did not match any values, but that's okay.",
+                    target=self.path,
+                )
         for path, value in matches:
             result = self.single_assertion(file, path, value)
             results.append(result)
@@ -84,8 +106,7 @@ class BaseAssertion(BaseEvaluable):
             severity=Severity.INFO,
         )
 
-    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
-        ...
+    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult: ...
 
 
 class BaseAssertionGroup(BaseEvaluable):
@@ -98,6 +119,7 @@ class BaseAssertionGroup(BaseEvaluable):
         """Parse assertions using the discriminated union."""
         assertion = get_assertion_union()
         from pydantic import TypeAdapter
+
         adapter = TypeAdapter(list[assertion])
         data["assertions"] = adapter.validate_python(data.get("assertions", []))
         return data

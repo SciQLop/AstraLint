@@ -229,4 +229,3 @@ def generate_starter_config() -> str:
         Starter configuration as YAML string.
     """
     return STARTER_CONFIG
-

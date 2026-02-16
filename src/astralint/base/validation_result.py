@@ -24,8 +24,10 @@ class ValidationResultGroup(BaseModel):
     severity: Severity
     results: "list[ValidationResult | ValidationResultGroup]"
 
-    def extend(self,
-               new_results: "list[ValidationResult | ValidationResultGroup] | ValidationResult | ValidationResultGroup"):
+    def extend(
+        self,
+        new_results: "list[ValidationResult | ValidationResultGroup] | ValidationResult | ValidationResultGroup",
+    ):
         if isinstance(new_results, list):
             self.results.extend(new_results)
         else:
@@ -33,7 +35,15 @@ class ValidationResultGroup(BaseModel):
 
     def count_by_severity(self) -> dict[str, int]:
         """Count results by severity level, recursively."""
-        counts = {"ERROR": 0, "WARNING": 0, "INFO": 0, "SKIPPED": 0, "passed": 0, "failed": 0, "skipped": 0}
+        counts = {
+            "ERROR": 0,
+            "WARNING": 0,
+            "INFO": 0,
+            "SKIPPED": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+        }
         for result in self.results:
             if isinstance(result, ValidationResult):
                 if result.severity == Severity.SKIPPED:

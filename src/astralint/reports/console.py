@@ -11,7 +11,9 @@ from ..base import Severity, ValidationResult, ValidationResultGroup
 
 @singledispatch
 def _render(obj) -> RenderableType:
-    raise ValueError(f"Cannot render object of type {type(obj)}. Expected ValidationResult or ValidationResultGroup.")
+    raise ValueError(
+        f"Cannot render object of type {type(obj)}. Expected ValidationResult or ValidationResultGroup."
+    )
 
 
 @_render.register(ValidationResult)
@@ -20,7 +22,13 @@ def _render_result(res: ValidationResult) -> Text:
     icon = "[bold green]✔[/]" if res.valid else "[bold red]✘[/]"
 
     # Severity color mapping
-    color = "red" if res.severity == Severity.ERROR else "yellow" if res.severity == Severity.WARNING else "blue"
+    color = (
+        "red"
+        if res.severity == Severity.ERROR
+        else "yellow"
+        if res.severity == Severity.WARNING
+        else "blue"
+    )
 
     text = Text.from_markup(f"{icon} [bold]{res.reference}[/]: {res.message}")
     text.append(f" ({res.severity.value})", style=f"bold {color}")
@@ -36,12 +44,11 @@ def _render_result(res: ValidationResult) -> Text:
 def _render_group(group: ValidationResultGroup) -> Tree:
     """Renders a branch (ValidationResultGroup) and recurses."""
     # Logic for group header style based on validity
-    all_valid = all(getattr(r, 'valid', True) for r in group.results)
+    all_valid = all(getattr(r, "valid", True) for r in group.results)
     header_style = "bold green" if all_valid else "bold yellow"
 
     header = Text.assemble(
-        (f" {group.name} ", header_style),
-        (f"[{group.rule_reference}]", "italic dim")
+        (f" {group.name} ", header_style), (f"[{group.rule_reference}]", "italic dim")
     )
 
     tree = Tree(header)
@@ -55,16 +62,18 @@ def console_report(results: ValidationResultGroup, console: Console):
     """Helper function to print the report to a given Console instance."""
     report_tree = _render(results)
     console.print("\n")
-    console.print(Panel(
-        report_tree,
-        title="[bold]AstraLint Conformance Report[/]",
-        border_style="blue",
-        padding=(1, 2)
-    ))
+    console.print(
+        Panel(
+            report_tree,
+            title="[bold]AstraLint Conformance Report[/]",
+            border_style="blue",
+            padding=(1, 2),
+        )
+    )
     return console
 
 
-def report(results: ValidationResultGroup, dest: Path|None = None):
+def report(results: ValidationResultGroup, dest: Path | None = None):
     """The main entry point called by the CLI."""
     console = Console()
     console_report(results, console)

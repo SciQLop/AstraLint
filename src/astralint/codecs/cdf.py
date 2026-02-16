@@ -16,15 +16,25 @@ from ..base import (
     is_remote_file,
 )
 
-type_mapping = {CDFDataType.CDF_CHAR: DataType.CHAR, CDFDataType.CDF_UCHAR: DataType.CHAR,
-                CDFDataType.CDF_UINT1: DataType.UINT8, CDFDataType.CDF_UINT2: DataType.UINT16,
-                CDFDataType.CDF_UINT4: DataType.UINT32, CDFDataType.CDF_INT1: DataType.INT8,
-                CDFDataType.CDF_INT2: DataType.INT16, CDFDataType.CDF_INT4: DataType.INT32,
-                CDFDataType.CDF_INT8: DataType.INT64, CDFDataType.CDF_FLOAT: DataType.FLOAT32,
-                CDFDataType.CDF_REAL4: DataType.FLOAT32, CDFDataType.CDF_DOUBLE: DataType.FLOAT64,
-                CDFDataType.CDF_REAL8: DataType.FLOAT64, CDFDataType.CDF_EPOCH: DataType.CDFEPOCH,
-                CDFDataType.CDF_EPOCH16: DataType.CDFEPOCH16, CDFDataType.CDF_TIME_TT2000: DataType.TT2000,
-                CDFDataType.CDF_NONE: DataType.NONE}
+type_mapping = {
+    CDFDataType.CDF_CHAR: DataType.CHAR,
+    CDFDataType.CDF_UCHAR: DataType.CHAR,
+    CDFDataType.CDF_UINT1: DataType.UINT8,
+    CDFDataType.CDF_UINT2: DataType.UINT16,
+    CDFDataType.CDF_UINT4: DataType.UINT32,
+    CDFDataType.CDF_INT1: DataType.INT8,
+    CDFDataType.CDF_INT2: DataType.INT16,
+    CDFDataType.CDF_INT4: DataType.INT32,
+    CDFDataType.CDF_INT8: DataType.INT64,
+    CDFDataType.CDF_FLOAT: DataType.FLOAT32,
+    CDFDataType.CDF_REAL4: DataType.FLOAT32,
+    CDFDataType.CDF_DOUBLE: DataType.FLOAT64,
+    CDFDataType.CDF_REAL8: DataType.FLOAT64,
+    CDFDataType.CDF_EPOCH: DataType.CDFEPOCH,
+    CDFDataType.CDF_EPOCH16: DataType.CDFEPOCH16,
+    CDFDataType.CDF_TIME_TT2000: DataType.TT2000,
+    CDFDataType.CDF_NONE: DataType.NONE,
+}
 
 
 def _to_data_type(cdf_dtype: CDFDataType) -> DataType:
@@ -61,12 +71,11 @@ def _parse_variable(var: CDFVariable) -> Variable:
         attributes={name: _parse_attribute(attr) for name, attr in var.attributes.items()},
         compression=var.compression.name,
         record_variance=not var.is_nrv,
-        data_type=_to_data_type(var.type)
+        data_type=_to_data_type(var.type),
     )
 
 
 class CdfCodec(Codec):
-
     @classmethod
     def supported_extensions(cls) -> list[str]:
         return ["cdf"]
@@ -88,7 +97,7 @@ class CdfCodec(Codec):
                 filename=fname,
                 compression=cdf.compression.name,
                 attributes={name: _parse_attribute(attr) for name, attr in cdf.attributes.items()},
-                variables={name: _parse_variable(var) for name, var in cdf.items()}
+                variables={name: _parse_variable(var) for name, var in cdf.items()},
             )
         else:
             raise ValueError(f"Could not load file {file} as CDF.")

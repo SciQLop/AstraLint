@@ -10,7 +10,7 @@ from .rule import Rule, get_rules_for_suite
 from .validation_result import Severity, ValidationResultGroup
 
 __HERE__ = os.path.dirname(__file__)
-__SUITES_DIR__ = os.path.abspath(os.path.join(__HERE__, '../suites'))
+__SUITES_DIR__ = os.path.abspath(os.path.join(__HERE__, "../suites"))
 
 log = get_logger(__name__)
 
@@ -22,7 +22,9 @@ def _matches_any_pattern(rule: Rule, patterns: list[str]) -> bool:
     return False
 
 
-def filter_rules(rules: list[Rule], select: list[str] | None, ignore: list[str] | None) -> list[Rule]:
+def filter_rules(
+    rules: list[Rule], select: list[str] | None, ignore: list[str] | None
+) -> list[Rule]:
     assert not (select and ignore), "Cannot use both select and ignore at the same time"
     if select:
         rules = [rule for rule in rules if _matches_any_pattern(rule, select)]
@@ -52,11 +54,12 @@ Merged with:
 url: {suite.url}
 """,
             url="",
-            rules=self.rules + suite.rules
+            rules=self.rules + suite.rules,
         )
 
-    def run(self, file: File, select: list[str] | None = None,
-            ignore: list[str] | None = None) -> ValidationResultGroup:
+    def run(
+        self, file: File, select: list[str] | None = None, ignore: list[str] | None = None
+    ) -> ValidationResultGroup:
         results = []
         rules = filter_rules(self.rules, select, ignore)
         for rule in rules:
@@ -77,12 +80,14 @@ class ConformanceSuiteYaml(BaseModel):
     description: str
     url: str
     rules_lookup_dir: str
-    inherit_from: list[str] = Field(default_factory=list,
-                                    description="List of suite names to inherit rules from.")
+    inherit_from: list[str] = Field(
+        default_factory=list, description="List of suite names to inherit rules from."
+    )
 
 
 def load_suite_from_yaml(path: str) -> ConformanceSuiteYaml:
     import yaml
+
     with open(path) as f:
         data = yaml.safe_load(f)
     return ConformanceSuiteYaml(**data)
@@ -102,7 +107,9 @@ def parents_rules(parents: list[str]) -> list[Rule]:
 
 
 class _ConformanceSuiteProtocolCtor:
-    def __init__(self, name: str, rules_lookup_dir: str, inherit_from: list[str] | None = None, **kwargs):
+    def __init__(
+        self, name: str, rules_lookup_dir: str, inherit_from: list[str] | None = None, **kwargs
+    ):
         self.kwargs = kwargs
         self.name = name
         self.rules_lookup_dir = rules_lookup_dir
@@ -120,15 +127,20 @@ class _ConformanceSuiteProtocolCtor:
 SUITES = {}
 
 
-def register_suite(description: str, url: str, name: str, rules_lookup_dir: str,
-                   alternative_names: list[str] | None = None,
-                   inherit_from: list[str] | None = None) -> _ConformanceSuiteProtocolCtor:
+def register_suite(
+    description: str,
+    url: str,
+    name: str,
+    rules_lookup_dir: str,
+    alternative_names: list[str] | None = None,
+    inherit_from: list[str] | None = None,
+) -> _ConformanceSuiteProtocolCtor:
     ctor = _ConformanceSuiteProtocolCtor(
         description=description,
         url=url,
         name=name,
         rules_lookup_dir=rules_lookup_dir,
-        inherit_from=inherit_from
+        inherit_from=inherit_from,
     )
     SUITES[name] = ctor
     if alternative_names:
@@ -151,5 +163,8 @@ def list_loaded_suites() -> list[str]:
 
 def list_all_suites() -> list[str]:
     suites = os.listdir(__SUITES_DIR__)
-    return [suite for suite in suites if
-            os.path.isdir(os.path.join(__SUITES_DIR__, suite)) and not suite.startswith("_")]
+    return [
+        suite
+        for suite in suites
+        if os.path.isdir(os.path.join(__SUITES_DIR__, suite)) and not suite.startswith("_")
+    ]

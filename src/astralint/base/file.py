@@ -3,7 +3,7 @@ from enum import Enum
 from pydantic import BaseModel
 
 
-class DataType(str, Enum): # noqa: UP042 # Simpler with pydantic, and we can still use it as a string for comparisons and error messages
+class DataType(str, Enum):  # noqa: UP042 # Simpler with pydantic, and we can still use it as a string for comparisons and error messages
     NONE = "NONE"
     CHAR = "CHAR"
     UINT8 = "UINT8"

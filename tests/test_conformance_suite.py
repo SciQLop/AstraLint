@@ -53,17 +53,15 @@ def test_register_suite_basic(temp_suite_dir):
             "reference": "TEST-001",
             "severity": "ERROR",
             "suite": "TestSuite",
-            "assertions": [
-                {"path": "attributes/test", "check": "exists"}
-            ]
-        }
+            "assertions": [{"path": "attributes/test", "check": "exists"}],
+        },
     )
 
     register_suite(
         name="TestSuite",
         description="Test suite",
         url="https://example.com",
-        rules_lookup_dir=rules_dir
+        rules_lookup_dir=rules_dir,
     )
 
     suite = get_suite("TestSuite")
@@ -88,17 +86,15 @@ def test_suite_inheritance_single_parent(temp_suite_dir):
             "reference": "PARENT-001",
             "severity": "ERROR",
             "suite": "ParentSuite",
-            "assertions": [
-                {"path": "attributes/parent_attr", "check": "exists"}
-            ]
-        }
+            "assertions": [{"path": "attributes/parent_attr", "check": "exists"}],
+        },
     )
 
     register_suite(
         name="ParentSuite",
         description="Parent suite",
         url="https://example.com",
-        rules_lookup_dir=parent_rules_dir
+        rules_lookup_dir=parent_rules_dir,
     )
 
     # Create child suite that inherits from parent
@@ -114,10 +110,8 @@ def test_suite_inheritance_single_parent(temp_suite_dir):
             "reference": "CHILD-001",
             "severity": "WARNING",
             "suite": "ChildSuite",
-            "assertions": [
-                {"path": "attributes/child_attr", "check": "exists"}
-            ]
-        }
+            "assertions": [{"path": "attributes/child_attr", "check": "exists"}],
+        },
     )
 
     register_suite(
@@ -125,7 +119,7 @@ def test_suite_inheritance_single_parent(temp_suite_dir):
         description="Child suite",
         url="https://example.com",
         rules_lookup_dir=child_rules_dir,
-        inherit_from=["ParentSuite"]
+        inherit_from=["ParentSuite"],
     )
 
     # Get the child suite and verify it has both parent and child rules
@@ -155,17 +149,15 @@ def test_suite_inheritance_multiple_parents(temp_suite_dir):
             "reference": "PARENT1-001",
             "severity": "ERROR",
             "suite": "Parent1Suite",
-            "assertions": [
-                {"path": "attributes/p1", "check": "exists"}
-            ]
-        }
+            "assertions": [{"path": "attributes/p1", "check": "exists"}],
+        },
     )
 
     register_suite(
         name="Parent1Suite",
         description="First parent suite",
         url="https://example.com",
-        rules_lookup_dir=parent1_rules_dir
+        rules_lookup_dir=parent1_rules_dir,
     )
 
     # Create second parent suite
@@ -181,17 +173,15 @@ def test_suite_inheritance_multiple_parents(temp_suite_dir):
             "reference": "PARENT2-001",
             "severity": "WARNING",
             "suite": "Parent2Suite",
-            "assertions": [
-                {"path": "attributes/p2", "check": "exists"}
-            ]
-        }
+            "assertions": [{"path": "attributes/p2", "check": "exists"}],
+        },
     )
 
     register_suite(
         name="Parent2Suite",
         description="Second parent suite",
         url="https://example.com",
-        rules_lookup_dir=parent2_rules_dir
+        rules_lookup_dir=parent2_rules_dir,
     )
 
     # Create child suite that inherits from both parents
@@ -207,10 +197,8 @@ def test_suite_inheritance_multiple_parents(temp_suite_dir):
             "reference": "CHILD-001",
             "severity": "ERROR",
             "suite": "ChildSuite",
-            "assertions": [
-                {"path": "attributes/child", "check": "exists"}
-            ]
-        }
+            "assertions": [{"path": "attributes/child", "check": "exists"}],
+        },
     )
 
     register_suite(
@@ -218,7 +206,7 @@ def test_suite_inheritance_multiple_parents(temp_suite_dir):
         description="Child suite inheriting from both parents",
         url="https://example.com",
         rules_lookup_dir=child_rules_dir,
-        inherit_from=["Parent1Suite", "Parent2Suite"]
+        inherit_from=["Parent1Suite", "Parent2Suite"],
     )
 
     # Get the child suite and verify it has all rules
@@ -242,7 +230,7 @@ def test_suite_inheritance_nonexistent_parent(temp_suite_dir):
         description="Child suite",
         url="https://example.com",
         rules_lookup_dir=child_rules_dir,
-        inherit_from=["NonexistentSuite"]
+        inherit_from=["NonexistentSuite"],
     )
 
     with pytest.raises(ValueError, match="Cannot inherit from suite 'NonexistentSuite'"):
@@ -263,10 +251,8 @@ def test_suite_inheritance_empty_list(temp_suite_dir):
             "reference": "TEST-001",
             "severity": "ERROR",
             "suite": "TestSuite",
-            "assertions": [
-                {"path": "attributes/test", "check": "exists"}
-            ]
-        }
+            "assertions": [{"path": "attributes/test", "check": "exists"}],
+        },
     )
 
     register_suite(
@@ -274,7 +260,7 @@ def test_suite_inheritance_empty_list(temp_suite_dir):
         description="Test suite",
         url="https://example.com",
         rules_lookup_dir=rules_dir,
-        inherit_from=[]
+        inherit_from=[],
     )
 
     suite = get_suite("TestSuite")
@@ -297,17 +283,15 @@ def test_suite_inheritance_chain(temp_suite_dir):
             "reference": "GRANDPARENT-001",
             "severity": "ERROR",
             "suite": "GrandparentSuite",
-            "assertions": [
-                {"path": "attributes/gp", "check": "exists"}
-            ]
-        }
+            "assertions": [{"path": "attributes/gp", "check": "exists"}],
+        },
     )
 
     register_suite(
         name="GrandparentSuite",
         description="Grandparent suite",
         url="https://example.com",
-        rules_lookup_dir=grandparent_rules_dir
+        rules_lookup_dir=grandparent_rules_dir,
     )
 
     # Create parent suite inheriting from grandparent
@@ -323,10 +307,8 @@ def test_suite_inheritance_chain(temp_suite_dir):
             "reference": "PARENT-001",
             "severity": "ERROR",
             "suite": "ParentSuite",
-            "assertions": [
-                {"path": "attributes/p", "check": "exists"}
-            ]
-        }
+            "assertions": [{"path": "attributes/p", "check": "exists"}],
+        },
     )
 
     register_suite(
@@ -334,7 +316,7 @@ def test_suite_inheritance_chain(temp_suite_dir):
         description="Parent suite",
         url="https://example.com",
         rules_lookup_dir=parent_rules_dir,
-        inherit_from=["GrandparentSuite"]
+        inherit_from=["GrandparentSuite"],
     )
 
     # Create child suite inheriting from parent
@@ -350,10 +332,8 @@ def test_suite_inheritance_chain(temp_suite_dir):
             "reference": "CHILD-001",
             "severity": "ERROR",
             "suite": "ChildSuite",
-            "assertions": [
-                {"path": "attributes/c", "check": "exists"}
-            ]
-        }
+            "assertions": [{"path": "attributes/c", "check": "exists"}],
+        },
     )
 
     register_suite(
@@ -361,7 +341,7 @@ def test_suite_inheritance_chain(temp_suite_dir):
         description="Child suite",
         url="https://example.com",
         rules_lookup_dir=child_rules_dir,
-        inherit_from=["ParentSuite"]
+        inherit_from=["ParentSuite"],
     )
 
     # Get the child suite - should have all 3 rules (grandparent, parent, child)
@@ -373,4 +353,3 @@ def test_suite_inheritance_chain(temp_suite_dir):
     assert "GRANDPARENT-001" in rule_refs
     assert "PARENT-001" in rule_refs
     assert "CHILD-001" in rule_refs
-

@@ -16,10 +16,7 @@ class Rule(BaseModel):
 
     def _format_result(self, valid: bool, message: str) -> ValidationResult:
         return ValidationResult(
-            valid=valid,
-            reference=self.reference,
-            severity=self.severity,
-            message=message
+            valid=valid, reference=self.reference, severity=self.severity, message=message
         )
 
 

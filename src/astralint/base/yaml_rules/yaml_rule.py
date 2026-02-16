@@ -26,13 +26,19 @@ class YamlRule(Rule):
         """Parse assertions using the discriminated union."""
         assertion = get_assertion_union()
         from pydantic import TypeAdapter
+
         adapter = TypeAdapter(list[assertion])
         data["assertions"] = adapter.validate_python(data.get("assertions", []))
         return data
 
     def _format_result(self, valid: bool, message: str, target: str = "Global") -> ValidationResult:
-        return ValidationResult(valid=valid, reference=self.reference, severity=self.severity, message=message,
-                                target=target)
+        return ValidationResult(
+            valid=valid,
+            reference=self.reference,
+            severity=self.severity,
+            message=message,
+            target=target,
+        )
 
     def check(self, file: File) -> ValidationResult | ValidationResultGroup:
         results = []

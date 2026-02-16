@@ -17,25 +17,25 @@ class MandatoryVariablesAttributes(Rule):
     severity: Severity = Severity.ERROR
 
     def check(self, file: File) -> ValidationResult | ValidationResultGroup:
-        required_attributes = {
-            "CATDESC",
-            "DEPEND_0",
-            "DISPLAY_TYPE"
-        }
+        required_attributes = {"CATDESC", "DEPEND_0", "DISPLAY_TYPE"}
         results = []
         for name, var in file.variables.items():
             missing_attributes = required_attributes - set(var.attributes.keys())
             if missing_attributes:
                 for attr in missing_attributes:
-                    results.append(self._format_result(
-                        valid=False,
-                        message=f"Missing mandatory variable attribute '{attr}' in variable '{name}'"
-                    ))
+                    results.append(
+                        self._format_result(
+                            valid=False,
+                            message=f"Missing mandatory variable attribute '{attr}' in variable '{name}'",
+                        )
+                    )
             else:
-                results.append(self._format_result(
-                    valid=True,
-                    message=f"All mandatory global attributes are present in variable '{name}'."
-                ))
+                results.append(
+                    self._format_result(
+                        valid=True,
+                        message=f"All mandatory global attributes are present in variable '{name}'.",
+                    )
+                )
         return ValidationResultGroup(
             name=self.name,
             rule_reference=self.reference,

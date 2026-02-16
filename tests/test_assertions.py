@@ -2,7 +2,7 @@ from yaml import safe_load
 
 from astralint.base.yaml_rules.yaml_rule import ValidationResultGroup, YamlRule
 
-from . import  * # isort:skip # noqa: F403
+from . import *  # isort:skip # noqa: F403
 
 
 def test_is_type_assertion(mock_file):
@@ -46,6 +46,7 @@ assertions:
 # =============================================================================
 # Complex nested assertion tests
 # =============================================================================
+
 
 def test_nested_all_of_with_multiple_conditions(mock_file):
     """Test deeply nested all_of with multiple assertion types."""
@@ -753,6 +754,7 @@ assertions:
 # Conditional assertion tests (if_then, if_then_else)
 # =============================================================================
 
+
 def test_if_then_condition_passes_then_passes(mock_file):
     """Test if_then when condition passes and then passes."""
     yaml_rule_txt = """
@@ -948,6 +950,7 @@ assertions:
 # =============================================================================
 # Counting assertion tests (one_of, at_least, at_most, exactly)
 # =============================================================================
+
 
 def test_one_of_exactly_one_passes(mock_file):
     """Test one_of when exactly one assertion passes."""

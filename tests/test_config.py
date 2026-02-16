@@ -40,12 +40,12 @@ class TestAstraLintConfig:
     def test_config_rejects_unknown_fields(self):
         """Config with unknown fields raises error."""
         with pytest.raises(ValidationError):
-            AstraLintConfig(unknown_field="value") # type: ignore
+            AstraLintConfig(unknown_field="value")  # type: ignore
 
     def test_nested_output_config(self):
         """Nested output config works correctly."""
         cfg = AstraLintConfig(
-            output={"format": "html", "verbose": True} # type: ignore
+            output={"format": "html", "verbose": True}  # type: ignore
         )
         assert cfg.output.format == "html"
         assert cfg.output.verbose is True
@@ -99,6 +99,7 @@ class TestStarterConfig:
     def test_starter_config_is_valid_yaml(self):
         """Generated starter config is valid YAML."""
         import yaml
+
         content = generate_starter_config()
         data = yaml.safe_load(content)
         assert isinstance(data, dict)
@@ -107,6 +108,7 @@ class TestStarterConfig:
     def test_starter_config_validates(self):
         """Generated starter config passes schema validation."""
         import yaml
+
         content = generate_starter_config()
         data = yaml.safe_load(content)
         cfg = AstraLintConfig(**data)
@@ -138,10 +140,7 @@ class TestLoadConfig:
             config_path = Path(tmpdir) / ".astralint.yaml"
             config_path.write_text("suite: PDS4\n")
 
-            cfg = load_config(
-                project_root=Path(tmpdir),
-                cli_overrides={"suite": "ISTP"}
-            )
+            cfg = load_config(project_root=Path(tmpdir), cli_overrides={"suite": "ISTP"})
             assert cfg.suite == "ISTP"
 
     def test_load_config_explicit_file(self):
@@ -155,10 +154,7 @@ class TestLoadConfig:
             explicit_config = Path(tmpdir) / "custom.yaml"
             explicit_config.write_text("suite: PDS4\n")
 
-            cfg = load_config(
-                project_root=Path(tmpdir),
-                config_file=explicit_config
-            )
+            cfg = load_config(project_root=Path(tmpdir), config_file=explicit_config)
             assert cfg.suite == "PDS4"
 
 
@@ -208,4 +204,3 @@ def test_severity_overrides_valid_values(severity):
     """Severity overrides accept valid severity values."""
     cfg = AstraLintConfig(severity_overrides={"RULE-001": severity})
     assert cfg.severity_overrides["RULE-001"] == severity
-

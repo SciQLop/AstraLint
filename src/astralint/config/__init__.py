@@ -11,4 +11,3 @@ __all__ = [
     "find_project_root",
     "validate_config_file",
 ]
-

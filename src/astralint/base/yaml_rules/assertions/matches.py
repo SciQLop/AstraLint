@@ -10,7 +10,7 @@ from .base import BaseAssertion
 
 class MatchesAssertion(BaseAssertion):
     model_config = ConfigDict(frozen=True)
-    check: Literal["matches"] = "matches" # type: ignore[assignment]
+    check: Literal["matches"] = "matches"  # type: ignore[assignment]
     pattern: str
 
     def single_assertion(self, file: File, path: str, value: str) -> ValidationResult:
@@ -20,7 +20,7 @@ class MatchesAssertion(BaseAssertion):
                 reference="",
                 severity=Severity.ERROR,
                 message=f"Value at path '{path}' is not a string.",
-                target=self.path
+                target=self.path,
             )
         elif not re.match(self.pattern, value):
             return ValidationResult(
@@ -28,9 +28,12 @@ class MatchesAssertion(BaseAssertion):
                 reference="",
                 severity=Severity.ERROR,
                 message=f"Value at path '{path}' does not match pattern '{self.pattern}'.",
-                target=self.path
+                target=self.path,
             )
         else:
-            return ValidationResult(valid=True, reference="",
-                                    message=f"Value at path '{path}' matches pattern '{self.pattern}'.",
-                                    severity=Severity.INFO)
+            return ValidationResult(
+                valid=True,
+                reference="",
+                message=f"Value at path '{path}' matches pattern '{self.pattern}'.",
+                severity=Severity.INFO,
+            )

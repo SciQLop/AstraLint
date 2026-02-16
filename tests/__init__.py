@@ -15,6 +15,7 @@ def mms1_asp2_srvy():
 @pytest.fixture
 def mock_file():
     from astralint.base.file import Attribute, DataType, File, Variable
+
     return File(
         extension="mock",
         filename="mock_file.mock",
@@ -33,5 +34,5 @@ def mock_file():
                 record_variance=True,
             )
         },
-        compression="NONE"
+        compression="NONE",
     )
