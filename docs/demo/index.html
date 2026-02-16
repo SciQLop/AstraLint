@@ -391,14 +391,13 @@
 
                 // Setup the validation function
                 await pyodide.runPythonAsync(`
-import pycdfpp
 from astralint.base import get_suite, list_all_suites
-from astralint.base.file import File, Attribute, Variable, DataType
-from astralint.codecs.cdf import CdfCodec, _parse_attribute, _parse_variable
+from astralint.base.codec import load_file
+from astralint.codecs.cdf import CdfCodec
 from astralint.reports.html import generate_html
 
 def validate_cdf_bytes(data: bytes, filename: str, suite_name: str = "ISTP") -> str:
-    """Main entry point for the web demo."""
+    """Validate CDF from bytes (for local file uploads)."""
     try:
         # Load CDF from bytes
         file = CdfCodec.load(bytes(data))
@@ -417,6 +416,27 @@ def validate_cdf_bytes(data: bytes, filename: str, suite_name: str = "ISTP") -> 
         import traceback
         tb = traceback.format_exc()
         return f'<div class="status error">Error processing {filename}: {str(e)}<pre style="font-size:0.75rem;margin-top:1rem;text-align:left;overflow-x:auto;">{tb}</pre></div>'
+
+def validate_cdf_url(url: str, suite_name: str = "ISTP") -> str:
+    """Validate CDF directly from URL using codec's native URL loading."""
+    try:
+        # Load file directly from URL using the codec
+        file = load_file(url)
+        if file is None:
+            raise ValueError(f"Failed to load file from URL: {url}")
+
+        # Get the suite and run validation
+        suite = get_suite(suite_name)
+        if suite is None:
+            return f'<div class="status error">Suite "{suite_name}" not found. Available: {list_all_suites()}</div>'
+
+        results = suite.run(file)
+        return generate_html(results)
+
+    except Exception as e:
+        import traceback
+        tb = traceback.format_exc()
+        return f'<div class="status error">Error loading from URL {url}: {str(e)}<pre style="font-size:0.75rem;margin-top:1rem;text-align:left;overflow-x:auto;">{tb}</pre></div>'
                 `);
 
                 status.className = 'status success';
@@ -471,32 +491,16 @@ validate_cdf_bytes(file_bytes.to_py(), file_name, selected_suite)
                 return;
             }
 
-            // Extract filename from URL
-            const urlObj = new URL(url);
-            const filename = urlObj.pathname.split('/').pop() || 'file.cdf';
-
-            results.innerHTML = '<div class="status loading"><div class="spinner"></div><span>Downloading file from URL...</span></div>';
+            results.innerHTML = '<div class="status loading"><div class="spinner"></div><span>Loading and validating...</span></div>';
             loadBtn.disabled = true;
 
             try {
-                const response = await fetch(url);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                results.innerHTML = '<div class="status loading"><div class="spinner"></div><span>Validating...</span></div>';
-
-                const arrayBuffer = await response.arrayBuffer();
-                const uint8Array = new Uint8Array(arrayBuffer);
-
-                // Pass file to Python
-                pyodide.globals.set('file_bytes', uint8Array);
-                pyodide.globals.set('file_name', filename);
+                // Pass URL directly to Python - codec handles the download
+                pyodide.globals.set('file_url', url);
                 pyodide.globals.set('selected_suite', document.querySelector('input[name="suite"]:checked').value);
 
                 const html = await pyodide.runPythonAsync(`
-validate_cdf_bytes(file_bytes.to_py(), file_name, selected_suite)
+validate_cdf_url(file_url, selected_suite)
                 `);
 
                 results.innerHTML = html;
@@ -509,11 +513,7 @@ validate_cdf_bytes(file_bytes.to_py(), file_name, selected_suite)
                 });
 
             } catch (error) {
-                let errorMsg = error.message;
-                if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                    errorMsg = 'Failed to fetch file. This may be due to CORS restrictions. The server hosting the file must allow cross-origin requests.';
-                }
-                results.innerHTML = '<div class="status error">✗ Error loading from URL: ' + errorMsg + '</div>';
+                results.innerHTML = '<div class="status error">✗ Error loading from URL: ' + error.message + '</div>';
                 console.error(error);
             } finally {
                 loadBtn.disabled = false;
