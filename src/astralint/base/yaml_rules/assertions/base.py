@@ -106,4 +106,4 @@ class BaseAssertionGroup(BaseEvaluable):
 def get_assertion_union():
     """Build discriminated union from registered types."""
     types = tuple(list(_registry.values()))
-    return Annotated[Union[types], Field(discriminator="check")]
+    return Annotated[Union[types], Field(discriminator="check")] # noqa: UP007

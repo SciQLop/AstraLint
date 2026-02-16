@@ -115,7 +115,7 @@ class ArrayShapeAssertion(BaseAssertion):
             return ValidationResult(valid=False, reference="", severity=Severity.ERROR,
                                     message=f"Value at path '{path}' has length {len(value)}, expected {len(self.shape)}.",
                                     target=self.path)
-        for i, (item, expected_length) in enumerate(zip(value, self.shape)):
+        for i, (item, expected_length) in enumerate(zip(value, self.shape, strict=True)):
             if not isinstance(item, list) or len(item) != expected_length:
                 return ValidationResult(valid=False, reference="", severity=Severity.ERROR,
                                         message=f"Item at index {i} in array at path '{path}' has length {len(item)}, expected {expected_length}.",

@@ -2,7 +2,7 @@ from yaml import safe_load
 
 from astralint.base.yaml_rules.yaml_rule import YamlRule
 
-from . import *
+from . import  * # isort:skip # noqa: F403
 
 
 def test_is_type_assertion(mock_file):

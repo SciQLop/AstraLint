@@ -5,6 +5,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 
 from astralint.config import AstraLintConfig, load_config, validate_config_file
 from astralint.config.loader import generate_starter_config, merge_configs
@@ -38,7 +39,7 @@ class TestAstraLintConfig:
 
     def test_config_rejects_unknown_fields(self):
         """Config with unknown fields raises error."""
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             AstraLintConfig(unknown_field="value")
 
     def test_nested_output_config(self):

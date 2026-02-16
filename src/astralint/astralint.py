@@ -5,7 +5,7 @@ from rich.console import Console, Group
 from rich.panel import Panel
 from rich.pretty import Pretty
 
-from .base import *
+from .base import ConformanceSuite, get_suite, list_all_suites, load_file
 from .config import (
     find_config_file,
     find_project_root,
