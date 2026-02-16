@@ -1,5 +1,6 @@
-from typing import Literal, Any
-from pydantic import model_validator, Field
+from typing import Any, Literal
+
+from pydantic import Field, model_validator
 
 from ...file import File
 from ...validation_result import Severity, ValidationResult

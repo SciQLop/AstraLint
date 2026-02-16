@@ -1,12 +1,13 @@
 """Tests for configuration loading."""
 
-import pytest
-from pathlib import Path
-import tempfile
 import os
+import tempfile
+from pathlib import Path
+
+import pytest
 
 from astralint.config import AstraLintConfig, load_config, validate_config_file
-from astralint.config.loader import merge_configs, generate_starter_config
+from astralint.config.loader import generate_starter_config, merge_configs
 
 
 class TestAstraLintConfig:

@@ -1,4 +1,5 @@
 import pytest
+
 from astralint.base.conformance_suite import filter_rules
 
 

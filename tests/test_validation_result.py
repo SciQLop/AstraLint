@@ -1,10 +1,11 @@
 """Tests for ValidationResult and ValidationResultGroup."""
 
 import pytest
+
 from astralint.base.validation_result import (
+    Severity,
     ValidationResult,
     ValidationResultGroup,
-    Severity,
 )
 
 

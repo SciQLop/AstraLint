@@ -1,4 +1,11 @@
-from astralint.base import File, RegisterRule, Rule, Severity, ValidationResult, ValidationResultGroup
+from astralint.base import (
+    File,
+    RegisterRule,
+    Rule,
+    Severity,
+    ValidationResult,
+    ValidationResultGroup,
+)
 
 
 @RegisterRule(suite="ISTP")

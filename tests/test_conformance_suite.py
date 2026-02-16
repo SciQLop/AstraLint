@@ -1,15 +1,15 @@
 import os
-import tempfile
 import shutil
+import tempfile
 
 import pytest
 from yaml import safe_dump
 
 from astralint.base.conformance_suite import (
-    ConformanceSuite,
-    register_suite,
-    get_suite,
     SUITES,
+    ConformanceSuite,
+    get_suite,
+    register_suite,
 )
 from astralint.base.rule import RULES
 

@@ -1,7 +1,7 @@
 """Configuration loading and merging."""
 
-from pathlib import Path
 import tomllib
+from pathlib import Path
 
 import yaml
 

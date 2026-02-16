@@ -1,4 +1,4 @@
-from .codec import Codec, load_file, classproperty, get_remote_file, is_remote_file
+from .codec import Codec, classproperty, get_remote_file, is_remote_file, load_file
 from .conformance_suite import (
     ConformanceSuite,
     get_suite,

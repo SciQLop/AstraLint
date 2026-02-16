@@ -6,7 +6,16 @@ from pycdfpp import Variable as CDFVariable
 from pycdfpp import VariableAttribute as CDFVariableAttribute
 from pycdfpp import load
 
-from ..base import Attribute, Codec, DataType, File, Variable, classproperty, is_remote_file, get_remote_file
+from ..base import (
+    Attribute,
+    Codec,
+    DataType,
+    File,
+    Variable,
+    classproperty,
+    get_remote_file,
+    is_remote_file,
+)
 
 type_mapping = {CDFDataType.CDF_CHAR: DataType.CHAR, CDFDataType.CDF_UCHAR: DataType.CHAR,
                 CDFDataType.CDF_UINT1: DataType.UINT8, CDFDataType.CDF_UINT2: DataType.UINT16,

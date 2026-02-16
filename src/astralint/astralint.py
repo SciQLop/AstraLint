@@ -7,9 +7,9 @@ from rich.pretty import Pretty
 
 from .base import *
 from .config import (
-    load_config,
     find_config_file,
     find_project_root,
+    load_config,
     validate_config_file,
 )
 from .config.loader import generate_starter_config

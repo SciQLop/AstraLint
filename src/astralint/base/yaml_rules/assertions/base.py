@@ -1,10 +1,10 @@
 import re
-from typing import Any, Union, Annotated
+from typing import Annotated, Any, Union
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ...file import File
-from ...validation_result import ValidationResult, ValidationResultGroup, Severity
+from ...validation_result import Severity, ValidationResult, ValidationResultGroup
 
 
 def flatten_object(obj: Any) -> list[tuple[str, Any]]:

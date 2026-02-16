@@ -1,7 +1,9 @@
+from yaml import safe_load
+
 from astralint.base import DataType
 from astralint.base.yaml_rules.yaml_rule import YamlRule
+
 from . import *
-from yaml import safe_load
 
 
 def test_is_type_assertion(mock_file):

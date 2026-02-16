@@ -1,6 +1,8 @@
 import os
-from astralint import load_file
+
 import pytest
+
+from astralint import load_file
 
 __HERE__ = os.path.dirname(__file__)
 
@@ -12,7 +14,7 @@ def mms1_asp2_srvy():
 
 @pytest.fixture
 def mock_file():
-    from astralint.base.file import File, Variable, Attribute, DataType
+    from astralint.base.file import Attribute, DataType, File, Variable
     return File(
         extension="mock",
         filename="mock_file.mock",
