@@ -137,7 +137,6 @@ ignore = [
 
 [tool.basedpyright]
 typeCheckingMode = "standard"
-plugins = ["pydantic"]
 # BasedPyright currently seems like the best type checker option, much faster
 # than mypy and with a good extension for VSCode/Cursor.
 # https://marketplace.visualstudio.com/items?itemName=detachhead.basedpyright
