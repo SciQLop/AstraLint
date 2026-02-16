@@ -7,7 +7,6 @@ from yaml import safe_dump
 
 from astralint.base.conformance_suite import (
     SUITES,
-    ConformanceSuite,
     get_suite,
     register_suite,
 )

@@ -1,8 +1,8 @@
 from typing import Any, Literal
 
 from ...file import File
-from ...validation_result import Severity, ValidationResult, ValidationResultGroup
-from .base import BaseAssertion, resolve_path
+from ...validation_result import Severity, ValidationResult
+from .base import BaseAssertion
 
 
 class ContainsKeysAssertion(BaseAssertion):

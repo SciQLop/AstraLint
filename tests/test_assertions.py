@@ -1,6 +1,5 @@
 from yaml import safe_load
 
-from astralint.base import DataType
 from astralint.base.yaml_rules.yaml_rule import YamlRule
 
 from . import *

@@ -1,8 +1,8 @@
 from typing import Any, Literal
 
 from ...file import DataType, File, Variable
-from ...validation_result import Severity, ValidationResult, ValidationResultGroup
-from .base import BaseAssertion, resolve_path
+from ...validation_result import Severity, ValidationResult
+from .base import BaseAssertion
 
 
 class IsTypeAssertion(BaseAssertion):
