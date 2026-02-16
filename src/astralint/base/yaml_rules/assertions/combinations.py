@@ -15,9 +15,9 @@ class AllOf(BaseAssertionGroup):
             result = assertion.evaluate(file)
             if not result.valid:
                 return ValidationResult(valid=False, reference="", severity=Severity.ERROR,
-                                        message=f"Assertion failed in 'all_of'", target="")
+                                        message="Assertion failed in 'all_of'", target="")
         return ValidationResult(valid=True, reference="", severity=Severity.INFO,
-                                message=f"All assertions in 'all_of' passed successfully.", target="")
+                                message="All assertions in 'all_of' passed successfully.", target="")
 
 
 class AnyOf(BaseAssertionGroup):
@@ -28,10 +28,10 @@ class AnyOf(BaseAssertionGroup):
             result = assertion.evaluate(file)
             if result.valid:
                 return ValidationResult(valid=True, reference="", severity=Severity.INFO,
-                                        message=f"At least one assertion in 'any_of' passed successfully.",
+                                        message="At least one assertion in 'any_of' passed successfully.",
                                         target="")
         return ValidationResult(valid=False, reference="", severity=Severity.ERROR,
-                                message=f"All assertions in 'any_of' failed.", target="")
+                                message="All assertions in 'any_of' failed.", target="")
 
 
 class NoneOf(BaseAssertionGroup):
@@ -42,10 +42,10 @@ class NoneOf(BaseAssertionGroup):
             result = assertion.evaluate(file)
             if result.valid:
                 return ValidationResult(valid=False, reference="", severity=Severity.ERROR,
-                                        message=f"At least one assertion in 'none_of' passed, which is not expected",
+                                        message="At least one assertion in 'none_of' passed, which is not expected",
                                         target="")
         return ValidationResult(valid=True, reference="", severity=Severity.INFO,
-                                message=f"All assertions in 'none_of' failed as expected.", target="")
+                                message="All assertions in 'none_of' failed as expected.", target="")
 
 
 class Not(BaseEvaluable):
@@ -67,9 +67,9 @@ class Not(BaseEvaluable):
         result = self.assertion.evaluate(file)
         if result.valid:
             return ValidationResult(valid=False, reference="", severity=Severity.ERROR,
-                                    message=f"Assertion passed but was expected to fail in 'not'", target="")
+                                    message="Assertion passed but was expected to fail in 'not'", target="")
         return ValidationResult(valid=True, reference="", severity=Severity.INFO,
-                                message=f"Assertion failed as expected in 'not'.", target="")
+                                message="Assertion failed as expected in 'not'.", target="")
 
 
 class IfThen(BaseEvaluable):
