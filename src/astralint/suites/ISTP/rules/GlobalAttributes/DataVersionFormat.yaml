@@ -1,0 +1,17 @@
+name: DataVersionFormat
+description: "Data_version must be a valid version string"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html#Data_version"
+reference: "ISTP-GA-005"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  - path: "attributes/Data_version/values/[0-9]*"
+    check: matches
+    pattern: "^\\d+(\\.\\d+)*$"
+    message: "Data_version must be numeric (e.g., '1', '1.0', '01')"
+
+  - path: "attributes/Data_version/values/[0-9]*"
+    check: not_empty
+    message: "Data_version cannot be empty"
+

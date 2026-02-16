@@ -20,14 +20,21 @@ def mock_file():
         extension="mock",
         filename="mock_file.mock",
         attributes={
-            "global_attr": Attribute(name="global_attr", data_type=[DataType.INT32], shape=[1])
+            "global_attr": Attribute(
+                name="global_attr", data_type=[DataType.INT32], shape=[1], values=[42]
+            )
         },
         variables={
             "var1": Variable(
                 name="var1",
                 shape=[10],
                 attributes={
-                    "var_attr": Attribute(name="var_attr", data_type=[DataType.FLOAT64], shape=[10])
+                    "var_attr": Attribute(
+                        name="var_attr",
+                        data_type=[DataType.FLOAT64],
+                        shape=[10],
+                        values=[float(i) for i in range(10)],
+                    ),
                 },
                 data_type=DataType.FLOAT64,
                 compression="gzip",

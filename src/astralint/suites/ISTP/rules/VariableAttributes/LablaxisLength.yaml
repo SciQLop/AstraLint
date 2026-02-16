@@ -1,0 +1,14 @@
+name: LablaxisLength
+description: "LABLAXIS should be short for axis labels (10 characters max)"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#LABLAXIS"
+reference: "ISTP-VA-008"
+severity: WARNING
+suite: ISTP
+
+assertions:
+  - path: "variables/.*/attributes/LABLAXIS/values/[0-9]*"
+    check: length
+    max: 10
+    error_if_no_match: false
+    message: "LABLAXIS should be 10 characters or less for proper axis labeling"
+

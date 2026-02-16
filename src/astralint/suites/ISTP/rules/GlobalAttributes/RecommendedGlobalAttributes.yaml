@@ -1,0 +1,23 @@
+name: RecommendedGlobalAttributes
+description: "Recommended global attributes should be present for better data discoverability"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html"
+reference: "ISTP-GA-002"
+severity: WARNING
+suite: ISTP
+
+assertions:
+  - path: "attributes"
+    check: contains_keys
+    error_if_no_match: false
+    keys:
+      - Acknowledgement
+      - Generated_by
+      - Generation_date
+      - HTTP_LINK
+      - LINK_TEXT
+      - LINK_TITLE
+      - MODS
+      - Rules_of_use
+      - Time_resolution
+    message: "Missing recommended global attribute: {key}"
+

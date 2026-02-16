@@ -1,0 +1,22 @@
+name: DisplayTypeValues
+description: "DISPLAY_TYPE should use standard ISTP values"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#DISPLAY_TYPE"
+reference: "ISTP-VA-005"
+severity: WARNING
+suite: ISTP
+
+assertions:
+  - path: "variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*"
+    check: in
+    error_if_no_match: false
+    values:
+      - time_series
+      - spectrogram
+      - stack_plot
+      - image
+      - no_plot
+      - orbit
+      - plasmagram
+      - movie
+    message: "DISPLAY_TYPE should be a standard value: time_series, spectrogram, stack_plot, image, no_plot, orbit, plasmagram, or movie"
+

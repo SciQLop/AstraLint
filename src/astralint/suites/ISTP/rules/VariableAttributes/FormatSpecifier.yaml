@@ -1,0 +1,15 @@
+name: FormatSpecifier
+description: "FORMAT must be a valid Fortran format specifier"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#FORMAT"
+reference: "ISTP-VA-010"
+severity: WARNING
+suite: ISTP
+
+assertions:
+  # Common Fortran formats: F, E, I, A, G followed by width and optional decimal places
+  - path: "variables/.*/attributes/FORMAT/values/[0-9]*"
+    check: matches
+    error_if_no_match: false
+    pattern: "^[AIEFDG]\\d+(\\.\\d+)?$"
+    message: "FORMAT should be a valid Fortran format specifier (e.g., F10.2, E12.4, I5, A20, G13.6)"
+

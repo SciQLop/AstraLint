@@ -1,0 +1,17 @@
+name: FieldnamLength
+description: "FIELDNAM should be concise for plot labels (30 characters max)"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#FIELDNAM"
+reference: "ISTP-VA-007"
+severity: WARNING
+suite: ISTP
+
+assertions:
+  - path: "variables/.*/attributes/FIELDNAM/values/[0-9]*"
+    check: length
+    max: 30
+    message: "FIELDNAM should be 30 characters or less for proper display in plots"
+
+  - path: "variables/.*/attributes/FIELDNAM/values/[0-9]*"
+    check: not_empty
+    message: "FIELDNAM cannot be empty"
+

@@ -1,0 +1,26 @@
+name: InstrumentTypeValues
+description: "Instrument_type should use standard ISTP values"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html#Instrument_type"
+reference: "ISTP-GA-010"
+severity: WARNING
+suite: ISTP
+
+assertions:
+  - path: "attributes/Instrument_type/values/[0-9]*"
+    check: in
+    error_if_no_match: false
+    values:
+      - "Magnetic Fields (space)"
+      - "Electric Fields (space)"
+      - "Particles (space)"
+      - "Plasma and Solar Wind"
+      - "Ephemeris/Attitude/Ancillary"
+      - "Radio and Plasma Waves (space)"
+      - "Engineering"
+      - "Imaging and Remote Sensing (space)"
+      - "Activity Indices"
+      - "Ground-Based Magnetometers"
+      - "Ground-Based VLF/ELF/ULF, Coverage"
+      - "Ground-Based HF-Radars"
+    message: "Instrument_type should use a standard ISTP value"
+

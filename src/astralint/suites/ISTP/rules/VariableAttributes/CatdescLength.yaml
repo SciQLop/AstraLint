@@ -1,0 +1,17 @@
+name: CatdescLength
+description: "CATDESC should be descriptive but concise (80 characters max per ISTP)"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#CATDESC"
+reference: "ISTP-VA-006"
+severity: WARNING
+suite: ISTP
+
+assertions:
+  - path: "variables/.*/attributes/CATDESC/values/[0-9]*"
+    check: length
+    max: 80
+    message: "CATDESC should be 80 characters or less"
+
+  - path: "variables/.*/attributes/CATDESC/values/[0-9]*"
+    check: not_empty
+    message: "CATDESC cannot be empty - must describe the variable"
+

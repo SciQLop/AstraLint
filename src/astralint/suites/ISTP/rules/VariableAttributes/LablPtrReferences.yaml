@@ -1,0 +1,26 @@
+name: LablPtrReferences
+description: "LABL_PTR_1, LABL_PTR_2, LABL_PTR_3 must reference existing variables"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#LABL_PTR_1"
+reference: "ISTP-VA-012"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  # LABL_PTR_1 must reference existing variable if present
+  - path: "variables/.*/attributes/LABL_PTR_1/values/[0-9]*"
+    check: reference_variable
+    error_if_no_match: false
+    message: "LABL_PTR_1 references non-existent variable"
+
+  # LABL_PTR_2 must reference existing variable if present
+  - path: "variables/.*/attributes/LABL_PTR_2/values/[0-9]*"
+    check: reference_variable
+    error_if_no_match: false
+    message: "LABL_PTR_2 references non-existent variable"
+
+  # LABL_PTR_3 must reference existing variable if present
+  - path: "variables/.*/attributes/LABL_PTR_3/values/[0-9]*"
+    check: reference_variable
+    error_if_no_match: false
+    message: "LABL_PTR_3 references non-existent variable"
+

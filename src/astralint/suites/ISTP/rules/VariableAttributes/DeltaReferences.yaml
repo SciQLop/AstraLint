@@ -1,0 +1,20 @@
+name: DeltaReferences
+description: "DELTA_PLUS_VAR and DELTA_MINUS_VAR must reference existing variables"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#DELTA_PLUS_VAR"
+reference: "ISTP-VA-014"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  # DELTA_PLUS_VAR must reference existing variable if present
+  - path: "variables/.*/attributes/DELTA_PLUS_VAR/values/[0-9]*"
+    check: reference_variable
+    error_if_no_match: false
+    message: "DELTA_PLUS_VAR references non-existent variable"
+
+  # DELTA_MINUS_VAR must reference existing variable if present
+  - path: "variables/.*/attributes/DELTA_MINUS_VAR/values/[0-9]*"
+    check: reference_variable
+    error_if_no_match: false
+    message: "DELTA_MINUS_VAR references non-existent variable"
+

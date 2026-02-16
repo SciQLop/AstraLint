@@ -1,0 +1,17 @@
+name: VarTypeValues
+description: "VAR_TYPE must be one of the allowed ISTP values"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#VAR_TYPE"
+reference: "ISTP-VA-004"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  - path: "variables/.*/attributes/VAR_TYPE/values/[0-9]*"
+    check: in
+    values:
+      - data
+      - support_data
+      - metadata
+      - ignore_data
+    message: "VAR_TYPE must be 'data', 'support_data', 'metadata', or 'ignore_data'"
+

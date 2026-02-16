@@ -1,0 +1,19 @@
+name: MandatoryVariableAttributes
+description: "All variables must have required ISTP variable attributes"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html"
+reference: "ISTP-VA-001"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  # Core attributes required for all variables
+  - path: "variables/.*/attributes"
+    check: contains_keys
+    keys:
+      - CATDESC
+      - FIELDNAM
+      - FILLVAL
+      - FORMAT
+      - VAR_TYPE
+    message: "Variable missing mandatory attribute: {key}"
+

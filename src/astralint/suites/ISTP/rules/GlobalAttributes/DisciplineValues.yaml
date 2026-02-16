@@ -1,0 +1,20 @@
+name: DisciplineValues
+description: "Discipline should use standard ISTP values"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html#Discipline"
+reference: "ISTP-GA-009"
+severity: WARNING
+suite: ISTP
+
+assertions:
+  - path: "attributes/Discipline/values/[0-9]*"
+    check: in
+    error_if_no_match: false
+    values:
+      - "Space Physics>Magnetospheric Science"
+      - "Space Physics>Interplanetary Studies"
+      - "Space Physics>Ionospheric Science"
+      - "Solar Physics>Heliospheric Physics"
+      - "Planetary Physics>Magnetospheric Science"
+      - "Planetary Physics>Rings and Dust"
+    message: "Discipline should use a standard ISTP value (e.g., 'Space Physics>Magnetospheric Science')"
+

@@ -1,0 +1,16 @@
+name: ScaleTypValues
+description: "SCALETYP should be 'linear' or 'log' for proper plotting"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#SCALETYP"
+reference: "ISTP-VA-013"
+severity: WARNING
+suite: ISTP
+
+assertions:
+  - path: "variables/.*/attributes/SCALETYP/values/[0-9]*"
+    check: in
+    error_if_no_match: false
+    values:
+      - linear
+      - log
+    message: "SCALETYP should be 'linear' or 'log'"
+

@@ -1,0 +1,18 @@
+name: LogicalFileIdFormat
+description: "Logical_file_id must match the filename and include date and version"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html#Logical_file_id"
+reference: "ISTP-GA-004"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  # Must contain logical_source + date + version pattern
+  - path: "attributes/Logical_file_id/values/[0-9]*"
+    check: matches
+    pattern: "^[a-z0-9_]+_\\d{8}(_v\\d+)?$"
+    message: "Logical_file_id should follow: logical_source_YYYYMMDD[_vN] format"
+
+  - path: "attributes/Logical_file_id/values/[0-9]*"
+    check: not_empty
+    message: "Logical_file_id cannot be empty"
+

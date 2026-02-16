@@ -1,17 +1,19 @@
 name: MandatoryGlobalAttributes
-description: "All mandatory global attributes must be present"
-url: "https://..."
-reference: "ISTP-MD-003"
+description: "All mandatory global attributes must be present (ISTP/SPDF required)"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html"
+reference: "ISTP-GA-001"
 severity: ERROR
 suite: ISTP
 
 assertions:
+  # Required global attributes per ISTP guidelines Section 3
   - path: "attributes"
     check: contains_keys
     keys:
       - Data_type
       - Data_version
       - Descriptor
+      - Discipline
       - Instrument_type
       - Logical_file_id
       - Logical_source
@@ -19,11 +21,8 @@ assertions:
       - Mission_group
       - PI_affiliation
       - PI_name
+      - Project
       - Source_name
       - TEXT
     message: "Missing mandatory global attribute: {key}"
 
-  - path: "variables/.*/attributes"
-    check: contains_keys
-    keys: [CATDESC, FIELDNAM, FILLVAL]
-    message: "Variable '{parent}' missing attribute: {key}"

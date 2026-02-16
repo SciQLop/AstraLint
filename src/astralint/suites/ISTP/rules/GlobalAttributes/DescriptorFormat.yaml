@@ -1,0 +1,18 @@
+name: DescriptorFormat
+description: "Descriptor must follow ISTP convention: ABBREV>Full_description"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html#Descriptor"
+reference: "ISTP-GA-008"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  # Format: ABBREV>Full_description (e.g., "EPI>Energetic Particles and Ion Composition")
+  - path: "attributes/Descriptor/values/[0-9]*"
+    check: matches
+    pattern: "^[A-Za-z0-9_-]+>.+$"
+    message: "Descriptor must follow format: ABBREV>Full_description"
+
+  - path: "attributes/Descriptor/values/[0-9]*"
+    check: not_empty
+    message: "Descriptor cannot be empty"
+

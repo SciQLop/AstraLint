@@ -1,0 +1,2 @@
+# ISTP Variable Attributes Rules
+

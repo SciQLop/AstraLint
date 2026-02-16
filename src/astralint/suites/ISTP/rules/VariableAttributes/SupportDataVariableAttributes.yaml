@@ -1,0 +1,29 @@
+name: SupportDataVariableAttributes
+description: "Support_data variables must have required attributes"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html"
+reference: "ISTP-VA-003"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  - check: if_then
+    if:
+      path: "variables/.*/attributes/VAR_TYPE/values/[0-9]*"
+      check: comparison
+      operator: "="
+      value: "support_data"
+    then:
+      check: all_of
+      assertions:
+        - path: "variables/.*/attributes"
+          check: contains_keys
+          keys:
+            - CATDESC
+            - FIELDNAM
+            - FILLVAL
+            - FORMAT
+            - UNITS
+            - VALIDMIN
+            - VALIDMAX
+          message: "Support_data variable missing required attribute: {key}"
+

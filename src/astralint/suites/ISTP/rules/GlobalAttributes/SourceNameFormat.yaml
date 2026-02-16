@@ -1,0 +1,18 @@
+name: SourceNameFormat
+description: "Source_name must follow ISTP convention: ABBREV>Full_Name"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html#Source_name"
+reference: "ISTP-GA-007"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  # Format: ABBREV>Full_Name (e.g., "GEOTAIL>Geomagnetic Tail")
+  - path: "attributes/Source_name/values/[0-9]*"
+    check: matches
+    pattern: "^[A-Z0-9_-]+>.+$"
+    message: "Source_name must follow format: ABBREV>Full_Name (e.g., 'GEOTAIL>Geomagnetic Tail')"
+
+  - path: "attributes/Source_name/values/[0-9]*"
+    check: not_empty
+    message: "Source_name cannot be empty"
+

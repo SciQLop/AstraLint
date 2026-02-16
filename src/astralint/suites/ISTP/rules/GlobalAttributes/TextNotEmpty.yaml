@@ -1,0 +1,17 @@
+name: TextNotEmpty
+description: "TEXT attribute must contain meaningful description of the data"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html#TEXT"
+reference: "ISTP-GA-011"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  - path: "attributes/TEXT/values/[0-9]*"
+    check: not_empty
+    message: "TEXT global attribute cannot be empty - must describe the data"
+
+  - path: "attributes/TEXT/values/[0-9]*"
+    check: length
+    min: 20
+    message: "TEXT should contain a meaningful description (at least 20 characters)"
+

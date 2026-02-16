@@ -1,0 +1,2 @@
+# ISTP Global Attributes Rules
+

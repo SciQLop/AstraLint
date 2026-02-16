@@ -1,0 +1,29 @@
+name: DataVariableAttributes
+description: "Data variables (VAR_TYPE=data) must have additional required attributes"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html"
+reference: "ISTP-VA-002"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  # Data variables need DEPEND_0 (usually Epoch), display info, and valid range
+  - check: if_then
+    if:
+      path: "variables/.*/attributes/VAR_TYPE/values/[0-9]*"
+      check: comparison
+      operator: "="
+      value: "data"
+    then:
+      check: all_of
+      assertions:
+        - path: "variables/.*/attributes"
+          check: contains_keys
+          keys:
+            - DEPEND_0
+            - DISPLAY_TYPE
+            - LABLAXIS
+            - UNITS
+            - VALIDMIN
+            - VALIDMAX
+          message: "Data variable missing required attribute: {key}"
+

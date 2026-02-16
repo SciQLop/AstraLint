@@ -1,0 +1,23 @@
+name: EpochVariable
+description: "Files should contain an Epoch variable for time tagging"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/variables.html#Epoch"
+reference: "ISTP-VAR-001"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  # Check that Epoch variable exists
+  - path: "variables/Epoch"
+    check: exists
+    message: "File must contain an 'Epoch' variable for time tagging"
+
+  # Epoch should be CDF_EPOCH, CDF_EPOCH16, or CDF_TIME_TT2000
+  - path: "variables/Epoch/data_type"
+    check: in
+    error_if_no_match: false
+    values:
+      - CDFEPOCH
+      - CDFEPOCH16
+      - TT2000
+    message: "Epoch variable must be of type CDF_EPOCH, CDF_EPOCH16, or CDF_TIME_TT2000"
+

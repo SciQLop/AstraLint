@@ -1,0 +1,32 @@
+name: DependReferences
+description: "DEPEND_0, DEPEND_1, DEPEND_2, DEPEND_3 must reference existing variables"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#DEPEND_0"
+reference: "ISTP-VA-011"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  # DEPEND_0 typically references Epoch - must be a valid variable
+  - path: "variables/.*/attributes/DEPEND_0/values/0"
+    check: reference_variable
+    error_if_no_match: false
+    message: "DEPEND_0 references non-existent variable"
+
+  # DEPEND_1 must reference existing variable if present
+  - path: "variables/.*/attributes/DEPEND_1/values/0"
+    check: reference_variable
+    error_if_no_match: false
+    message: "DEPEND_1 references non-existent variable"
+
+  # DEPEND_2 must reference existing variable if present
+  - path: "variables/.*/attributes/DEPEND_2/values/0"
+    check: reference_variable
+    error_if_no_match: false
+    message: "DEPEND_2 references non-existent variable"
+
+  # DEPEND_3 must reference existing variable if present
+  - path: "variables/.*/attributes/DEPEND_3/values/0"
+    check: reference_variable
+    error_if_no_match: false
+    message: "DEPEND_3 references non-existent variable"
+

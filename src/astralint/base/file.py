@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -25,6 +26,7 @@ class Attribute(BaseModel):
     name: str
     data_type: list[DataType]
     shape: list[int]
+    values: list[Any]
 
 
 class Variable(BaseModel):

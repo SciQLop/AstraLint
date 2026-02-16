@@ -52,7 +52,9 @@ def _(attr: CDFAttribute) -> Attribute:
         data_type = [_to_data_type(attr.type(i)) for i in range(len(attr))]
     else:
         data_type = [DataType.NONE]
-    return Attribute(name=attr.name, data_type=data_type, shape=[len(attr)])
+    return Attribute(
+        name=attr.name, data_type=data_type, shape=[len(attr)], values=[a for a in attr]
+    )
 
 
 @_parse_attribute.register(CDFVariableAttribute)
@@ -61,7 +63,9 @@ def _(attr: CDFVariableAttribute) -> Attribute:
         data_type = [_to_data_type(attr.type())]
     else:
         data_type = [DataType.NONE]
-    return Attribute(name=attr.name, data_type=data_type, shape=[len(attr)])
+    return Attribute(
+        name=attr.name, data_type=data_type, shape=[len(attr)], values=[a for a in attr]
+    )
 
 
 def _parse_variable(var: CDFVariable) -> Variable:

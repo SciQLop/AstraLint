@@ -1,0 +1,13 @@
+name: UnitsNotEmpty
+description: "UNITS attribute must not be empty (use 'unitless' or ' ' if no units)"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#UNITS"
+reference: "ISTP-VA-009"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  - path: "variables/.*/attributes/UNITS/values/[0-9]*"
+    check: not_empty
+    error_if_no_match: false
+    message: "UNITS cannot be empty - use 'unitless' or a single space if variable has no units"
+

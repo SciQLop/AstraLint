@@ -1,0 +1,3 @@
+[submodule "resources/ISTP_metadata"]
+	path = resources/ISTP_metadata
+	url = https://github.com/IHDE-Alliance/ISTP_metadata

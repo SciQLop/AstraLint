@@ -1,0 +1,42 @@
+name: EpochAttributes
+description: "Epoch variable must have required ISTP attributes"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/variables.html#Epoch"
+reference: "ISTP-VAR-002"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  - path: "variables/Epoch/attributes"
+    check: contains_keys
+    error_if_no_match: false
+    keys:
+      - CATDESC
+      - FIELDNAM
+      - FILLVAL
+      - LABLAXIS
+      - UNITS
+      - VALIDMIN
+      - VALIDMAX
+      - VAR_TYPE
+      - MONOTON
+      - TIME_BASE
+      - TIME_SCALE
+    message: "Epoch variable missing required attribute: {key}"
+
+  # Epoch VAR_TYPE should be support_data
+  - path: "variables/Epoch/attributes/VAR_TYPE/values/[0-9]*"
+    check: comparison
+    operator: "="
+    value: "support_data"
+    error_if_no_match: false
+    message: "Epoch VAR_TYPE should be 'support_data'"
+
+  # Epoch MONOTON should be INCREASE (or rarely DECREASE)
+  - path: "variables/Epoch/attributes/MONOTON/values/[0-9]*"
+    check: in
+    error_if_no_match: false
+    values:
+      - INCREASE
+      - DECREASE
+    message: "Epoch MONOTON should be 'INCREASE' or 'DECREASE'"
+

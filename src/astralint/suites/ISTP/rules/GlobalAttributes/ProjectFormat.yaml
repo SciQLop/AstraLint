@@ -1,0 +1,18 @@
+name: ProjectFormat
+description: "Project must follow ISTP convention"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html#Project"
+reference: "ISTP-GA-012"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  # Project can be multi-valued, format: ABBREV>Full_Name
+  - path: "attributes/Project/values/[0-9]*"
+    check: matches
+    pattern: "^[A-Z0-9_-]+>.+$"
+    message: "Project must follow format: ABBREV>Full_Name (e.g., 'ISTP>International Solar-Terrestrial Physics')"
+
+  - path: "attributes/Project/values/[0-9]*"
+    check: not_empty
+    message: "Project cannot be empty"
+
