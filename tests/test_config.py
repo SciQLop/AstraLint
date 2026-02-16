@@ -40,12 +40,12 @@ class TestAstraLintConfig:
     def test_config_rejects_unknown_fields(self):
         """Config with unknown fields raises error."""
         with pytest.raises(ValidationError):
-            AstraLintConfig(unknown_field="value")
+            AstraLintConfig(unknown_field="value") # type: ignore
 
     def test_nested_output_config(self):
         """Nested output config works correctly."""
         cfg = AstraLintConfig(
-            output={"format": "html", "verbose": True}
+            output={"format": "html", "verbose": True} # type: ignore
         )
         assert cfg.output.format == "html"
         assert cfg.output.verbose is True

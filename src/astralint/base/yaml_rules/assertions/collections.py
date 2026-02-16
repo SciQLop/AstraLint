@@ -1,12 +1,15 @@
 from typing import Any, Literal
 
+from pydantic import ConfigDict
+
 from ...file import File
 from ...validation_result import Severity, ValidationResult
 from .base import BaseAssertion
 
 
 class ContainsAssertion(BaseAssertion):
-    check: Literal["in"] = "in"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["in"] = "in" # type: ignore[assignment]
     values: list[Any]
 
     def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
@@ -21,7 +24,8 @@ class ContainsAssertion(BaseAssertion):
 
 
 class NotContainsAssertion(BaseAssertion):
-    check: Literal["not_in"] = "not_in"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["not_in"] = "not_in" # type: ignore[assignment]
     values: list[Any]
 
     def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
@@ -36,7 +40,8 @@ class NotContainsAssertion(BaseAssertion):
 
 
 class LengthAssertion(BaseAssertion):
-    check: Literal["length"] = "length"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["length"] = "length" # type: ignore[assignment]
     min: int | None = None
     max: int | None = None
     value: int | None = None
@@ -72,7 +77,8 @@ class LengthAssertion(BaseAssertion):
 
 
 class NotEmptyAssertion(BaseAssertion):
-    check: Literal["not_empty"] = "not_empty"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["not_empty"] = "not_empty" # type: ignore[assignment]
 
     def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
         try:
@@ -89,7 +95,8 @@ class NotEmptyAssertion(BaseAssertion):
 
 
 class RequiresAssertion(BaseAssertion):
-    check: Literal["requires"] = "requires"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["requires"] = "requires" # type: ignore[assignment]
     key: str
 
     def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
@@ -104,7 +111,8 @@ class RequiresAssertion(BaseAssertion):
 
 
 class ArrayShapeAssertion(BaseAssertion):
-    check: Literal["array_shape"] = "array_shape"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["array_shape"] = "array_shape" # type: ignore[assignment]
     shape: list[int]
 
     def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:

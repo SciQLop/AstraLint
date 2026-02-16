@@ -3,12 +3,6 @@ from typing import Protocol
 from .file import File
 
 
-# https://stackoverflow.com/a/13624858
-class classproperty(property):
-    def __get__(self, owner_self, owner_cls):
-        return self.fget(owner_cls)
-
-
 def get_remote_file(url: str) -> bytes:
     """Fetch a remote file from the given URL and return its content as bytes. This function can be used by codecs to load files from remote URLs.
 
@@ -39,7 +33,7 @@ class Codec(Protocol):
 
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
-        for ext in cls.supported_extensions:
+        for ext in cls.supported_extensions():
             if ext in cls._registry:
                 raise ValueError(f"Extension '{ext}' is already registered by {cls._registry[ext].__name__}.")
             cls._registry[ext] = cls
@@ -51,7 +45,7 @@ class Codec(Protocol):
         else:
             raise ValueError(f"No codec registered for extension '{extension}'.")
 
-    @classproperty
+    @classmethod
     def supported_extensions(cls) -> list[str]:
         ...
 

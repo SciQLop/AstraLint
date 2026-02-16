@@ -1,12 +1,15 @@
 from typing import Any, Literal
 
+from pydantic import ConfigDict
+
 from ...file import DataType, File, Variable
 from ...validation_result import Severity, ValidationResult
 from .base import BaseAssertion
 
 
 class IsTypeAssertion(BaseAssertion):
-    check: Literal["is_type"] = "is_type"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["is_type"] = "is_type" # type: ignore[assignment]
     type: str
 
     def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:

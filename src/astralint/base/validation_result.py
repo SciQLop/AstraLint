@@ -31,15 +31,6 @@ class ValidationResultGroup(BaseModel):
         else:
             self.results.append(new_results)
 
-    def __iter__(self):
-        return self.results.__iter__()
-
-    def __getitem__(self, index):
-        return self.results[index]
-
-    def __len__(self):
-        return len(self.results)
-
     def count_by_severity(self) -> dict[str, int]:
         """Count results by severity level, recursively."""
         counts = {"ERROR": 0, "WARNING": 0, "INFO": 0, "SKIPPED": 0, "passed": 0, "failed": 0, "skipped": 0}

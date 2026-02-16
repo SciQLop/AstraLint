@@ -102,7 +102,7 @@ def parents_rules(parents: list[str]) -> list[Rule]:
 
 
 class _ConformanceSuiteProtocolCtor:
-    def __init__(self, name: str, rules_lookup_dir: str, inherit_from: list[str] = None, **kwargs):
+    def __init__(self, name: str, rules_lookup_dir: str, inherit_from: list[str] | None = None, **kwargs):
         self.kwargs = kwargs
         self.name = name
         self.rules_lookup_dir = rules_lookup_dir
@@ -120,8 +120,9 @@ class _ConformanceSuiteProtocolCtor:
 SUITES = {}
 
 
-def register_suite(description: str, url: str, name: str, rules_lookup_dir: str, alternative_names: list[str] = None,
-                   inherit_from: list[str] = None) -> _ConformanceSuiteProtocolCtor:
+def register_suite(description: str, url: str, name: str, rules_lookup_dir: str,
+                   alternative_names: list[str] | None = None,
+                   inherit_from: list[str] | None = None) -> _ConformanceSuiteProtocolCtor:
     ctor = _ConformanceSuiteProtocolCtor(
         description=description,
         url=url,

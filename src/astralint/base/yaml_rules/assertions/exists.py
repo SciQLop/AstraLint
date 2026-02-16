@@ -1,12 +1,15 @@
 from typing import Literal
 
+from pydantic import ConfigDict
+
 from ...file import File
 from ...validation_result import Severity, ValidationResult, ValidationResultGroup
 from .base import BaseAssertion, resolve_path
 
 
 class ExistsAssertion(BaseAssertion):
-    check: Literal["exists"] = "exists"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["exists"] = "exists" # type: ignore[assignment]
 
     def evaluate(self, file: File) -> ValidationResult | ValidationResultGroup:
         matches = resolve_path(file, self.path)
@@ -19,7 +22,8 @@ class ExistsAssertion(BaseAssertion):
 
 
 class NotExistsAssertion(BaseAssertion):
-    check: Literal["not_exists"] = "not_exists"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["not_exists"] = "not_exists" # type: ignore[assignment]
 
     def evaluate(self, file: File) -> ValidationResult | ValidationResultGroup:
         matches = resolve_path(file, self.path)

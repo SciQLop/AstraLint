@@ -58,7 +58,7 @@ dev = [
     "ruff>=0.14.11",
     "codespell>=2.4.1",
     "rich>=14.2.0",
-    "basedpyright>=1.37.1",
+    "basedpyright[pydantic]>=1.37.1",
     "funlog>=0.2.1",
 ]
 
@@ -136,6 +136,8 @@ ignore = [
 ]
 
 [tool.basedpyright]
+typeCheckingMode = "standard"
+plugins = ["pydantic"]
 # BasedPyright currently seems like the best type checker option, much faster
 # than mypy and with a good extension for VSCode/Cursor.
 # https://marketplace.visualstudio.com/items?itemName=detachhead.basedpyright

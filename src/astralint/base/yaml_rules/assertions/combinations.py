@@ -1,6 +1,6 @@
 from typing import Any, Literal
 
-from pydantic import Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from ...file import File
 from ...validation_result import Severity, ValidationResult
@@ -8,7 +8,8 @@ from .base import BaseAssertionGroup, BaseEvaluable, get_assertion_union
 
 
 class AllOf(BaseAssertionGroup):
-    check: Literal["all_of"] = "all_of"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["all_of"] = "all_of" # type: ignore[assignment]
 
     def evaluate(self, file: File) -> ValidationResult:
         for assertion in self.assertions:
@@ -21,7 +22,8 @@ class AllOf(BaseAssertionGroup):
 
 
 class AnyOf(BaseAssertionGroup):
-    check: Literal["any_of"] = "any_of"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["any_of"] = "any_of" # type: ignore[assignment]
 
     def evaluate(self, file: File) -> ValidationResult:
         for assertion in self.assertions:
@@ -35,7 +37,8 @@ class AnyOf(BaseAssertionGroup):
 
 
 class NoneOf(BaseAssertionGroup):
-    check: Literal["none_of"] = "none_of"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["none_of"] = "none_of" # type: ignore[assignment]
 
     def evaluate(self, file: File) -> ValidationResult:
         for assertion in self.assertions:
@@ -49,7 +52,8 @@ class NoneOf(BaseAssertionGroup):
 
 
 class Not(BaseEvaluable):
-    check: Literal["not"] = "not"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["not"] = "not" # type: ignore[assignment]
     assertion: Any
 
     @model_validator(mode="before")
@@ -75,7 +79,8 @@ class Not(BaseEvaluable):
 class IfThen(BaseEvaluable):
     """Conditional assertion: if condition passes, then assertion must pass.
     If condition fails, the assertion is skipped (vacuously true)."""
-    check: Literal["if_then"] = "if_then"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["if_then"] = "if_then" # type: ignore[assignment]
     if_: Any = Field(alias="if")
     then: Any
 
@@ -107,7 +112,8 @@ class IfThen(BaseEvaluable):
 
 class IfThenElse(BaseEvaluable):
     """Conditional assertion with else branch: if condition passes, run then; otherwise run else."""
-    check: Literal["if_then_else"] = "if_then_else"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["if_then_else"] = "if_then_else" # type: ignore[assignment]
     if_: Any = Field(alias="if")
     then: Any
     else_: Any = Field(alias="else")
@@ -147,7 +153,8 @@ class IfThenElse(BaseEvaluable):
 
 class OneOf(BaseAssertionGroup):
     """Exactly one assertion must pass (XOR)."""
-    check: Literal["one_of"] = "one_of"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["one_of"] = "one_of" # type: ignore[assignment]
 
     def evaluate(self, file: File) -> ValidationResult:
         passing_count = sum(1 for assertion in self.assertions if assertion.evaluate(file).valid)
@@ -161,7 +168,8 @@ class OneOf(BaseAssertionGroup):
 
 class AtLeast(BaseAssertionGroup):
     """At least N assertions must pass."""
-    check: Literal["at_least"] = "at_least"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["at_least"] = "at_least" # type: ignore[assignment]
     count: int
 
     def evaluate(self, file: File) -> ValidationResult:
@@ -177,7 +185,8 @@ class AtLeast(BaseAssertionGroup):
 
 class AtMost(BaseAssertionGroup):
     """At most N assertions can pass."""
-    check: Literal["at_most"] = "at_most"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["at_most"] = "at_most" # type: ignore[assignment]
     count: int
 
     def evaluate(self, file: File) -> ValidationResult:
@@ -193,7 +202,8 @@ class AtMost(BaseAssertionGroup):
 
 class Exactly(BaseAssertionGroup):
     """Exactly N assertions must pass."""
-    check: Literal["exactly"] = "exactly"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["exactly"] = "exactly" # type: ignore[assignment]
     count: int
 
     def evaluate(self, file: File) -> ValidationResult:

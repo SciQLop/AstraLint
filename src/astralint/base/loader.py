@@ -12,7 +12,10 @@ log = get_logger(__name__)
 def _caller_package():
     frame = inspect.stack()[2]
     module = inspect.getmodule(frame[0])
-    return module.__package__
+    if module is None:
+        raise RuntimeError("Could not determine caller package")
+    else:
+        return module.__package__
 
 
 def _make_relative_import_path(module_path: str, package_path: str) -> str:

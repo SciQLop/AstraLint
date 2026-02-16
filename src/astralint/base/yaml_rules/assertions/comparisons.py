@@ -1,5 +1,7 @@
 from typing import Any, Literal
 
+from pydantic import ConfigDict
+
 from ...file import File
 from ...validation_result import Severity, ValidationResult
 from .base import BaseAssertion
@@ -17,7 +19,8 @@ _operators = {
 
 
 class ComparisonAssertion(BaseAssertion):
-    check: Literal["comparison"] = "comparison"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["comparison"] = "comparison" # type: ignore[assignment]
     operator: Literal["=", "!=", "<", "<=", ">", ">="]
     value: _yaml_types
 
@@ -33,7 +36,8 @@ class ComparisonAssertion(BaseAssertion):
 
 
 class RangeAssertion(BaseAssertion):
-    check: Literal["range"] = "range"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["range"] = "range" # type: ignore[assignment]
     min: _yaml_types
     max: _yaml_types
 

@@ -12,7 +12,6 @@ from ..base import (
     DataType,
     File,
     Variable,
-    classproperty,
     get_remote_file,
     is_remote_file,
 )
@@ -29,7 +28,7 @@ type_mapping = {CDFDataType.CDF_CHAR: DataType.CHAR, CDFDataType.CDF_UCHAR: Data
 
 
 def _to_data_type(cdf_dtype: CDFDataType) -> DataType:
-    return type_mapping.get(cdf_dtype)
+    return type_mapping.get(cdf_dtype, DataType.NONE)
 
 
 @singledispatch
@@ -68,7 +67,7 @@ def _parse_variable(var: CDFVariable) -> Variable:
 
 class CdfCodec(Codec):
 
-    @classproperty
+    @classmethod
     def supported_extensions(cls) -> list[str]:
         return ["cdf"]
 

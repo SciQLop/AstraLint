@@ -1,13 +1,16 @@
 import re
 from typing import Literal
 
+from pydantic import ConfigDict
+
 from ...file import File
 from ...validation_result import Severity, ValidationResult
 from .base import BaseAssertion
 
 
 class MatchesAssertion(BaseAssertion):
-    check: Literal["matches"] = "matches"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["matches"] = "matches" # type: ignore[assignment]
     pattern: str
 
     def single_assertion(self, file: File, path: str, value: str) -> ValidationResult:

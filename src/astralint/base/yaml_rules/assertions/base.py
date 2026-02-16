@@ -39,7 +39,7 @@ def resolve_path(obj: Any, path: str) -> list[tuple[str, Any]]:
     return list(filter(lambda kv: rx.match(kv[0]), flattened))
 
 
-_registry: dict[str, type["BaseAssertion"]] = {}
+_registry: dict[str, type["BaseEvaluable"]] = {}
 
 
 class BaseEvaluable(BaseModel):
@@ -65,7 +65,7 @@ class BaseAssertion(BaseEvaluable):
 
     def evaluate(self, file: File) -> ValidationResult | ValidationResultGroup:
         matches = resolve_path(file, self.path)
-        results: list[ValidationResult] = []
+        results: list[ValidationResult | ValidationResultGroup] = []
         if not matches:
             if self.error_if_no_match:
                 return ValidationResult(valid=False, reference="", severity=Severity.ERROR,
@@ -106,4 +106,4 @@ class BaseAssertionGroup(BaseEvaluable):
 def get_assertion_union():
     """Build discriminated union from registered types."""
     types = tuple(list(_registry.values()))
-    return Annotated[Union[types], Field(discriminator="check")] # noqa: UP007
+    return Annotated[Union[types], Field(discriminator="check")]  # noqa: UP007

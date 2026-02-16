@@ -1,12 +1,15 @@
 from typing import Any, Literal
 
+from pydantic import ConfigDict
+
 from ...file import File
 from ...validation_result import Severity, ValidationResult
 from .base import BaseAssertion
 
 
 class ContainsKeysAssertion(BaseAssertion):
-    check: Literal["contains_keys"] = "contains_keys"
+    model_config = ConfigDict(frozen=True)
+    check: Literal["contains_keys"] = "contains_keys" # type: ignore[assignment]
     keys: list[str]
 
     def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
