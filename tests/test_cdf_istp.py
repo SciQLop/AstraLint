@@ -12,3 +12,13 @@ def test_can_run_istp_suite():
     results = suite.run(sample)
     assert results is not None, "Validation should return results."
     assert len(results) > 0, "Validation should produce at least one result."
+
+
+def test_remote_file_in_istp_suite():
+    suite = get_suite("ISTP")
+    assert suite is not None, "ISTP suite should be registered and retrievable."
+    sample_url = "https://cdaweb.gsfc.nasa.gov/pub/software/cdawlib/0MASTERS/ac_h5_swi_00000000_v01.cdf"
+    sample = load_file(sample_url)
+    results = suite.run(sample)
+    assert results is not None, "Validation should return results."
+    assert len(results) > 0, "Validation should produce at least one result."

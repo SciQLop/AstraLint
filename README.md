@@ -156,6 +156,8 @@ The abstract `File` model is the core data structure that all codecs produce. Ru
 
 ```
 File
+├── filename: str                            # File name or identifier
+├── extension: str                           # File extension (e.g., "cdf")
 ├── compression: str                     # e.g., "gzip", "none"
 ├── attributes: {name → Attribute}       # Global metadata
 │   ├── "Project"      → Attribute
@@ -271,10 +273,12 @@ class MyCodec(Codec):
         return ["ext"]
 
     @staticmethod
-    def load(path: str) -> File:
+    def load(file_url_or_bytes: str | bytes) -> File | None:
         # Transform your file format into the abstract File model
         ...
 ```
+
+For remote files, AstraLint provides a `get_remote_file` function that handles downloading remote files and `is_remote_file` checks if a file is remote.
 
 ### Adding a New Assertion Type
 

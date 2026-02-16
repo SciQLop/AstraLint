@@ -6,7 +6,7 @@ from pycdfpp import Variable as CDFVariable
 from pycdfpp import VariableAttribute as CDFVariableAttribute
 from pycdfpp import load
 
-from ..base import Attribute, Codec, DataType, File, Variable, classproperty
+from ..base import Attribute, Codec, DataType, File, Variable, classproperty, is_remote_file, get_remote_file
 
 type_mapping = {CDFDataType.CDF_CHAR: DataType.CHAR, CDFDataType.CDF_UCHAR: DataType.CHAR,
                 CDFDataType.CDF_UINT1: DataType.UINT8, CDFDataType.CDF_UINT2: DataType.UINT16,
@@ -64,9 +64,20 @@ class CdfCodec(Codec):
         return ["cdf"]
 
     @staticmethod
-    def load(file: str|bytes) -> File | None:
+    def load(file_url_or_bytes: str | bytes) -> File | None:
+        if isinstance(file_url_or_bytes, str) and is_remote_file(file_url_or_bytes):
+            file = get_remote_file(file_url_or_bytes)
+            fname = file_url_or_bytes.split("/")[-1]
+        else:
+            file = file_url_or_bytes
+            if isinstance(file, str):
+                fname = file.split("/")[-1]
+            else:
+                fname = "<bytes input>"
         if cdf := load(file):
             return File(
+                extension="cdf",
+                filename=fname,
                 compression=cdf.compression.name,
                 attributes={name: _parse_attribute(attr) for name, attr in cdf.attributes.items()},
                 variables={name: _parse_variable(var) for name, var in cdf.items()}

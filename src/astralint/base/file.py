@@ -37,6 +37,8 @@ class Variable(BaseModel):
 
 
 class File(BaseModel):
+    extension: str
+    filename: str
     compression: str
     attributes: dict[str, Attribute]
     variables: dict[str, Variable]

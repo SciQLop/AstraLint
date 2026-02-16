@@ -14,6 +14,8 @@ def mms1_asp2_srvy():
 def mock_file():
     from astralint.base.file import File, Variable, Attribute, DataType
     return File(
+        extension="mock",
+        filename="mock_file.mock",
         attributes={
             "global_attr": Attribute(name="global_attr", data_type=[DataType.INT32], shape=[1])
         },
