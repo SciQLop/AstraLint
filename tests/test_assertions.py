@@ -21,7 +21,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0][0].valid == True
+    assert result.results[0][0].valid
 
 
 def test_is_type_assertion_wrong_type(mock_file):
@@ -40,7 +40,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0][0].valid == False
+    assert not result.results[0][0].valid
 
 
 # =============================================================================
@@ -73,7 +73,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_any_of_with_one_passing(mock_file):
@@ -100,7 +100,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_any_of_all_failing(mock_file):
@@ -124,7 +124,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == False
+    assert not result.results[0].valid
 
 
 def test_not_negates_passing_assertion(mock_file):
@@ -145,7 +145,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == False
+    assert not result.results[0].valid
 
 
 def test_not_negates_failing_assertion(mock_file):
@@ -166,7 +166,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_none_of_all_failing(mock_file):
@@ -190,7 +190,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_none_of_one_passing(mock_file):
@@ -214,7 +214,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == False
+    assert not result.results[0].valid
 
 
 def test_complex_nested_any_of_inside_all_of(mock_file):
@@ -243,7 +243,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_not_inside_all_of(mock_file):
@@ -269,7 +269,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_triple_nested_groups(mock_file):
@@ -297,7 +297,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_multiple_top_level_assertions(mock_file):
@@ -353,7 +353,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == False
+    assert not result.results[0].valid
 
 
 def test_none_of_inside_any_of(mock_file):
@@ -380,7 +380,7 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     # none_of should pass (FLOAT64 check fails), so any_of passes
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_exists_assertion_inside_all_of(mock_file):
@@ -403,7 +403,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_not_exists_assertion(mock_file):
@@ -421,7 +421,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_deeply_nested_not_in_all_of_in_any_of(mock_file):
@@ -452,7 +452,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_variable_assertions(mock_file):
@@ -475,7 +475,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_variable_attribute_assertions(mock_file):
@@ -498,7 +498,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_comparison_assertion(mock_file):
@@ -518,7 +518,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_comparison_inside_any_of(mock_file):
@@ -544,7 +544,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_quadruple_nested_groups(mock_file):
@@ -577,7 +577,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_all_of_with_many_assertions(mock_file):
@@ -613,7 +613,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_mixed_assertions_all_passing(mock_file):
@@ -681,7 +681,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == False
+    assert not result.results[0].valid
 
 
 def test_not_with_exists_assertion(mock_file):
@@ -702,7 +702,7 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     # exists fails on nonexistent path, not inverts it to pass
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_complex_real_world_scenario(mock_file):
@@ -746,7 +746,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 # =============================================================================
@@ -774,7 +774,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
     assert result.results[0].severity.value == "INFO"
 
 
@@ -799,7 +799,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == False
+    assert not result.results[0].valid
 
 
 def test_if_then_condition_fails_skipped(mock_file):
@@ -823,7 +823,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
     assert result.results[0].severity.value == "SKIPPED"
 
 
@@ -854,7 +854,7 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     # all_of should pass because skipped is considered valid
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_if_then_else_condition_passes(mock_file):
@@ -882,7 +882,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_if_then_else_condition_fails_runs_else(mock_file):
@@ -911,7 +911,7 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     # else branch runs and passes (INT32 is correct)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_if_then_else_else_branch_fails(mock_file):
@@ -940,7 +940,7 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     # else branch runs and fails (FLOAT64 is wrong)
-    assert result.results[0].valid == False
+    assert not result.results[0].valid
 
 
 # =============================================================================
@@ -971,7 +971,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_one_of_none_passes(mock_file):
@@ -995,7 +995,7 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == False
+    assert not result.results[0].valid
 
 
 def test_one_of_multiple_pass(mock_file):
@@ -1019,7 +1019,7 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     # Both pass, so one_of should fail
-    assert result.results[0].valid == False
+    assert not result.results[0].valid
 
 
 def test_at_least_passes(mock_file):
@@ -1047,7 +1047,7 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     # 2 pass (INT32 and exists), meets threshold
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_at_least_fails(mock_file):
@@ -1075,7 +1075,7 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     # Only 2 pass, need 3
-    assert result.results[0].valid == False
+    assert not result.results[0].valid
 
 
 def test_at_most_passes(mock_file):
@@ -1103,7 +1103,7 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     # 2 pass, at most 2 allowed
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_at_most_fails(mock_file):
@@ -1128,7 +1128,7 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     # 2 pass, only 1 allowed
-    assert result.results[0].valid == False
+    assert not result.results[0].valid
 
 
 def test_exactly_passes(mock_file):
@@ -1156,7 +1156,7 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     # Exactly 2 pass
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_exactly_too_few(mock_file):
@@ -1184,7 +1184,7 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     # Only 2 pass, need exactly 3
-    assert result.results[0].valid == False
+    assert not result.results[0].valid
 
 
 def test_exactly_too_many(mock_file):
@@ -1209,7 +1209,7 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     # 2 pass, need exactly 1
-    assert result.results[0].valid == False
+    assert not result.results[0].valid
 
 
 def test_nested_if_then_in_any_of(mock_file):
@@ -1239,7 +1239,7 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     # if_then is skipped (valid=True), so any_of passes
-    assert result.results[0].valid == True
+    assert result.results[0].valid
 
 
 def test_complex_conditional_scenario(mock_file):
@@ -1287,4 +1287,4 @@ assertions:
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
-    assert result.results[0].valid == True
+    assert result.results[0].valid
