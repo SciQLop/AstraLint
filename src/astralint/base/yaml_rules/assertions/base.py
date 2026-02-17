@@ -67,8 +67,9 @@ class BaseEvaluable(BaseModel):
                 raise ValueError(f"Duplicate check: {cls.check}")
             _registry[cls.check] = cls
 
-    def evaluate(self, file: File, severity: Severity) -> ValidationResult | ValidationResultGroup:
-        ...
+    def evaluate(
+        self, file: File, severity: Severity
+    ) -> ValidationResult | ValidationResultGroup: ...
 
 
 class BaseAssertion(BaseEvaluable):
@@ -107,8 +108,9 @@ class BaseAssertion(BaseEvaluable):
             severity=severity,
         )
 
-    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
-        ...
+    def single_assertion(
+        self, file: File, path: str, value: Any, severity: Severity
+    ) -> ValidationResult: ...
 
 
 class BaseAssertionGroup(BaseEvaluable):

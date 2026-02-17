@@ -12,7 +12,9 @@ class ContainsKeysAssertion(BaseAssertion):
     check: Literal["contains_keys"] = "contains_keys"  # type: ignore[assignment]
     keys: frozenset[str]
 
-    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
+    def single_assertion(
+        self, file: File, path: str, value: Any, severity: Severity
+    ) -> ValidationResult:
         if isinstance(value, dict):
             missing_keys = self.keys - value.keys()
             if missing_keys:

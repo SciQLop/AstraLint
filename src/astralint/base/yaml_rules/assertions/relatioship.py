@@ -13,7 +13,9 @@ class ReferencesVariableAssertion(BaseAssertion):
     check: Literal["reference_variable"] = "reference_variable"  # type: ignore[assignment]
     variable: str | None = None  # Optional: if specified, check for specific variable
 
-    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
+    def single_assertion(
+        self, file: File, path: str, value: Any, severity: Severity
+    ) -> ValidationResult:
         if type(value) is str:
             # If variable is specified, check for that specific variable
             if self.variable is not None:

@@ -12,7 +12,9 @@ class ContainsAssertion(BaseAssertion):
     check: Literal["in"] = "in"  # type: ignore[assignment]
     values: list[Any]
 
-    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
+    def single_assertion(
+        self, file: File, path: str, value: Any, severity: Severity
+    ) -> ValidationResult:
         if value in self.values:
             return ValidationResult(
                 valid=True,
@@ -36,7 +38,9 @@ class NotContainsAssertion(BaseAssertion):
     check: Literal["not_in"] = "not_in"  # type: ignore[assignment]
     values: list[Any]
 
-    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
+    def single_assertion(
+        self, file: File, path: str, value: Any, severity: Severity
+    ) -> ValidationResult:
         if value not in self.values:
             return ValidationResult(
                 valid=True,
@@ -62,7 +66,9 @@ class LengthAssertion(BaseAssertion):
     max: int | None = None
     value: int | None = None
 
-    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
+    def single_assertion(
+        self, file: File, path: str, value: Any, severity: Severity
+    ) -> ValidationResult:
         try:
             length = len(value)
             if self.value is not None:
@@ -121,7 +127,9 @@ class NotEmptyAssertion(BaseAssertion):
     model_config = ConfigDict(frozen=True)
     check: Literal["not_empty"] = "not_empty"  # type: ignore[assignment]
 
-    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
+    def single_assertion(
+        self, file: File, path: str, value: Any, severity: Severity
+    ) -> ValidationResult:
         try:
             if len(value) > 0:
                 return ValidationResult(
@@ -154,7 +162,9 @@ class RequiresAssertion(BaseAssertion):
     check: Literal["requires"] = "requires"  # type: ignore[assignment]
     key: str
 
-    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
+    def single_assertion(
+        self, file: File, path: str, value: Any, severity: Severity
+    ) -> ValidationResult:
         if self.key in value:
             return ValidationResult(
                 valid=True,
@@ -178,7 +188,9 @@ class ArrayShapeAssertion(BaseAssertion):
     check: Literal["array_shape"] = "array_shape"  # type: ignore[assignment]
     shape: list[int]
 
-    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
+    def single_assertion(
+        self, file: File, path: str, value: Any, severity: Severity
+    ) -> ValidationResult:
         if not isinstance(value, list):
             return ValidationResult(
                 valid=False,

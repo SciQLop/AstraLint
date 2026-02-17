@@ -778,7 +778,7 @@ assertions:
     result = rule.check(mock_file)
     assert result.valid
     assert isinstance(result, ValidationResultGroup)
-    assert result.results[0].severity.value == "INFO"
+    assert result.results[0].severity.value == "ERROR"
 
 
 def test_if_then_condition_passes_then_fails(mock_file):

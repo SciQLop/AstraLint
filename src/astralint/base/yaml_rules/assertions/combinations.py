@@ -97,36 +97,22 @@ class Not(BaseEvaluable):
             data["assertion"] = adapter.validate_python(data["assertion"])
         return data
 
-    def evaluate(self, file: File, severity: Severity) -> ValidationResultGroup:
+    def evaluate(self, file: File, severity: Severity) -> ValidationResult:
         result = self.assertion.evaluate(file, severity)
         if result.valid:
-            return ValidationResultGroup(
-                name="Not",
-                rule_reference="",
-                results=[
-                    ValidationResult(
-                        valid=False,
-                        reference=result.reference,
-                        severity=severity,
-                        message=f"Assertion '{result.message}' passed but was expected to fail in 'not'.",
-                        target=result.target,
-                    )
-                ],
-                severity=severity
+            return ValidationResult(
+                valid=False,
+                reference="",
+                message=f"Assertion '{result}' passed, but was expected to fail in 'not'.",
+                target="",
+                severity=severity,
             )
-        return ValidationResultGroup(
-            name="Not",
-            rule_reference="",
-            results=[
-                ValidationResult(
-                    valid=True,
-                    reference=result.reference,
-                    severity=severity,
-                    message=f"Assertion '{result.message}' failed as expected in 'not'.",
-                    target=result.target,
-                )
-            ],
-            severity=severity
+        return ValidationResult(
+            valid=True,
+            reference="",
+            message=f"Assertion '{result}' failed as expected in 'not'.",
+            target="",
+            severity=severity,
         )
 
 
@@ -167,7 +153,7 @@ class IfThen(BaseEvaluable):
             name="IfThen",
             rule_reference="",
             results=[self.then.evaluate(file, severity)],
-            severity=severity
+            severity=severity,
         )
 
 
@@ -204,15 +190,15 @@ class IfThenElse(BaseEvaluable):
                 name="IfThenElse (Then branch)",
                 rule_reference="",
                 results=[then_result],
-                severity=severity
+                severity=severity,
             )
         else:
-            else_result = self.else_.evaluate(file)
+            else_result = self.else_.evaluate(file, severity)
             return ValidationResultGroup(
                 name="IfThenElse (Else branch)",
                 rule_reference="",
                 results=[else_result],
-                severity=severity
+                severity=severity,
             )
 
 
@@ -223,7 +209,9 @@ class OneOf(BaseAssertionGroup):
     check: Literal["one_of"] = "one_of"  # type: ignore[assignment]
 
     def evaluate(self, file: File, severity: Severity) -> ValidationResult:
-        passing_count = sum(1 for assertion in self.assertions if assertion.evaluate(file, severity).valid)
+        passing_count = sum(
+            1 for assertion in self.assertions if assertion.evaluate(file, severity).valid
+        )
         if passing_count == 1:
             return ValidationResult(
                 valid=True,
@@ -249,7 +237,9 @@ class AtLeast(BaseAssertionGroup):
     count: int
 
     def evaluate(self, file: File, severity: Severity) -> ValidationResult:
-        passing_count = sum(1 for assertion in self.assertions if assertion.evaluate(file, severity).valid)
+        passing_count = sum(
+            1 for assertion in self.assertions if assertion.evaluate(file, severity).valid
+        )
         if passing_count >= self.count:
             return ValidationResult(
                 valid=True,
@@ -275,7 +265,9 @@ class AtMost(BaseAssertionGroup):
     count: int
 
     def evaluate(self, file: File, severity: Severity) -> ValidationResult:
-        passing_count = sum(1 for assertion in self.assertions if assertion.evaluate(file, severity).valid)
+        passing_count = sum(
+            1 for assertion in self.assertions if assertion.evaluate(file, severity).valid
+        )
         if passing_count <= self.count:
             return ValidationResult(
                 valid=True,
@@ -301,7 +293,9 @@ class Exactly(BaseAssertionGroup):
     count: int
 
     def evaluate(self, file: File, severity: Severity) -> ValidationResult:
-        passing_count = sum(1 for assertion in self.assertions if assertion.evaluate(file, severity).valid)
+        passing_count = sum(
+            1 for assertion in self.assertions if assertion.evaluate(file, severity).valid
+        )
         if passing_count == self.count:
             return ValidationResult(
                 valid=True,

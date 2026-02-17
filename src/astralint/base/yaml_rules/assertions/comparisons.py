@@ -24,7 +24,9 @@ class ComparisonAssertion(BaseAssertion):
     operator: Literal["=", "!=", "<", "<=", ">", ">="]
     value: _yaml_types
 
-    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
+    def single_assertion(
+        self, file: File, path: str, value: Any, severity: Severity
+    ) -> ValidationResult:
         if _operators[self.operator](value, self.value):
             return ValidationResult(
                 valid=True,
@@ -49,7 +51,9 @@ class RangeAssertion(BaseAssertion):
     min: _yaml_types
     max: _yaml_types
 
-    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
+    def single_assertion(
+        self, file: File, path: str, value: Any, severity: Severity
+    ) -> ValidationResult:
         if self.min <= value <= self.max:
             return ValidationResult(
                 valid=True,

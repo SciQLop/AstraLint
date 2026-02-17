@@ -12,7 +12,9 @@ class IsTypeAssertion(BaseAssertion):
     check: Literal["is_type"] = "is_type"  # type: ignore[assignment]
     type: str
 
-    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
+    def single_assertion(
+        self, file: File, path: str, value: Any, severity: Severity
+    ) -> ValidationResult:
         if not isinstance(value, DataType):
             if isinstance(value, Variable):
                 value = value.data_type
