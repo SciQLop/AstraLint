@@ -12,7 +12,7 @@ from ..base import (
 
 AnyHDU = fits.PrimaryHDU | fits.ImageHDU | fits.BinTableHDU | fits.TableHDU
 
-HDUTypesNames = {
+HDUTypesNames: dict[type, str] = {
     fits.PrimaryHDU: "PrimaryHDU",
     fits.ImageHDU: "ImageHDU",
     fits.BinTableHDU: "BinTableHDU",
@@ -20,7 +20,12 @@ HDUTypesNames = {
     fits.CompImageHDU: "CompImageHDU",
 }
 
-def _parse_headers(hdu:AnyHDU) -> dict[str, Attribute]:
+
+def _hdu_type_name(hdu: AnyHDU) -> str:
+    return HDUTypesNames.get(type(hdu), str(type(hdu)))
+
+
+def _parse_headers(hdu: AnyHDU) -> dict[str, Attribute]:
     headers = {}
     for key, value in hdu.header.items():
         headers[key] = Attribute(
@@ -30,6 +35,7 @@ def _parse_headers(hdu:AnyHDU) -> dict[str, Attribute]:
             values=[str(value)],
         )
     return headers
+
 
 class FitsCodec(Codec):
     @classmethod
@@ -48,13 +54,13 @@ class FitsCodec(Codec):
             else:
                 fname = "<bytes input>"
         if fits_file := fits.open(file):
-            global_attributes : dict[str, Attribute]={}
-            variables : dict[str, Variable]={}
+            global_attributes: dict[str, Attribute] = {}
+            variables: dict[str, Variable] = {}
             ext_hdu_count = {}
-            for i, hdu in enumerate(fits_file):
+            for _, hdu in enumerate(fits_file):
                 if isinstance(hdu, fits.PrimaryHDU):
                     global_attributes = _parse_headers(hdu)
-                    name = HDUTypesNames.get(type(hdu))
+                    name: str = _hdu_type_name(hdu)
                     variables[name] = Variable(
                         name=name,
                         data_type=DataType.UINT8,
@@ -64,8 +70,8 @@ class FitsCodec(Codec):
                         record_variance=False,
                     )
                 else:
-                    hdu_type_name = HDUTypesNames.get(type(hdu), str(type(hdu)))
-                    name = f"{hdu_type_name}_{ext_hdu_count.get(type(hdu),0)}"
+                    hdu_type_name = _hdu_type_name(hdu)
+                    name = f"{hdu_type_name}_{ext_hdu_count.get(type(hdu), 0)}"
                     variables[name] = Variable(
                         name=name,
                         data_type=DataType.UINT8,
