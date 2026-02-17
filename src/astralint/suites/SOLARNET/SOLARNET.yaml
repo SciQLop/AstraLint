@@ -1,0 +1,4 @@
+name: SOLARNET
+url: "https://solarnet.readthedocs.io/en/stable/index.html"
+rules_lookup_dir: "rules"
+description: "SOLARNET Metadata Recommendations for Solar Observations"

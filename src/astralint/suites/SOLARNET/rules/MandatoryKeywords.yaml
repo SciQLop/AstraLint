@@ -1,0 +1,18 @@
+name: MandatoryGlobalAttributes
+description: "All mandatory global attributes must be present (SOLARNET compliant)"
+url: "https://solarnet.readthedocs.io/en/stable/generated/parta.html#fully-and-partially-solarnet-compliant-obs-hdus"
+reference: "SOLARNET-GA-001"
+severity: ERROR
+suite: SOLARNET
+
+assertions:
+  # Required global attributes per ISTP guidelines Section 3
+  - path: "attributes"
+    check: contains_keys
+    keys:
+      - EXTNAME
+      - SOLARNET
+      - OBS_HDU
+      - DATE-BEG
+    message: "Missing mandatory global attribute: {key}"
+
