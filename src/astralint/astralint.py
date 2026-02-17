@@ -219,6 +219,23 @@ def list_suites(details: bool = False):
     console.print(Panel(Group(*suites_panels), title="Available Conformance Suites"))
 
 
+@app.command()
+def dump_file_model(path: str):
+    """Dump the internal file model for a given file, showing how AstraLint parses it.
+
+    Parameters
+    ----------
+    path : str
+        The path to the file to dump.
+    """
+    console = Console()
+
+    if file := load_file(path):
+        console.print(Panel(Pretty(file), title=f"Internal File Model for {path}"))
+    else:
+        console.print(f"[red]✗[/] Could not load file: {path}")
+
+
 def main():
     app()
 
