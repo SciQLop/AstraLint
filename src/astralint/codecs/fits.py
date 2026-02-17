@@ -1,3 +1,5 @@
+from io import BytesIO
+
 from astropy.io import fits
 
 from ..base import (
@@ -52,6 +54,7 @@ class FitsCodec(Codec):
             if isinstance(file, str):
                 fname = file.split("/")[-1]
             else:
+                file = BytesIO(file)
                 fname = "<bytes input>"
         if fits_file := fits.open(file):
             global_attributes: dict[str, Attribute] = {}
