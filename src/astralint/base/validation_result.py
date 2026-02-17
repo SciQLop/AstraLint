@@ -23,6 +23,7 @@ class ValidationResultGroup(BaseModel):
     rule_reference: str
     severity: Severity
     results: "list[ValidationResult | ValidationResultGroup]"
+    message: str = ""
 
     def extend(
         self,

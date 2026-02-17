@@ -66,10 +66,11 @@ url: {suite.url}
             log.debug(f"Validating rule {rule.name}")
             results.append(rule.check(file))
         return ValidationResultGroup(
-            name=self.name,
+            name=f"AstraLint Results for suite '{self.name}' on file '{file.filename}'",
             rule_reference="",
             results=results,
             severity=Severity.INFO,
+            message=f"Validation completed for suite '{self.name}' with {len(results)} rules on file '{file.filename}'.",
         )
 
 

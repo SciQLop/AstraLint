@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Protocol
 
 from .file import File
@@ -68,6 +69,7 @@ class Codec(Protocol):
         ...
 
 
-def load_file(url: str):
+def load_file(url: str | Path) -> File | None:
+    url = str(url)
     extension = url.split(".")[-1]
     return Codec.get_codec_for_extension(extension).load(url)

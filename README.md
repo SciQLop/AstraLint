@@ -36,6 +36,9 @@ AstraLint validates data files against conformance suites using a **codec-agnost
 # Lint a file against the default ISTP suite
 astralint lint myfile.cdf
 
+# Lint a multiple files at once
+astralint lint file1.cdf file2.cdf file3.cdf
+
 # Lint against a specific suite
 astralint lint myfile.cdf --suite PDS4
 

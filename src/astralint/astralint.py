@@ -5,7 +5,14 @@ from rich.console import Console, Group
 from rich.panel import Panel
 from rich.pretty import Pretty
 
-from .base import ConformanceSuite, get_suite, list_all_suites, load_file
+from .base import (
+    ConformanceSuite,
+    Severity,
+    ValidationResultGroup,
+    get_suite,
+    list_all_suites,
+    load_file,
+)
 from .config import (
     find_config_file,
     find_project_root,
@@ -110,7 +117,7 @@ def init(force: bool = False):
 
 @app.command()
 def lint(
-    path: str,
+    path: list[Path],
     suite: str | None = None,
     select: list[str] | None = None,
     ignore: list[str] | None = None,
@@ -181,15 +188,23 @@ def lint(
     # Run linting
     checker: ConformanceSuite | None = get_suite(cfg.suite)
     if checker:
-        if file := load_file(path):
-            results = checker.run(file, select=cfg.select or None, ignore=cfg.ignore or None)
-            report(results, output=cfg.output.format, dest=cfg.output.dest)
+        results = []
+        for p in path:
+            if file := load_file(str(p)):
+                results.append(
+                    checker.run(file, select=cfg.select or None, ignore=cfg.ignore or None)
+                )
 
-            # Exit with error code if validation failed
-            if results.has_errors():
-                raise SystemExit(1)
-            elif strict and results.has_failures():
-                raise SystemExit(1)
+        results = ValidationResultGroup(
+            name="AstraLint Results", rule_reference="", results=results, severity=Severity.INFO
+        )
+        report(results, output=cfg.output.format, dest=cfg.output.dest)
+
+        # Exit with error code if validation failed
+        if results.has_errors():
+            raise SystemExit(1)
+        elif strict and results.has_failures():
+            raise SystemExit(1)
     else:
         raise ValueError(
             f"Unknown conformance suite '{cfg.suite}'. "

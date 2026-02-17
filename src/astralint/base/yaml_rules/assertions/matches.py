@@ -16,7 +16,6 @@ class MatchesAssertion(BaseAssertion):
     def single_assertion(
         self, file: File, path: str, value: str, severity: Severity
     ) -> ValidationResult:
-        print(f"Checking if value at path '{path}' matches pattern '{self.pattern.pattern}'...")
         if not isinstance(value, str):
             return ValidationResult(
                 valid=False,
