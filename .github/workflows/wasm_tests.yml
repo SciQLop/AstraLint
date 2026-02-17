@@ -16,7 +16,7 @@ jobs:
     - name: Set up Python (using uv)
       run: uv python install
     - name: Build wheel
-      run: uv build -f wheel
+      run: uv build 
     - name: Upload artifact
       uses: actions/upload-artifact@v6
       with:
