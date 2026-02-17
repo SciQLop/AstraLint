@@ -11,6 +11,16 @@ as [ISTP](https://spdf.gsfc.nasa.gov/istp_guide/) and [PDS4](https://pds.nasa.go
   <a href="https://sciqlop.github.io/AstraLint/"><strong>🚀 Try it online — no installation required!</strong></a>
 </p>
 
+## Install
+
+AstraLint is published on PyPI. The simplest way to install is with pip:
+
+```bash
+pip install astralint
+```
+
+Note: PyPI package names are case-insensitive; `pip install AstraLint` also works. If you prefer using a virtual environment, create and activate one before installing.
+
 ## Overview
 
 AstraLint validates data files against conformance suites using a **codec-agnostic architecture**:

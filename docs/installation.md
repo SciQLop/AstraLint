@@ -25,3 +25,19 @@ Now you can use uv to install a current Python environment:
 ```shell
 uv python install 3.13 # Or pick another version.
 ```
+
+## Installing AstraLint from PyPI
+
+AstraLint is published on PyPI. The simplest way to install it is with pip (recommended inside a virtual environment):
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install astralint
+```
+
+PyPI package names are case-insensitive so `pip install AstraLint` also works. If you prefer to develop from source, install the project in editable mode:
+
+```bash
+pip install -e .[dev]
+```
