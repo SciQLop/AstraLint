@@ -9,7 +9,7 @@ Repository = "https://github.com/jeandet/AstraLint"
 name = "AstraLint"
 description = "A data model linter "
 authors = [
-    { name="Alexis Jeandet", email="alexis.jeandet@member.fsf.org" },
+    { name = "Alexis Jeandet", email = "alexis.jeandet@member.fsf.org" },
 ]
 readme = "README.md"
 license = "MIT"
@@ -39,7 +39,8 @@ classifiers = [
 # ---- Main dependencies ----
 
 dependencies = [
-    "astropy>=7.2.0",
+    "astropy<=7.0.1; sys_platform == 'emscripten'",
+    "astropy>=7.2.0; sys_platform != 'emscripten'",
     "cyclopts>=4.5.2",
     "jinja2>=3.1.0",
     "pycdfpp>=0.8.5",
