@@ -2,18 +2,20 @@ import os
 
 import pytest
 
-from astralint import load_file
-
 __HERE__ = os.path.dirname(__file__)
 
 
 @pytest.fixture
 def mms1_asp2_srvy():
+    pytest.importorskip("astralint")
+    from astralint import load_file
+
     return load_file(os.path.join(__HERE__, "resources/mms1_asp2_srvy_l1b_stat_00000000_v01.cdf"))
 
 
 @pytest.fixture
 def mock_file():
+    pytest.importorskip("astralint")
     from astralint.base.file import Attribute, DataType, File, Variable
 
     return File(
