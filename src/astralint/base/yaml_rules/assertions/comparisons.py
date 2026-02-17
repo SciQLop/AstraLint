@@ -24,12 +24,12 @@ class ComparisonAssertion(BaseAssertion):
     operator: Literal["=", "!=", "<", "<=", ">", ">="]
     value: _yaml_types
 
-    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
+    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
         if _operators[self.operator](value, self.value):
             return ValidationResult(
                 valid=True,
                 reference="",
-                severity=Severity.INFO,
+                severity=severity,
                 message=f"Value at path '{path}' satisfies condition '{value} {self.operator} {self.value}'.",
                 target=self.path,
             )
@@ -37,7 +37,7 @@ class ComparisonAssertion(BaseAssertion):
             return ValidationResult(
                 valid=False,
                 reference="",
-                severity=Severity.ERROR,
+                severity=severity,
                 message=f"Value at path '{path}' does not satisfy condition '{value} {self.operator} {self.value}'.",
                 target=self.path,
             )
@@ -49,12 +49,12 @@ class RangeAssertion(BaseAssertion):
     min: _yaml_types
     max: _yaml_types
 
-    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
+    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
         if self.min <= value <= self.max:
             return ValidationResult(
                 valid=True,
                 reference="",
-                severity=Severity.INFO,
+                severity=severity,
                 message=f"Value at path '{path}' is within range [{self.min}, {self.max}].",
                 target=self.path,
             )
@@ -62,7 +62,7 @@ class RangeAssertion(BaseAssertion):
             return ValidationResult(
                 valid=False,
                 reference="",
-                severity=Severity.ERROR,
+                severity=severity,
                 message=f"Value at path '{path}' is not within range [{self.min}, {self.max}].",
                 target=self.path,
             )

@@ -67,7 +67,8 @@ class BaseEvaluable(BaseModel):
                 raise ValueError(f"Duplicate check: {cls.check}")
             _registry[cls.check] = cls
 
-    def evaluate(self, file: File) -> ValidationResult | ValidationResultGroup: ...
+    def evaluate(self, file: File, severity: Severity) -> ValidationResult | ValidationResultGroup:
+        ...
 
 
 class BaseAssertion(BaseEvaluable):
@@ -76,7 +77,7 @@ class BaseAssertion(BaseEvaluable):
     error_if_no_match: bool = Field(default=True)
     message: str = Field(default="")
 
-    def evaluate(self, file: File) -> ValidationResult | ValidationResultGroup:
+    def evaluate(self, file: File, severity: Severity) -> ValidationResult | ValidationResultGroup:
         matches = resolve_path(file, self.path)
         results: list[ValidationResult | ValidationResultGroup] = []
         if not matches:
@@ -97,16 +98,17 @@ class BaseAssertion(BaseEvaluable):
                     target=self.path,
                 )
         for path, value in matches:
-            result = self.single_assertion(file, path, value)
+            result = self.single_assertion(file, path, value, severity=severity)
             results.append(result)
         return ValidationResultGroup(
             name=self.__class__.__name__,
             rule_reference="",
             results=results,
-            severity=Severity.INFO,
+            severity=severity,
         )
 
-    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult: ...
+    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
+        ...
 
 
 class BaseAssertionGroup(BaseEvaluable):

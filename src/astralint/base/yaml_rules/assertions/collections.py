@@ -12,12 +12,12 @@ class ContainsAssertion(BaseAssertion):
     check: Literal["in"] = "in"  # type: ignore[assignment]
     values: list[Any]
 
-    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
+    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
         if value in self.values:
             return ValidationResult(
                 valid=True,
                 reference="",
-                severity=Severity.INFO,
+                severity=severity,
                 message=f"Value at path '{path}' is in the expected list of values.",
                 target=self.path,
             )
@@ -25,7 +25,7 @@ class ContainsAssertion(BaseAssertion):
             return ValidationResult(
                 valid=False,
                 reference="",
-                severity=Severity.ERROR,
+                severity=severity,
                 message=f"Value at path '{path}' is not in the expected list of values.",
                 target=self.path,
             )
@@ -36,12 +36,12 @@ class NotContainsAssertion(BaseAssertion):
     check: Literal["not_in"] = "not_in"  # type: ignore[assignment]
     values: list[Any]
 
-    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
+    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
         if value not in self.values:
             return ValidationResult(
                 valid=True,
                 reference="",
-                severity=Severity.INFO,
+                severity=severity,
                 message=f"Value at path '{path}' is not in the list of disallowed values, as expected.",
                 target=self.path,
             )
@@ -49,7 +49,7 @@ class NotContainsAssertion(BaseAssertion):
             return ValidationResult(
                 valid=False,
                 reference="",
-                severity=Severity.ERROR,
+                severity=severity,
                 message=f"Value at path '{path}' is in the list of disallowed values, which is not expected.",
                 target=self.path,
             )
@@ -62,7 +62,7 @@ class LengthAssertion(BaseAssertion):
     max: int | None = None
     value: int | None = None
 
-    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
+    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
         try:
             length = len(value)
             if self.value is not None:
@@ -70,7 +70,7 @@ class LengthAssertion(BaseAssertion):
                     return ValidationResult(
                         valid=True,
                         reference="",
-                        severity=Severity.INFO,
+                        severity=severity,
                         message=f"Value at path '{path}' has length {length}, as expected.",
                         target=self.path,
                     )
@@ -78,7 +78,7 @@ class LengthAssertion(BaseAssertion):
                     return ValidationResult(
                         valid=False,
                         reference="",
-                        severity=Severity.ERROR,
+                        severity=severity,
                         message=f"Value at path '{path}' has length {length}, expected {self.value}.",
                         target=self.path,
                     )
@@ -87,7 +87,7 @@ class LengthAssertion(BaseAssertion):
                     return ValidationResult(
                         valid=False,
                         reference="",
-                        severity=Severity.ERROR,
+                        severity=severity,
                         message=f"Value at path '{path}' has length {length}, which is less than minimum {self.min}.",
                         target=self.path,
                     )
@@ -95,7 +95,7 @@ class LengthAssertion(BaseAssertion):
                     return ValidationResult(
                         valid=False,
                         reference="",
-                        severity=Severity.ERROR,
+                        severity=severity,
                         message=f"Value at path '{path}' has length {length}, which is greater than maximum {self.max}.",
                         target=self.path,
                     )
@@ -103,7 +103,7 @@ class LengthAssertion(BaseAssertion):
                     return ValidationResult(
                         valid=True,
                         reference="",
-                        severity=Severity.INFO,
+                        severity=severity,
                         message=f"Value at path '{path}' has length {length}, which is within the specified range.",
                         target=self.path,
                     )
@@ -121,13 +121,13 @@ class NotEmptyAssertion(BaseAssertion):
     model_config = ConfigDict(frozen=True)
     check: Literal["not_empty"] = "not_empty"  # type: ignore[assignment]
 
-    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
+    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
         try:
             if len(value) > 0:
                 return ValidationResult(
                     valid=True,
                     reference="",
-                    severity=Severity.INFO,
+                    severity=severity,
                     message=f"Value at path '{path}' is not empty, as expected.",
                     target=self.path,
                 )
@@ -135,7 +135,7 @@ class NotEmptyAssertion(BaseAssertion):
                 return ValidationResult(
                     valid=False,
                     reference="",
-                    severity=Severity.ERROR,
+                    severity=severity,
                     message=f"Value at path '{path}' is empty, which is not expected.",
                     target=self.path,
                 )
@@ -154,12 +154,12 @@ class RequiresAssertion(BaseAssertion):
     check: Literal["requires"] = "requires"  # type: ignore[assignment]
     key: str
 
-    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
+    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
         if self.key in value:
             return ValidationResult(
                 valid=True,
                 reference="",
-                severity=Severity.INFO,
+                severity=severity,
                 message=f"Value at path '{path}' contains required key '{self.key}'.",
                 target=self.path,
             )
@@ -167,7 +167,7 @@ class RequiresAssertion(BaseAssertion):
             return ValidationResult(
                 valid=False,
                 reference="",
-                severity=Severity.ERROR,
+                severity=severity,
                 message=f"Value at path '{path}' is missing required key '{self.key}'.",
                 target=self.path,
             )
@@ -178,7 +178,7 @@ class ArrayShapeAssertion(BaseAssertion):
     check: Literal["array_shape"] = "array_shape"  # type: ignore[assignment]
     shape: list[int]
 
-    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
+    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
         if not isinstance(value, list):
             return ValidationResult(
                 valid=False,
@@ -191,7 +191,7 @@ class ArrayShapeAssertion(BaseAssertion):
             return ValidationResult(
                 valid=False,
                 reference="",
-                severity=Severity.ERROR,
+                severity=severity,
                 message=f"Value at path '{path}' has length {len(value)}, expected {len(self.shape)}.",
                 target=self.path,
             )
@@ -200,14 +200,14 @@ class ArrayShapeAssertion(BaseAssertion):
                 return ValidationResult(
                     valid=False,
                     reference="",
-                    severity=Severity.ERROR,
+                    severity=severity,
                     message=f"Item at index {i} in array at path '{path}' has length {len(item)}, expected {expected_length}.",
                     target=self.path,
                 )
         return ValidationResult(
             valid=True,
             reference="",
-            severity=Severity.INFO,
+            severity=severity,
             message=f"Array at path '{path}' matches the expected shape.",
             target=self.path,
         )

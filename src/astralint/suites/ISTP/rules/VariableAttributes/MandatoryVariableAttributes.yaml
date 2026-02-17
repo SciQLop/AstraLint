@@ -13,7 +13,18 @@ assertions:
       - CATDESC
       - FIELDNAM
       - FILLVAL
-      - FORMAT
       - VAR_TYPE
     message: "Variable missing mandatory attribute: {key}"
 
+  - check: one_of
+    assertions:
+      - path: "variables/.*/attributes"
+        check: contains_keys
+        keys:
+          - FORMAT
+        message: "Variable must have either FORMAT or FORM_PTR attribute"
+      - path: "variables/.*/attributes"
+        check: contains_keys
+        keys:
+          - FORM_PTR
+        message: "Variable must have either FORMAT or FORM_PTR attribute"

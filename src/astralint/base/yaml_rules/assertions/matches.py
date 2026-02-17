@@ -13,7 +13,7 @@ class MatchesAssertion(BaseAssertion):
     check: Literal["matches"] = "matches"  # type: ignore[assignment]
     pattern: re.Pattern
 
-    def single_assertion(self, file: File, path: str, value: str) -> ValidationResult:
+    def single_assertion(self, file: File, path: str, value: str, severity: Severity) -> ValidationResult:
         print(f"Checking if value at path '{path}' matches pattern '{self.pattern.pattern}'...")
         if not isinstance(value, str):
             return ValidationResult(
@@ -27,7 +27,7 @@ class MatchesAssertion(BaseAssertion):
             return ValidationResult(
                 valid=False,
                 reference="",
-                severity=Severity.ERROR,
+                severity=severity,
                 message=f"Value ({value}) at path '{path}' does not match pattern '{self.pattern.pattern}'.",
                 target=self.path,
             )
@@ -36,5 +36,6 @@ class MatchesAssertion(BaseAssertion):
                 valid=True,
                 reference="",
                 message=f"Value ({value}) at path '{path}' matches pattern '{self.pattern.pattern}'.",
-                severity=Severity.INFO,
+                severity=severity,
+                target=self.path,
             )

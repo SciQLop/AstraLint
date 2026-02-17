@@ -10,16 +10,16 @@ from .base import BaseAssertion
 class ContainsKeysAssertion(BaseAssertion):
     model_config = ConfigDict(frozen=True)
     check: Literal["contains_keys"] = "contains_keys"  # type: ignore[assignment]
-    keys: list[str]
+    keys: frozenset[str]
 
-    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
+    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
         if isinstance(value, dict):
-            missing_keys = [k for k in self.keys if k not in value]
+            missing_keys = self.keys - value.keys()
             if missing_keys:
                 return ValidationResult(
                     valid=False,
                     reference="",
-                    severity=Severity.ERROR,
+                    severity=severity,
                     message=f"Value at path '{path}' is missing keys: {missing_keys}",
                     target=self.path,
                 )
@@ -27,7 +27,7 @@ class ContainsKeysAssertion(BaseAssertion):
                 return ValidationResult(
                     valid=True,
                     reference="",
-                    severity=Severity.INFO,
+                    severity=severity,
                     message=f"Value at path '{path}' contains all required keys.",
                     target=self.path,
                 )
@@ -35,7 +35,7 @@ class ContainsKeysAssertion(BaseAssertion):
             return ValidationResult(
                 valid=False,
                 reference="",
-                severity=Severity.ERROR,
+                severity=severity,
                 message=f"Value at path '{path}' is not an object.",
                 target=self.path,
             )

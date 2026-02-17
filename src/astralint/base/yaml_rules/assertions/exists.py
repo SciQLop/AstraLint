@@ -11,13 +11,13 @@ class ExistsAssertion(BaseAssertion):
     model_config = ConfigDict(frozen=True)
     check: Literal["exists"] = "exists"  # type: ignore[assignment]
 
-    def evaluate(self, file: File) -> ValidationResult | ValidationResultGroup:
+    def evaluate(self, file: File, severity: Severity) -> ValidationResult | ValidationResultGroup:
         matches = resolve_path(file, self.path)
         if matches:
             return ValidationResult(
                 valid=True,
                 reference="",
-                severity=Severity.INFO,
+                severity=severity,
                 message=f"Path '{self.path}' exists in the file.",
                 target=self.path,
             )
@@ -25,7 +25,7 @@ class ExistsAssertion(BaseAssertion):
             return ValidationResult(
                 valid=False,
                 reference="",
-                severity=Severity.ERROR,
+                severity=severity,
                 message=f"Path '{self.path}' does not exist in the file.",
                 target=self.path,
             )
@@ -35,13 +35,13 @@ class NotExistsAssertion(BaseAssertion):
     model_config = ConfigDict(frozen=True)
     check: Literal["not_exists"] = "not_exists"  # type: ignore[assignment]
 
-    def evaluate(self, file: File) -> ValidationResult | ValidationResultGroup:
+    def evaluate(self, file: File, severity: Severity) -> ValidationResult | ValidationResultGroup:
         matches = resolve_path(file, self.path)
         if matches:
             return ValidationResult(
                 valid=False,
                 reference="",
-                severity=Severity.ERROR,
+                severity=severity,
                 message=f"Path '{self.path}' exists in the file but should not.",
                 target=self.path,
             )
@@ -49,7 +49,7 @@ class NotExistsAssertion(BaseAssertion):
             return ValidationResult(
                 valid=True,
                 reference="",
-                severity=Severity.INFO,
+                severity=severity,
                 message=f"Path '{self.path}' does not exist in the file as expected.",
                 target=self.path,
             )

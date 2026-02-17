@@ -12,7 +12,7 @@ class IsTypeAssertion(BaseAssertion):
     check: Literal["is_type"] = "is_type"  # type: ignore[assignment]
     type: str
 
-    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
+    def single_assertion(self, file: File, path: str, value: Any, severity: Severity) -> ValidationResult:
         if not isinstance(value, DataType):
             if isinstance(value, Variable):
                 value = value.data_type
@@ -29,7 +29,7 @@ class IsTypeAssertion(BaseAssertion):
             return ValidationResult(
                 valid=False,
                 reference="",
-                severity=Severity.ERROR,
+                severity=severity,
                 message=f"Value at path '{path}' is of type '{value}', expected '{expected_type}'.",
                 target=path,
             )
@@ -37,7 +37,7 @@ class IsTypeAssertion(BaseAssertion):
             return ValidationResult(
                 valid=True,
                 reference="",
-                severity=Severity.INFO,
+                severity=severity,
                 message=f"Value at path '{path}' is of expected type '{expected_type}'.",
                 target=path,
             )

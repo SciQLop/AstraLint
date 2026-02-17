@@ -9,7 +9,7 @@ assertions:
   # Format: source_name_descriptor_datatype (all lowercase with underscores)
   - path: "attributes/Logical_source/values/[0-9]*"
     check: matches
-    pattern: "^[a-z0-9]+_[a-z0-9_]+_[a-z0-9_]+$"
+    pattern: "^[a-zA-Z0-9-]+_[a-zA-Z0-9_-]+_[a-zA-Z0-9_-]+$"
     message: "Logical_source must follow format: source_descriptor_datatype (lowercase with underscores)"
 
   - path: "attributes/Logical_source/values/[0-9]*"

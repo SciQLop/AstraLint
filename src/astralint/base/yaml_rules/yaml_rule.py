@@ -44,7 +44,7 @@ class YamlRule(Rule):
         results = []
         for assertion in self.assertions:
             assert isinstance(assertion, BaseEvaluable)
-            results.append(assertion.evaluate(file))
+            results.append(assertion.evaluate(file, severity=self.severity))
         return ValidationResultGroup(
             name=self.name,
             rule_reference=self.reference,
