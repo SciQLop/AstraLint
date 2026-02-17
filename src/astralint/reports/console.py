@@ -2,6 +2,7 @@ from functools import singledispatch
 from pathlib import Path
 
 from rich.console import Console, RenderableType
+from rich.markup import escape
 from rich.panel import Panel
 from rich.text import Text
 from rich.tree import Tree
@@ -30,7 +31,7 @@ def _render_result(res: ValidationResult) -> Text:
         else "blue"
     )
 
-    text = Text.from_markup(f"{icon} [bold]{res.reference}[/]: {res.message}")
+    text = Text.from_markup(f"{icon} [bold]{res.reference}[/]: {escape(res.message)}")
     text.append(f" ({res.severity.value})", style=f"bold {color}")
 
     # Show target if it's not the generic 'Global'
