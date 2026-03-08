@@ -13,7 +13,6 @@ assertions:
       - Data_type
       - Data_version
       - Descriptor
-      - Discipline
       - Instrument_type
       - Logical_file_id
       - Logical_source
@@ -21,7 +20,6 @@ assertions:
       - Mission_group
       - PI_affiliation
       - PI_name
-      - Project
       - Source_name
       - TEXT
     message: "Missing mandatory global attribute: {key}"

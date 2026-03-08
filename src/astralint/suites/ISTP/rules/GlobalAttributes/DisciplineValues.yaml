@@ -10,11 +10,10 @@ assertions:
     check: in
     error_if_no_match: false
     values:
-      - "Space Physics>Magnetospheric Science"
-      - "Space Physics>Interplanetary Studies"
-      - "Space Physics>Ionospheric Science"
       - "Solar Physics>Heliospheric Physics"
-      - "Planetary Physics>Magnetospheric Science"
-      - "Planetary Physics>Rings and Dust"
+      - "Space Physics>Interplanetary Studies"
+      - "Space Physics>Magnetospheric Science"
+      - "Space Physics>Ionospheric Science"
+      - "Space Physics>Astrophysics Science"
     message: "Discipline should use a standard ISTP value (e.g., 'Space Physics>Magnetospheric Science')"
 
