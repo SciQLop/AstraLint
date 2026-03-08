@@ -1,0 +1,12 @@
+name: UnitPtrReferences
+description: "UNIT_PTR must reference an existing variable"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#UNIT_PTR"
+reference: "ISTP-VA-016"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  - path: "variables/.*/attributes/UNIT_PTR/values/[0-9]*"
+    check: reference_variable
+    error_if_no_match: false
+    message: "UNIT_PTR must reference an existing variable"

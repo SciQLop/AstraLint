@@ -1,0 +1,13 @@
+name: GenerationDateFormat
+description: "Generation_date must use yyyymmdd format"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html#Generation_date"
+reference: "ISTP-GA-015"
+severity: WARNING
+suite: ISTP
+
+assertions:
+  - path: "attributes/Generation_date/values/[0-9]*"
+    check: matches
+    error_if_no_match: false
+    pattern: "^\\d{8}$"
+    message: "Generation_date must use yyyymmdd format"

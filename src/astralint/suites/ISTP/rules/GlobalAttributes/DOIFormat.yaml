@@ -1,0 +1,13 @@
+name: DOIFormat
+description: "DOI must use the standard https://doi.org/ format"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html#DOI"
+reference: "ISTP-GA-014"
+severity: WARNING
+suite: ISTP
+
+assertions:
+  - path: "attributes/DOI/values/[0-9]*"
+    check: matches
+    error_if_no_match: false
+    pattern: "^https://doi\\.org/.+/.+$"
+    message: "DOI must be of the form https://doi.org/PREFIX/SUFFIX"
