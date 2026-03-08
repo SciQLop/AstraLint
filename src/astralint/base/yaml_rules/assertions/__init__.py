@@ -11,6 +11,7 @@ from .combinations import (
     Not,
     OneOf,
 )
+from .compare_to import CompareToAssertion
 from .comparisons import ComparisonAssertion, RangeAssertion
 from .contains_keys import ContainsKeysAssertion
 from .exists import ExistsAssertion, NotExistsAssertion
@@ -34,6 +35,7 @@ __all__ = [
     "Exactly",
     "ExistsAssertion",
     "NotExistsAssertion",
+    "CompareToAssertion",
     "ComparisonAssertion",
     "RangeAssertion",
     "ContainsAssertion",
