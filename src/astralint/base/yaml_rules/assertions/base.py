@@ -126,6 +126,9 @@ def interpolate_captures(template: str, captures: dict[str, str]) -> str:
     return result
 
 
+_NO_MATCH_FAIL_TEMPLATE = "{{ target or path }} did not match any values"
+_NO_MATCH_OK_TEMPLATE = "{{ target or path }} did not match any values (not required)"
+
 _registry: dict[str, type["BaseEvaluable"]] = {}
 
 
@@ -155,21 +158,23 @@ class BaseAssertion(BaseEvaluable):
         matches = resolve_path(file, self.path)
         results: list[ValidationResult | ValidationResultGroup] = []
         if not matches:
+            target = clean_target(self.path)
+            ctx = {"target": target, "path": self.path}
             if self.error_if_no_match:
                 return ValidationResult(
                     valid=False,
                     reference="",
                     severity=Severity.ERROR,
-                    message=f"Path '{self.path}' did not match any values.",
-                    target=self.path,
+                    message=render_message(_NO_MATCH_FAIL_TEMPLATE, ctx),
+                    target=target,
                 )
             else:
                 return ValidationResult(
                     valid=True,
                     reference="",
                     severity=Severity.INFO,
-                    message=f"Path '{self.path}' did not match any values, but that's okay.",
-                    target=self.path,
+                    message=render_message(_NO_MATCH_OK_TEMPLATE, ctx),
+                    target=target,
                 )
         for path, value in matches:
             result = self.single_assertion(file, path, value, severity=severity)
