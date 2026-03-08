@@ -114,9 +114,7 @@ def parse_captures(path: str) -> tuple[str, dict[str, int]]:
     return regex_pattern, captures
 
 
-def resolve_path_with_captures(
-    obj: Any, path: str
-) -> list[tuple[str, Any, dict[str, str]]]:
+def resolve_path_with_captures(obj: Any, path: str) -> list[tuple[str, Any, dict[str, str]]]:
     """Like resolve_path but extracts captured values from {name} placeholders."""
     pattern, captures = parse_captures(path)
     flattened = flatten_object(obj)
@@ -138,8 +136,7 @@ def interpolate_captures(template: str, captures: dict[str, str]) -> str:
     return result
 
 
-_NO_MATCH_FAIL_TEMPLATE = "{{ target or path }} did not match any values"
-_NO_MATCH_OK_TEMPLATE = "{{ target or path }} did not match any values (not required)"
+_NO_MATCH_TEMPLATE = "{% if valid %}{{ target or path }} did not match any values (not required){% else %}{{ target or path }} did not match any values{% endif %}"
 
 _registry: dict[str, type["BaseEvaluable"]] = {}
 
@@ -171,23 +168,15 @@ class BaseAssertion(BaseEvaluable):
         results: list[ValidationResult | ValidationResultGroup] = []
         if not matches:
             target = clean_target(self.path)
-            ctx = {"target": target, "path": self.path}
-            if self.error_if_no_match:
-                return ValidationResult(
-                    valid=False,
-                    reference="",
-                    severity=Severity.ERROR,
-                    message=render_message(_NO_MATCH_FAIL_TEMPLATE, ctx),
-                    target=target,
-                )
-            else:
-                return ValidationResult(
-                    valid=True,
-                    reference="",
-                    severity=Severity.INFO,
-                    message=render_message(_NO_MATCH_OK_TEMPLATE, ctx),
-                    target=target,
-                )
+            valid = not self.error_if_no_match
+            ctx = {"target": target, "path": self.path, "valid": valid}
+            return ValidationResult(
+                valid=valid,
+                reference="",
+                severity=Severity.ERROR if not valid else Severity.INFO,
+                message=render_message(_NO_MATCH_TEMPLATE, ctx),
+                target=target,
+            )
         for path, value in matches:
             result = self.single_assertion(file, path, value, severity=severity)
             results.append(result)

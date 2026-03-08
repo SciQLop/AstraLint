@@ -12,8 +12,7 @@ class IsTypeAssertion(BaseAssertion):
     check: Literal["is_type"] = "is_type"  # type: ignore[assignment]
     type: str
 
-    _default_pass_template: str = "type is '{{ expected_type }}' as expected"
-    _default_fail_template: str = "type is '{{ actual_type }}', expected '{{ expected_type }}'"
+    _default_template: str = "{% if valid %}type is '{{ expected_type }}' as expected{% else %}type is '{{ actual_type }}', expected '{{ expected_type }}'{% endif %}"
     _not_datatype_template: str = "value is not a valid DataType, got '{{ value }}'"
 
     def single_assertion(
@@ -24,7 +23,7 @@ class IsTypeAssertion(BaseAssertion):
             if isinstance(value, Variable):
                 value = value.data_type
             else:
-                ctx = build_context(target, path, value)
+                ctx = build_context(target, path, value, valid=False)
                 return ValidationResult(
                     valid=False,
                     reference="",
@@ -33,15 +32,14 @@ class IsTypeAssertion(BaseAssertion):
                     target=target,
                 )
         expected_type = DataType(self.type)
-        ctx = build_context(target, path, value, expected_type=expected_type, actual_type=value)
         passed = value == expected_type
-        template = self.message or (
-            self._default_pass_template if passed else self._default_fail_template
+        ctx = build_context(
+            target, path, value, valid=passed, expected_type=expected_type, actual_type=value
         )
         return ValidationResult(
             valid=passed,
             reference="",
             severity=severity,
-            message=render_message(template, ctx),
+            message=render_message(self.message or self._default_template, ctx),
             target=target,
         )
