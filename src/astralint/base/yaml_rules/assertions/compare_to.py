@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Literal
 
 from pydantic import ConfigDict, Field
 
@@ -30,9 +30,7 @@ class CompareToAssertion(BaseEvaluable):
     error_if_no_match: bool = Field(default=True)
     message: str = Field(default="")
 
-    def evaluate(
-        self, file: File, severity: Severity
-    ) -> ValidationResult | ValidationResultGroup:
+    def evaluate(self, file: File, severity: Severity) -> ValidationResult | ValidationResultGroup:
         matches = resolve_path_with_captures(file, self.path)
         if not matches:
             if self.error_if_no_match:
@@ -51,7 +49,7 @@ class CompareToAssertion(BaseEvaluable):
                 target=self.path,
             )
 
-        results: list[ValidationResult] = []
+        results: list[ValidationResult | ValidationResultGroup] = []
         for path, value, captures in matches:
             resolved_other = interpolate_captures(self.other_path, captures)
             other_matches = resolve_path(file, resolved_other)
