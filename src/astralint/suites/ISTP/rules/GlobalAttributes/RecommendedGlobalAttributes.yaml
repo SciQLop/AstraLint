@@ -11,13 +11,17 @@ assertions:
     error_if_no_match: false
     keys:
       - Acknowledgement
+      - Discipline
+      - DOI
       - Generated_by
       - Generation_date
       - HTTP_LINK
       - LINK_TEXT
       - LINK_TITLE
       - MODS
+      - Project
       - Rules_of_use
+      - spase_DatasetResourceID
       - Time_resolution
     message: "Missing recommended global attribute: {key}"
 
