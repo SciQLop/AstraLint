@@ -1,0 +1,13 @@
+name: CatdescMaxLength
+description: "CATDESC must not exceed 120 characters (hard limit)"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#CATDESC"
+reference: "ISTP-VA-020"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  - path: "variables/.*/attributes/CATDESC/values/[0-9]*"
+    check: length
+    max: 120
+    error_if_no_match: false
+    message: "CATDESC exceeds 120 character hard limit"

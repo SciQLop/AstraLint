@@ -1,0 +1,13 @@
+name: LablaxisMaxLength
+description: "LABLAXIS must not exceed 20 characters (hard limit)"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#LABLAXIS"
+reference: "ISTP-VA-022"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  - path: "variables/.*/attributes/LABLAXIS/values/[0-9]*"
+    check: length
+    max: 20
+    error_if_no_match: false
+    message: "LABLAXIS exceeds 20 character hard limit"

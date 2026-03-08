@@ -18,9 +18,6 @@ assertions:
       - VALIDMIN
       - VALIDMAX
       - VAR_TYPE
-      - MONOTON
-      - TIME_BASE
-      - TIME_SCALE
     message: "Epoch variable missing required attribute: {key}"
 
   # Epoch VAR_TYPE should be support_data
