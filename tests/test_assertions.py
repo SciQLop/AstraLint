@@ -1307,6 +1307,150 @@ assertions:
     assert result.valid
 
 
+# =============================================================================
+# compare_to assertion tests
+# =============================================================================
+
+
+def test_compare_to_less_than_passes(mock_file_with_range):
+    yaml_rule_txt = """
+name: TEST-CMP-001
+description: "FILLVAL < VALIDMIN"
+url: "https://..."
+reference: "TEST-CMP-001"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: compare_to
+      path: "variables/{var}/attributes/FILLVAL/values/0"
+      operator: "<"
+      other_path: "variables/{var}/attributes/VALIDMIN/values/0"
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file_with_range)
+    assert result.valid
+
+
+def test_compare_to_fails_when_in_range(mock_file_with_range):
+    from astralint.base.file import Attribute, DataType, File, Variable
+
+    file = File(
+        extension="cdf",
+        filename="test.cdf",
+        attributes={},
+        variables={
+            "var1": Variable(
+                name="var1",
+                shape=[10],
+                attributes={
+                    "FILLVAL": Attribute(
+                        name="FILLVAL",
+                        data_type=[DataType.FLOAT64],
+                        shape=[1],
+                        values=[50.0],
+                    ),
+                    "VALIDMIN": Attribute(
+                        name="VALIDMIN",
+                        data_type=[DataType.FLOAT64],
+                        shape=[1],
+                        values=[0.0],
+                    ),
+                },
+                data_type=DataType.FLOAT64,
+                compression="NONE",
+                record_variance=True,
+            ),
+        },
+        compression="NONE",
+    )
+    yaml_rule_txt = """
+name: TEST-CMP-002
+description: "FILLVAL should be < VALIDMIN but is not"
+url: "https://..."
+reference: "TEST-CMP-002"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: compare_to
+      path: "variables/{var}/attributes/FILLVAL/values/0"
+      operator: "<"
+      other_path: "variables/{var}/attributes/VALIDMIN/values/0"
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(file)
+    assert not result.valid
+
+
+def test_compare_to_message_interpolation(mock_file_with_range):
+    yaml_rule_txt = """
+name: TEST-CMP-003
+description: "Message interpolation"
+url: "https://..."
+reference: "TEST-CMP-003"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: compare_to
+      path: "variables/{var}/attributes/FILLVAL/values/0"
+      operator: "<"
+      other_path: "variables/{var}/attributes/VALIDMIN/values/0"
+      message: "Variable '{var}' FILLVAL must be less than VALIDMIN"
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file_with_range)
+    assert result.valid
+    # Check message interpolation - dig into the result group
+    from astralint.base.validation_result import ValidationResultGroup
+
+    if isinstance(result, ValidationResultGroup):
+        inner = result.results[0]
+        if isinstance(inner, ValidationResultGroup):
+            msg = inner.results[0].message
+        else:
+            msg = inner.message
+        assert "var1" in msg
+        assert "{var}" not in msg
+
+
+def test_compare_to_other_path_not_found(mock_file_with_range):
+    yaml_rule_txt = """
+name: TEST-CMP-004
+description: "other_path does not exist"
+url: "https://..."
+reference: "TEST-CMP-004"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: compare_to
+      path: "variables/{var}/attributes/FILLVAL/values/0"
+      operator: "<"
+      other_path: "variables/{var}/attributes/NONEXISTENT/values/0"
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file_with_range)
+    assert not result.valid
+
+
+def test_compare_to_no_match_error_if_no_match_false(mock_file_with_range):
+    yaml_rule_txt = """
+name: TEST-CMP-005
+description: "path does not match, error_if_no_match false"
+url: "https://..."
+reference: "TEST-CMP-005"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: compare_to
+      path: "variables/{var}/attributes/NONEXISTENT/values/0"
+      operator: "<"
+      other_path: "variables/{var}/attributes/VALIDMIN/values/0"
+      error_if_no_match: false
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file_with_range)
+    assert result.valid
+
+
 def test_complex_conditional_scenario(mock_file):
     """Test complex scenario with multiple conditionals."""
     yaml_rule_txt = """

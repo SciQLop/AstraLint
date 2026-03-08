@@ -45,3 +45,45 @@ def mock_file():
         },
         compression="NONE",
     )
+
+
+@pytest.fixture
+def mock_file_with_range():
+    pytest.importorskip("astralint")
+    from astralint.base.file import Attribute, DataType, File, Variable
+
+    return File(
+        extension="cdf",
+        filename="test.cdf",
+        attributes={},
+        variables={
+            "var1": Variable(
+                name="var1",
+                shape=[10],
+                attributes={
+                    "FILLVAL": Attribute(
+                        name="FILLVAL",
+                        data_type=[DataType.FLOAT64],
+                        shape=[1],
+                        values=[-1e31],
+                    ),
+                    "VALIDMIN": Attribute(
+                        name="VALIDMIN",
+                        data_type=[DataType.FLOAT64],
+                        shape=[1],
+                        values=[0.0],
+                    ),
+                    "VALIDMAX": Attribute(
+                        name="VALIDMAX",
+                        data_type=[DataType.FLOAT64],
+                        shape=[1],
+                        values=[100.0],
+                    ),
+                },
+                data_type=DataType.FLOAT64,
+                compression="NONE",
+                record_variance=True,
+            ),
+        },
+        compression="NONE",
+    )
