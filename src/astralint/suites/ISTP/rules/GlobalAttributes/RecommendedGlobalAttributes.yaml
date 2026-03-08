@@ -23,5 +23,5 @@ assertions:
       - Rules_of_use
       - spase_DatasetResourceID
       - Time_resolution
-    message: "Missing recommended global attribute: {{ key }}"
+    message: "{% if valid %}all recommended global attributes present{% else %}missing recommended global attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
 

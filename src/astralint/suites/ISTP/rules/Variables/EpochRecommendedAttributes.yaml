@@ -13,4 +13,4 @@ assertions:
       - MONOTON
       - TIME_BASE
       - TIME_SCALE
-    message: "Epoch variable missing recommended attribute: {{ key }}"
+    message: "{% if valid %}Epoch has all recommended attributes{% else %}Epoch missing recommended attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
