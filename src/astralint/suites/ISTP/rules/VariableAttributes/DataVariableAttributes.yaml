@@ -6,7 +6,6 @@ severity: ERROR
 suite: ISTP
 
 assertions:
-  # Data variables need DEPEND_0 (usually Epoch), display info, and valid range
   - check: if_then
     if:
       path: "variables/.*/attributes/VAR_TYPE/values/[0-9]*"
@@ -21,9 +20,29 @@ assertions:
           keys:
             - DEPEND_0
             - DISPLAY_TYPE
-            - LABLAXIS
-            - UNITS
             - VALIDMIN
             - VALIDMAX
           message: "Data variable missing required attribute: {key}"
+        - check: any_of
+          message: "Data variable must have LABLAXIS or LABL_PTR_1"
+          assertions:
+            - path: "variables/.*/attributes/LABLAXIS"
+              check: exists
+              error_if_no_match: false
+              message: ""
+            - path: "variables/.*/attributes/LABL_PTR_1"
+              check: exists
+              error_if_no_match: false
+              message: ""
+        - check: any_of
+          message: "Data variable must have UNITS or UNIT_PTR"
+          assertions:
+            - path: "variables/.*/attributes/UNITS"
+              check: exists
+              error_if_no_match: false
+              message: ""
+            - path: "variables/.*/attributes/UNIT_PTR"
+              check: exists
+              error_if_no_match: false
+              message: ""
 
