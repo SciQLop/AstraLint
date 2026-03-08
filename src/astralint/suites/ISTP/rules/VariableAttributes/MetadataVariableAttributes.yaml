@@ -21,7 +21,7 @@ assertions:
             - CATDESC
             - FIELDNAM
             - VAR_TYPE
-          message: "Metadata variable missing required attribute: {{ key }}"
+          message: "{% if valid %}{{ variable }} has all required metadata attributes{% else %}{{ variable }} missing required attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
         - check: any_of
           message: "Metadata variable must have FORMAT or FORM_PTR"
           assertions:

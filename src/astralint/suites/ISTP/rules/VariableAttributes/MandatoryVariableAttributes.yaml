@@ -12,7 +12,7 @@ assertions:
       - CATDESC
       - FIELDNAM
       - VAR_TYPE
-    message: "Variable missing mandatory attribute: {{ key }}"
+    message: "{% if valid %}{{ variable }} has all mandatory attributes{% else %}{{ variable }} is missing mandatory attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
 
   - check: one_of
     assertions:

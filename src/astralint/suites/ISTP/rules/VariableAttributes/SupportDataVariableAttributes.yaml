@@ -22,7 +22,7 @@ assertions:
             - FIELDNAM
             - VALIDMIN
             - VALIDMAX
-          message: "Support_data variable missing required attribute: {{ key }}"
+          message: "{% if valid %}{{ variable }} has all required support_data attributes{% else %}{{ variable }} missing required attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
         - check: any_of
           message: "Support_data variable must have FORMAT or FORM_PTR"
           assertions:

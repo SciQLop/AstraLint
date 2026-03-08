@@ -18,7 +18,7 @@ assertions:
       - VALIDMIN
       - VALIDMAX
       - VAR_TYPE
-    message: "Epoch variable missing required attribute: {{ key }}"
+    message: "{% if valid %}Epoch has all required attributes{% else %}Epoch missing required attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
 
   # Epoch VAR_TYPE should be support_data
   - path: "variables/Epoch/attributes/VAR_TYPE/values/[0-9]*"

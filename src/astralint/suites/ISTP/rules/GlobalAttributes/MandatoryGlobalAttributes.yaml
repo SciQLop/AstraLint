@@ -22,5 +22,5 @@ assertions:
       - PI_name
       - Source_name
       - TEXT
-    message: "Missing mandatory global attribute: {{ key }}"
+    message: "{% if valid %}all mandatory global attributes present{% else %}missing mandatory global attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
 

@@ -22,7 +22,7 @@ assertions:
             - DISPLAY_TYPE
             - VALIDMIN
             - VALIDMAX
-          message: "Data variable missing required attribute: {{ key }}"
+          message: "{% if valid %}{{ variable }} has all required data attributes{% else %}{{ variable }} missing required attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
         - check: any_of
           message: "Data variable must have LABLAXIS or LABL_PTR_1"
           assertions:
