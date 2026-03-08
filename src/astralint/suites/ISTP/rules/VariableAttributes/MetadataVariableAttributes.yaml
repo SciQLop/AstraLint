@@ -21,7 +21,7 @@ assertions:
             - CATDESC
             - FIELDNAM
             - VAR_TYPE
-          message: "Metadata variable missing required attribute: {key}"
+          message: "Metadata variable missing required attribute: {{ key }}"
         - check: any_of
           message: "Metadata variable must have FORMAT or FORM_PTR"
           assertions:

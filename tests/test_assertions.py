@@ -1394,7 +1394,7 @@ assertions:
       path: "variables/{var}/attributes/FILLVAL/values/0"
       operator: "<"
       other_path: "variables/{var}/attributes/VALIDMIN/values/0"
-      message: "Variable '{var}' FILLVAL must be less than VALIDMIN"
+      message: "Variable '{{ var }}' FILLVAL must be less than VALIDMIN"
     """
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file_with_range)

@@ -13,4 +13,4 @@ assertions:
       - MONOTON
       - TIME_BASE
       - TIME_SCALE
-    message: "Epoch variable missing recommended attribute: {key}"
+    message: "Epoch variable missing recommended attribute: {{ key }}"

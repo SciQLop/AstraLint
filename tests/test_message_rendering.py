@@ -333,6 +333,38 @@ def test_is_type_pass_message(mock_file):
     assert "as expected" in leaf.message
 
 
+from astralint.base.yaml_rules.assertions.compare_to import CompareToAssertion
+
+
+def test_compare_to_pass_message(mock_file_with_range):
+    assertion = CompareToAssertion(
+        check="compare_to",
+        path="variables/{var}/attributes/FILLVAL/values/0",
+        operator="<",
+        other_path="variables/{var}/attributes/VALIDMIN/values/0",
+    )
+    result = assertion.evaluate(mock_file_with_range, Severity.WARNING)
+    leaf = result.results[0]
+    # FILLVAL is -1e31, VALIDMIN is 0.0, so -1e31 < 0.0 is True
+    assert leaf.valid is True
+    assert "path" not in leaf.message.lower() or len(leaf.message) < 100
+    assert "values/0" not in leaf.target
+
+
+def test_compare_to_custom_jinja_message(mock_file_with_range):
+    assertion = CompareToAssertion(
+        check="compare_to",
+        path="variables/{var}/attributes/FILLVAL/values/0",
+        operator="<",
+        other_path="variables/{var}/attributes/VALIDMIN/values/0",
+        message="Variable '{{ var }}': FILLVAL ({{ value }}) must be < VALIDMIN ({{ other_value }})",
+    )
+    result = assertion.evaluate(mock_file_with_range, Severity.WARNING)
+    leaf = result.results[0]
+    assert "var1" in leaf.message
+    assert "FILLVAL" in leaf.message
+
+
 from astralint.base.yaml_rules.assertions.relatioship import ReferencesVariableAssertion
 
 

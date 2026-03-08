@@ -22,7 +22,7 @@ assertions:
             - DISPLAY_TYPE
             - VALIDMIN
             - VALIDMAX
-          message: "Data variable missing required attribute: {key}"
+          message: "Data variable missing required attribute: {{ key }}"
         - check: any_of
           message: "Data variable must have LABLAXIS or LABL_PTR_1"
           assertions:
