@@ -163,3 +163,59 @@ def test_matches_custom_message():
     result = assertion.evaluate(f, Severity.WARNING)
     leaf = result.results[0] if hasattr(result, "results") else result
     assert leaf.message == "Source 'BAD' must be lowercase"
+
+
+from astralint.base.yaml_rules.assertions.comparisons import RangeAssertion
+
+
+def test_comparison_fail_message(mock_file):
+    assertion = ComparisonAssertion(
+        check="comparison",
+        path="attributes/global_attr/values/0",
+        operator=">",
+        value=100,
+    )
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert "does not satisfy" in leaf.message
+    assert "path" not in leaf.message.lower()
+    assert leaf.target == "global_attr"
+
+
+def test_comparison_pass_message(mock_file):
+    assertion = ComparisonAssertion(
+        check="comparison",
+        path="attributes/global_attr/values/0",
+        operator="=",
+        value=42,
+    )
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert leaf.valid is True
+    assert "satisfies" in leaf.message
+
+
+def test_range_fail_message(mock_file):
+    assertion = RangeAssertion(
+        check="range",
+        path="attributes/global_attr/values/0",
+        min=100,
+        max=200,
+    )
+    result = assertion.evaluate(mock_file, Severity.WARNING)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert "not within range" in leaf.message
+    assert leaf.target == "global_attr"
+
+
+def test_range_pass_message(mock_file):
+    assertion = RangeAssertion(
+        check="range",
+        path="attributes/global_attr/values/0",
+        min=0,
+        max=100,
+    )
+    result = assertion.evaluate(mock_file, Severity.WARNING)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert leaf.valid is True
+    assert "within range" in leaf.message

@@ -5,7 +5,7 @@ from pydantic import ConfigDict
 
 from ...file import File
 from ...validation_result import Severity, ValidationResult
-from .base import BaseAssertion, clean_target, render_message
+from .base import BaseAssertion, build_context, clean_target, render_message
 
 
 class MatchesAssertion(BaseAssertion):
@@ -21,19 +21,7 @@ class MatchesAssertion(BaseAssertion):
         self, file: File, path: str, value: str, severity: Severity
     ) -> ValidationResult:
         target = clean_target(path)
-        ctx = {
-            "value": value,
-            "pattern": self.pattern.pattern,
-            "variable": None,
-            "attribute": None,
-            "path": path,
-        }
-        parts = target.split("/")
-        if len(parts) == 2:
-            ctx["variable"], ctx["attribute"] = parts
-        elif len(parts) == 1 and target:
-            ctx["attribute"] = target if path.startswith("attributes/") else None
-            ctx["variable"] = target if path.startswith("variables/") else None
+        ctx = build_context(target, path, value, pattern=self.pattern.pattern)
 
         if not isinstance(value, str):
             return ValidationResult(
