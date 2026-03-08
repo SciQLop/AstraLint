@@ -6,13 +6,11 @@ severity: ERROR
 suite: ISTP
 
 assertions:
-  # Core attributes required for all variables
   - path: "variables/.*/attributes"
     check: contains_keys
     keys:
       - CATDESC
       - FIELDNAM
-      - FILLVAL
       - VAR_TYPE
     message: "Variable missing mandatory attribute: {key}"
 
@@ -28,3 +26,16 @@ assertions:
         keys:
           - FORM_PTR
         message: "Variable must have either FORMAT or FORM_PTR attribute"
+
+  - check: if_then
+    if:
+      path: "variables/.*/record_variance"
+      check: comparison
+      operator: "="
+      value: true
+    then:
+      path: "variables/.*/attributes"
+      check: contains_keys
+      keys:
+        - FILLVAL
+      message: "Record-varying variable must have FILLVAL attribute"
