@@ -1,0 +1,16 @@
+name: EpochRecommendedAttributes
+description: "Epoch variable should have recommended ISTP attributes"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/variables.html#Epoch"
+reference: "ISTP-VAR-003"
+severity: WARNING
+suite: ISTP
+
+assertions:
+  - path: "variables/Epoch/attributes"
+    check: contains_keys
+    error_if_no_match: false
+    keys:
+      - MONOTON
+      - TIME_BASE
+      - TIME_SCALE
+    message: "Epoch variable missing recommended attribute: {key}"

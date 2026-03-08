@@ -1,0 +1,13 @@
+name: FieldnamMaxLength
+description: "FIELDNAM must not exceed 50 characters (hard limit)"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#FIELDNAM"
+reference: "ISTP-VA-021"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  - path: "variables/.*/attributes/FIELDNAM/values/[0-9]*"
+    check: length
+    max: 50
+    error_if_no_match: false
+    message: "FIELDNAM exceeds 50 character hard limit"

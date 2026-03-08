@@ -2,7 +2,7 @@ name: EpochVariable
 description: "Files should contain an Epoch variable for time tagging"
 url: "https://spdf.gsfc.nasa.gov/istp_guide/variables.html#Epoch"
 reference: "ISTP-VAR-001"
-severity: ERROR
+severity: WARNING
 suite: ISTP
 
 assertions:
