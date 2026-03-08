@@ -10,4 +10,4 @@ assertions:
     check: length
     max: 20
     error_if_no_match: false
-    message: "LABLAXIS exceeds 20 character hard limit"
+    message: "{% if valid %}Attribute LABLAXIS of {{ variable }} (length {{ length }}) is within 20 char limit{% else %}Attribute LABLAXIS of {{ variable }} (length {{ length }}) exceeds 20 character hard limit{% endif %}"

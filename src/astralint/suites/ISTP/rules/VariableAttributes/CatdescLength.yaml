@@ -9,9 +9,9 @@ assertions:
   - path: "variables/.*/attributes/CATDESC/values/[0-9]*"
     check: length
     max: 80
-    message: "CATDESC should be 80 characters or less"
+    message: "{% if valid %}Attribute CATDESC of {{ variable }} (length {{ length }}) is within 80 char limit{% else %}Attribute CATDESC of {{ variable }} (length {{ length }}) should be 80 characters or less{% endif %}"
 
   - path: "variables/.*/attributes/CATDESC/values/[0-9]*"
     check: not_empty
-    message: "CATDESC cannot be empty - must describe the variable"
+    message: "{% if valid %}Attribute CATDESC of {{ variable }} is not empty{% else %}Attribute CATDESC of {{ variable }} cannot be empty - must describe the variable{% endif %}"
 

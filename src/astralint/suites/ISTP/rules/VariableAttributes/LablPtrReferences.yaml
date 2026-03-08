@@ -10,17 +10,17 @@ assertions:
   - path: "variables/.*/attributes/LABL_PTR_1/values/[0-9]*"
     check: reference_variable
     error_if_no_match: false
-    message: "LABL_PTR_1 references non-existent variable"
+    message: "{% if valid %}Attribute LABL_PTR_1 of {{ variable }} references existing variable '{{ value }}'{% else %}Attribute LABL_PTR_1 of {{ variable }} references non-existent variable '{{ value }}'{% endif %}"
 
   # LABL_PTR_2 must reference existing variable if present
   - path: "variables/.*/attributes/LABL_PTR_2/values/[0-9]*"
     check: reference_variable
     error_if_no_match: false
-    message: "LABL_PTR_2 references non-existent variable"
+    message: "{% if valid %}Attribute LABL_PTR_2 of {{ variable }} references existing variable '{{ value }}'{% else %}Attribute LABL_PTR_2 of {{ variable }} references non-existent variable '{{ value }}'{% endif %}"
 
   # LABL_PTR_3 must reference existing variable if present
   - path: "variables/.*/attributes/LABL_PTR_3/values/[0-9]*"
     check: reference_variable
     error_if_no_match: false
-    message: "LABL_PTR_3 references non-existent variable"
+    message: "{% if valid %}Attribute LABL_PTR_3 of {{ variable }} references existing variable '{{ value }}'{% else %}Attribute LABL_PTR_3 of {{ variable }} references non-existent variable '{{ value }}'{% endif %}"
 

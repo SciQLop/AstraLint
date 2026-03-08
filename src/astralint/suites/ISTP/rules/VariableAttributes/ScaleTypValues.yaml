@@ -12,5 +12,5 @@ assertions:
     values:
       - linear
       - log
-    message: "SCALETYP should be 'linear' or 'log'"
+    message: "{% if valid %}Attribute SCALETYP of {{ variable }} has value '{{ value }}'{% else %}Attribute SCALETYP of {{ variable }} has value '{{ value }}', expected 'linear' or 'log'{% endif %}"
 

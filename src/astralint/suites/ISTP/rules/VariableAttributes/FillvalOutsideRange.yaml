@@ -9,7 +9,7 @@ assertions:
   - path: "variables/{var}/attributes/FILLVAL/values/0"
     check: any_of
     error_if_no_match: false
-    message: "Variable '{{ var }}': FILLVAL must be outside [VALIDMIN, VALIDMAX] range"
+    message: "{% if valid %}Attribute FILLVAL of {{ var }} is outside [VALIDMIN, VALIDMAX] range{% else %}Attribute FILLVAL of {{ var }} must be outside [VALIDMIN, VALIDMAX] range{% endif %}"
     assertions:
       - path: "variables/{var}/attributes/FILLVAL/values/0"
         check: compare_to

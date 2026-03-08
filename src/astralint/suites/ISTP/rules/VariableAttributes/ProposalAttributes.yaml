@@ -11,7 +11,7 @@ assertions:
     error_if_no_match: false
     keys:
       - COORDINATE_SYSTEM
-    message: "PROPOSAL: COORDINATE_SYSTEM attribute is available for vectors/tensors"
+    message: "{% if valid %}Attribute COORDINATE_SYSTEM of {{ variable }} is present{% else %}Attribute COORDINATE_SYSTEM of {{ variable }} is available for vectors/tensors (proposal){% endif %}"
   - path: "attributes"
     check: contains_keys
     error_if_no_match: false

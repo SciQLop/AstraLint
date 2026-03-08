@@ -11,5 +11,5 @@ assertions:
     check: matches
     error_if_no_match: false
     pattern: "^[AIEFDG]\\d+(\\.\\d+)?$"
-    message: "FORMAT should be a valid Fortran format specifier (e.g., F10.2, E12.4, I5, A20, G13.6)"
+    message: "{% if valid %}Attribute FORMAT of {{ variable }} has value '{{ value }}'{% else %}Attribute FORMAT of {{ variable }} has value '{{ value }}', expected a valid Fortran format specifier (e.g., F10.2, E12.4, I5, A20, G13.6){% endif %}"
 

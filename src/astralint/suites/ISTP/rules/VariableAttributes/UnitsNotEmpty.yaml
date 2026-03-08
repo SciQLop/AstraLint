@@ -9,5 +9,5 @@ assertions:
   - path: "variables/.*/attributes/UNITS/values/[0-9]*"
     check: not_empty
     error_if_no_match: false
-    message: "UNITS cannot be empty - use 'unitless' or a single space if variable has no units"
+    message: "{% if valid %}Attribute UNITS of {{ variable }} is not empty{% else %}Attribute UNITS of {{ variable }} cannot be empty - use 'unitless' or a single space{% endif %}"
 

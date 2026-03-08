@@ -26,7 +26,7 @@ assertions:
     operator: "="
     value: "support_data"
     error_if_no_match: false
-    message: "Epoch VAR_TYPE should be 'support_data'"
+    message: "{% if valid %}Attribute VAR_TYPE of Epoch has value '{{ value }}'{% else %}Attribute VAR_TYPE of Epoch has value '{{ value }}', expected 'support_data'{% endif %}"
 
   # Epoch MONOTON should be INCREASE (or rarely DECREASE)
   - path: "variables/Epoch/attributes/MONOTON/values/[0-9]*"
@@ -35,5 +35,5 @@ assertions:
     values:
       - INCREASE
       - DECREASE
-    message: "Epoch MONOTON should be 'INCREASE' or 'DECREASE'"
+    message: "{% if valid %}Attribute MONOTON of Epoch has value '{{ value }}'{% else %}Attribute MONOTON of Epoch has value '{{ value }}', expected 'INCREASE' or 'DECREASE'{% endif %}"
 

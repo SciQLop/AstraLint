@@ -10,4 +10,4 @@ assertions:
     check: length
     max: 120
     error_if_no_match: false
-    message: "CATDESC exceeds 120 character hard limit"
+    message: "{% if valid %}Attribute CATDESC of {{ variable }} (length {{ length }}) is within 120 char limit{% else %}Attribute CATDESC of {{ variable }} (length {{ length }}) exceeds 120 character hard limit{% endif %}"

@@ -10,4 +10,4 @@ assertions:
     check: length
     max: 50
     error_if_no_match: false
-    message: "FIELDNAM exceeds 50 character hard limit"
+    message: "{% if valid %}Attribute FIELDNAM of {{ variable }} (length {{ length }}) is within 50 char limit{% else %}Attribute FIELDNAM of {{ variable }} (length {{ length }}) exceeds 50 character hard limit{% endif %}"

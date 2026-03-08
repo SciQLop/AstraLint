@@ -10,11 +10,11 @@ assertions:
   - path: "variables/.*/attributes/DELTA_PLUS_VAR/values/[0-9]*"
     check: reference_variable
     error_if_no_match: false
-    message: "DELTA_PLUS_VAR references non-existent variable"
+    message: "{% if valid %}Attribute DELTA_PLUS_VAR of {{ variable }} references existing variable '{{ value }}'{% else %}Attribute DELTA_PLUS_VAR of {{ variable }} references non-existent variable '{{ value }}'{% endif %}"
 
   # DELTA_MINUS_VAR must reference existing variable if present
   - path: "variables/.*/attributes/DELTA_MINUS_VAR/values/[0-9]*"
     check: reference_variable
     error_if_no_match: false
-    message: "DELTA_MINUS_VAR references non-existent variable"
+    message: "{% if valid %}Attribute DELTA_MINUS_VAR of {{ variable }} references existing variable '{{ value }}'{% else %}Attribute DELTA_MINUS_VAR of {{ variable }} references non-existent variable '{{ value }}'{% endif %}"
 

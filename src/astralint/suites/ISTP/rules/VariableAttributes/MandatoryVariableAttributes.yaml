@@ -20,12 +20,12 @@ assertions:
         check: contains_keys
         keys:
           - FORMAT
-        message: "Variable must have either FORMAT or FORM_PTR attribute"
+        message: "{% if valid %}{{ variable }} has FORMAT attribute{% else %}{{ variable }} must have either FORMAT or FORM_PTR attribute{% endif %}"
       - path: "variables/.*/attributes"
         check: contains_keys
         keys:
           - FORM_PTR
-        message: "Variable must have either FORMAT or FORM_PTR attribute"
+        message: "{% if valid %}{{ variable }} has FORM_PTR attribute{% else %}{{ variable }} must have either FORMAT or FORM_PTR attribute{% endif %}"
 
   - check: if_then
     if:
@@ -38,4 +38,4 @@ assertions:
       check: contains_keys
       keys:
         - FILLVAL
-      message: "Record-varying variable must have FILLVAL attribute"
+      message: "{% if valid %}{{ variable }} has FILLVAL attribute{% else %}{{ variable }} (record-varying) must have FILLVAL attribute{% endif %}"
