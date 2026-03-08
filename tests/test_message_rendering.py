@@ -75,3 +75,29 @@ def test_base_assertion_no_match_ok(mock_file):
     assert "NonExistent" in result.message
     assert "not required" in result.message
     assert result.target == "NonExistent"
+
+
+from astralint.base.yaml_rules.assertions.exists import ExistsAssertion
+
+
+def test_exists_pass_message(mock_file):
+    assertion = ExistsAssertion(check="exists", path="attributes/global_attr")
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    assert result.valid is True
+    assert "global_attr" in result.message
+    assert "exists" in result.message
+    assert "path" not in result.message.lower()
+
+
+def test_exists_fail_message(mock_file):
+    assertion = ExistsAssertion(check="exists", path="attributes/Missing")
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    assert result.valid is False
+    assert "Missing" in result.message
+    assert result.target == "Missing"
+
+
+def test_exists_pass_target_is_clean(mock_file):
+    assertion = ExistsAssertion(check="exists", path="attributes/global_attr")
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    assert result.target == "global_attr"
