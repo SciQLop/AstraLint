@@ -101,3 +101,65 @@ def test_exists_pass_target_is_clean(mock_file):
     assertion = ExistsAssertion(check="exists", path="attributes/global_attr")
     result = assertion.evaluate(mock_file, Severity.ERROR)
     assert result.target == "global_attr"
+
+
+from astralint.base.yaml_rules.assertions.matches import MatchesAssertion
+from astralint.base.file import Attribute, DataType, File
+
+
+def test_matches_fail_message(mock_file):
+    assertion = MatchesAssertion(
+        check="matches",
+        path="attributes/global_attr/values/0",
+        pattern="^[a-z]+$",
+    )
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert "expected a string value" in leaf.message
+    assert "path" not in leaf.message.lower()
+    assert leaf.target == "global_attr"
+
+
+def test_matches_pass_message():
+    f = File(
+        extension="mock",
+        filename="test.mock",
+        attributes={
+            "Source": Attribute(
+                name="Source", data_type=[DataType.CHAR], shape=[1], values=["hello"]
+            )
+        },
+        variables={},
+        compression="NONE",
+    )
+    assertion = MatchesAssertion(
+        check="matches", path="attributes/Source/values/0", pattern="^[a-z]+$"
+    )
+    result = assertion.evaluate(f, Severity.WARNING)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert leaf.valid is True
+    assert "'hello'" in leaf.message
+    assert "matches" in leaf.message
+
+
+def test_matches_custom_message():
+    f = File(
+        extension="mock",
+        filename="test.mock",
+        attributes={
+            "Source": Attribute(
+                name="Source", data_type=[DataType.CHAR], shape=[1], values=["BAD"]
+            )
+        },
+        variables={},
+        compression="NONE",
+    )
+    assertion = MatchesAssertion(
+        check="matches",
+        path="attributes/Source/values/0",
+        pattern="^[a-z]+$",
+        message="{{ attribute }} '{{ value }}' must be lowercase",
+    )
+    result = assertion.evaluate(f, Severity.WARNING)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert leaf.message == "Source 'BAD' must be lowercase"
