@@ -44,3 +44,34 @@ def test_render_message_with_attribute():
         "{{ attribute or path }} is empty", {"attribute": "CATDESC", "path": "x/y"}
     )
     assert result == "CATDESC is empty"
+
+
+from astralint.base.yaml_rules.assertions.comparisons import ComparisonAssertion
+from astralint.base.validation_result import Severity
+
+
+def test_base_assertion_no_match_message(mock_file):
+    assertion = ComparisonAssertion(
+        check="comparison",
+        path="attributes/NonExistent/values/0",
+        operator="=",
+        value=42,
+    )
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    assert "NonExistent" in result.message
+    assert "values/0" not in result.message
+    assert result.target == "NonExistent"
+
+
+def test_base_assertion_no_match_ok(mock_file):
+    assertion = ComparisonAssertion(
+        check="comparison",
+        path="attributes/NonExistent/values/0",
+        operator="=",
+        value=42,
+        error_if_no_match=False,
+    )
+    result = assertion.evaluate(mock_file, Severity.INFO)
+    assert "NonExistent" in result.message
+    assert "not required" in result.message
+    assert result.target == "NonExistent"
