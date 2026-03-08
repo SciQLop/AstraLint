@@ -20,6 +20,7 @@ Assertions are the building blocks of validation rules. Each assertion checks a 
 | `requires` | Collection | Object contains required key |
 | `array_shape` | Collection | Array matches dimensions |
 | `reference_variable` | Relationship | Value references existing variable |
+| `compare_to` | Relationship | Compare values at two different paths |
 | `all_of` | Combinator | All nested assertions pass (AND) |
 | `any_of` | Combinator | At least one passes (OR) |
 | `none_of` | Combinator | None must pass (NOR) |
@@ -263,6 +264,30 @@ Check that a value references an existing variable name in the file.
 - path: "variables/.*/attributes/LABL_PTR_1"
   check: reference_variable
   message: "LABL_PTR_1 must reference an existing variable"
+```
+
+### `compare_to`
+
+Compare a value at one path against a value at another path in the same file. Supports named path captures for cross-variable comparisons.
+
+**Operators:** `=`, `!=`, `<`, `<=`, `>`, `>=`
+
+```yaml
+# FILLVAL must be less than VALIDMIN (same variable)
+- path: "variables/{var}/attributes/FILLVAL/values/0"
+  check: compare_to
+  operator: "<"
+  other_path: "variables/{var}/attributes/VALIDMIN/values/0"
+  message: "Variable '{var}': FILLVAL must be less than VALIDMIN"
+```
+
+```yaml
+# Compare attribute entry counts
+- path: "attributes/HTTP_LINK/shape/0"
+  check: compare_to
+  operator: "="
+  other_path: "attributes/LINK_TEXT/shape/0"
+  message: "HTTP_LINK and LINK_TEXT must have the same number of entries"
 ```
 
 ---
@@ -724,5 +749,32 @@ The path system uses Python's `re.fullmatch()`, so regex patterns work:
 | `data_.*` | Match paths starting with "data_" |
 | `[0-9]+` | Match any numeric index |
 | `(Epoch\|Time)` | Match "Epoch" or "Time" |
+
+### Named Captures
+
+Capture path segments for reuse in `other_path` and `message` fields using `{name}` syntax:
+
+| Syntax | Description |
+|--------|-------------|
+| `{name}` | Capture segment, matches any single path component |
+| `{name:pattern}` | Capture segment with custom regex pattern |
+
+Captured names can be used in:
+- `other_path` — to reference the same captured value in a different location
+- `message` — for descriptive error messages
+
+```yaml
+# Capture variable name, reuse in other_path and message
+- path: "variables/{var}/attributes/FILLVAL/values/0"
+  check: compare_to
+  operator: "<"
+  other_path: "variables/{var}/attributes/VALIDMIN/values/0"
+  message: "Variable '{var}': FILLVAL must be less than VALIDMIN"
+
+# Capture with custom regex filter
+- path: "variables/{var:LFR_.*}/attributes/UNITS/values/0"
+  check: not_empty
+  message: "LFR variable '{var}' must have non-empty UNITS"
+```
 
 
