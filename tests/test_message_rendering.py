@@ -331,3 +331,57 @@ def test_is_type_pass_message(mock_file):
     assert leaf.valid is True
     assert "INT32" in leaf.message
     assert "as expected" in leaf.message
+
+
+from astralint.base.yaml_rules.assertions.relatioship import ReferencesVariableAssertion
+
+
+def test_ref_variable_not_string_message(mock_file):
+    # mock_file global_attr value is 42 (int), not a string
+    assertion = ReferencesVariableAssertion(
+        check="reference_variable",
+        path="attributes/global_attr/values/0",
+    )
+    result = assertion.evaluate(mock_file, Severity.WARNING)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert "string" in leaf.message.lower()
+    assert "path" not in leaf.message.lower()
+    assert leaf.target == "global_attr"
+
+
+def test_ref_variable_pass_message(mock_file):
+    # mock_file has variable "var1", create a file where an attribute value references it
+    from astralint.base.file import Attribute, DataType, File, Variable
+
+    f = File(
+        extension="mock",
+        filename="test.mock",
+        attributes={
+            "DEPEND_0": Attribute(
+                name="DEPEND_0",
+                data_type=[DataType.CHAR],
+                shape=[1],
+                values=["Epoch"],
+            )
+        },
+        variables={
+            "Epoch": Variable(
+                name="Epoch",
+                shape=[10],
+                attributes={},
+                data_type=DataType.INT64,
+                compression="NONE",
+                record_variance=True,
+            )
+        },
+        compression="NONE",
+    )
+    assertion = ReferencesVariableAssertion(
+        check="reference_variable",
+        path="attributes/DEPEND_0/values/0",
+    )
+    result = assertion.evaluate(f, Severity.WARNING)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert leaf.valid is True
+    assert "Epoch" in leaf.message
+    assert "path" not in leaf.message.lower()
