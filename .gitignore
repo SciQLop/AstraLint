@@ -5,7 +5,9 @@ tmp/
 trash/
 attic/
 .kash/
-
+.claude/
+.idea/
+.serena/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
