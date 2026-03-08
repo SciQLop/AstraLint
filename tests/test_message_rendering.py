@@ -300,3 +300,34 @@ def test_requires_fail_message(mock_file):
     leaf = result.results[0] if hasattr(result, "results") else result
     assert "MissingVar" in leaf.message
     assert "path" not in leaf.message.lower()
+
+
+from astralint.base.yaml_rules.assertions.is_type import IsTypeAssertion
+
+
+def test_is_type_fail_message(mock_file):
+    # mock_file has global_attr with data_type=[DataType.INT32]
+    assertion = IsTypeAssertion(
+        check="is_type",
+        path="attributes/global_attr/data_type/0",
+        type="FLOAT64",
+    )
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert "FLOAT64" in leaf.message
+    assert "INT32" in leaf.message
+    assert "path" not in leaf.message.lower()
+    assert leaf.target == "global_attr"
+
+
+def test_is_type_pass_message(mock_file):
+    assertion = IsTypeAssertion(
+        check="is_type",
+        path="attributes/global_attr/data_type/0",
+        type="INT32",
+    )
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert leaf.valid is True
+    assert "INT32" in leaf.message
+    assert "as expected" in leaf.message
