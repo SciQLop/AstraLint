@@ -6,7 +6,9 @@ from ...file import File
 from ...validation_result import Severity, ValidationResult, ValidationResultGroup
 from .base import (
     BaseEvaluable,
+    clean_target,
     interpolate_captures,
+    render_message,
     resolve_path,
     resolve_path_with_captures,
 )
@@ -20,6 +22,9 @@ _operators = {
     ">=": lambda a, b: a >= b,
 }
 
+_NO_MATCH_FAIL = "{{ target or path }} did not match any values"
+_NO_MATCH_OK = "{{ target or path }} did not match any values (not required)"
+
 
 class CompareToAssertion(BaseEvaluable):
     model_config = ConfigDict(frozen=True)
@@ -30,62 +35,87 @@ class CompareToAssertion(BaseEvaluable):
     error_if_no_match: bool = Field(default=True)
     message: str = Field(default="")
 
+    _default_pass_template: str = "{{ value }} {{ operator }} {{ other_value }}"
+    _default_fail_template: str = "{{ value }} does not satisfy {{ operator }} {{ other_value }}"
+    _other_not_found_template: str = "comparison target not found"
+
     def evaluate(self, file: File, severity: Severity) -> ValidationResult | ValidationResultGroup:
         matches = resolve_path_with_captures(file, self.path)
         if not matches:
+            target = clean_target(self.path)
+            ctx = {"target": target, "path": self.path}
             if self.error_if_no_match:
                 return ValidationResult(
                     valid=False,
                     reference="",
                     severity=Severity.ERROR,
-                    message=f"Path '{self.path}' did not match any values.",
-                    target=self.path,
+                    message=render_message(_NO_MATCH_FAIL, ctx),
+                    target=target,
                 )
             return ValidationResult(
                 valid=True,
                 reference="",
                 severity=Severity.INFO,
-                message=f"Path '{self.path}' did not match any values, but that's okay.",
-                target=self.path,
+                message=render_message(_NO_MATCH_OK, ctx),
+                target=target,
             )
 
         results: list[ValidationResult | ValidationResultGroup] = []
         for path, value, captures in matches:
+            target = clean_target(path)
+            # Still use interpolate_captures for path resolution (not messages)
             resolved_other = interpolate_captures(self.other_path, captures)
             other_matches = resolve_path(file, resolved_other)
+
+            # Build context: merge captures + standard fields
+            ctx = {
+                "value": value,
+                "operator": self.operator,
+                "path": path,
+                "target": target,
+                "variable": None,
+                "attribute": None,
+                **captures,
+            }
+            parts = target.split("/")
+            if len(parts) == 2:
+                ctx["variable"], ctx["attribute"] = parts
+            elif len(parts) == 1 and target:
+                ctx["attribute"] = target if path.startswith("attributes/") else None
+                ctx["variable"] = target if path.startswith("variables/") else None
+
             if not other_matches:
+                ctx["other_value"] = None
                 results.append(
                     ValidationResult(
                         valid=False,
                         reference="",
                         severity=severity,
-                        message=interpolate_captures(
-                            self.message or f"Other path '{resolved_other}' not found.",
-                            captures,
+                        message=render_message(
+                            self.message or self._other_not_found_template, ctx
                         ),
-                        target=path,
+                        target=target,
                     )
                 )
                 continue
 
             other_value = other_matches[0][1]
+            ctx["other_value"] = other_value
             try:
                 passed = _operators[self.operator](value, other_value)
             except TypeError:
                 passed = False
 
-            msg = interpolate_captures(
-                self.message
-                or f"Value at '{path}' ({value}) {self.operator} value at '{resolved_other}' ({other_value}): {'pass' if passed else 'fail'}.",
-                captures,
+            template = self.message or (
+                self._default_pass_template if passed else self._default_fail_template
             )
             results.append(
                 ValidationResult(
                     valid=passed,
                     reference="",
                     severity=severity,
-                    message=msg,
-                    target=path,
+                    message=render_message(template, ctx),
+                    target=target,
                 )
             )
 

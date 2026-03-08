@@ -12,7 +12,7 @@ assertions:
       - CATDESC
       - FIELDNAM
       - VAR_TYPE
-    message: "Variable missing mandatory attribute: {key}"
+    message: "Variable missing mandatory attribute: {{ key }}"
 
   - check: one_of
     assertions:

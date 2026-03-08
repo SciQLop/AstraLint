@@ -14,5 +14,5 @@ assertions:
       - SOLARNET
       - OBS_HDU
       - DATE-BEG
-    message: "Missing mandatory global attribute: {key}"
+    message: "Missing mandatory global attribute: {{ key }}"
 

@@ -22,5 +22,5 @@ assertions:
       - PI_name
       - Source_name
       - TEXT
-    message: "Missing mandatory global attribute: {key}"
+    message: "Missing mandatory global attribute: {{ key }}"
 

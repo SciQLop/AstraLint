@@ -23,5 +23,5 @@ assertions:
       - Rules_of_use
       - spase_DatasetResourceID
       - Time_resolution
-    message: "Missing recommended global attribute: {key}"
+    message: "Missing recommended global attribute: {{ key }}"
 

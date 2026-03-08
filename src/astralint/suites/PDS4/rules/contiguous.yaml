@@ -9,4 +9,4 @@ assertions:
   - path: "variables/.*/attributes"
     check: contains_keys
     keys: [ CATDESC, FIELDNAM, FILLVAL ]
-    message: "Variable '{parent}' missing attribute: {key}"
+    message: "Variable '{{ parent }}' missing attribute: {{ key }}"
