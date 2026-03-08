@@ -1,8 +1,67 @@
 from yaml import safe_load
 
+from astralint.base.yaml_rules.assertions.base import (
+    interpolate_captures,
+    parse_captures,
+    resolve_path_with_captures,
+)
 from astralint.base.yaml_rules.yaml_rule import ValidationResultGroup, YamlRule
 
 from . import *  # isort:skip # noqa: F403
+
+
+# =============================================================================
+# Path capture tests
+# =============================================================================
+
+
+def test_parse_captures_simple():
+    pattern, captures = parse_captures("variables/{var}/attributes/FILLVAL")
+    assert pattern == "variables/([^/]*)/attributes/FILLVAL"
+    assert captures == {"var": 0}
+
+
+def test_parse_captures_with_regex():
+    pattern, captures = parse_captures("variables/{var:LFR_.*}/attributes")
+    assert pattern == "variables/(LFR_.*)/attributes"
+    assert captures == {"var": 0}
+
+
+def test_parse_captures_multiple():
+    pattern, captures = parse_captures("{a}/attributes/{b:X.*}")
+    assert pattern == "([^/]*)/attributes/(X.*)"
+    assert captures == {"a": 0, "b": 1}
+
+
+def test_parse_captures_no_captures():
+    pattern, captures = parse_captures("variables/.*/attributes")
+    assert pattern == "variables/.*/attributes"
+    assert captures == {}
+
+
+def test_resolve_path_with_captures_basic(mock_file):
+    matches = resolve_path_with_captures(mock_file, "variables/{var}/data_type")
+    assert len(matches) >= 1
+    path, value, captures = matches[0]
+    assert "var" in captures
+    assert captures["var"] == "var1"
+
+
+def test_resolve_path_with_captures_no_captures(mock_file):
+    matches = resolve_path_with_captures(mock_file, "variables/.*/data_type")
+    assert len(matches) >= 1
+    path, value, captures = matches[0]
+    assert captures == {}
+
+
+def test_interpolate_captures_basic():
+    msg = interpolate_captures("Variable '{var}' has bad FILLVAL", {"var": "Epoch"})
+    assert msg == "Variable 'Epoch' has bad FILLVAL"
+
+
+def test_interpolate_captures_no_captures():
+    msg = interpolate_captures("No captures here", {})
+    assert msg == "No captures here"
 
 
 def test_is_type_assertion(mock_file):

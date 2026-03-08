@@ -53,6 +53,50 @@ def resolve_path(obj: Any, path: str) -> list[tuple[str, Any]]:
     return list(filter(lambda kv: rx.match(kv[0]), flattened))
 
 
+_CAPTURE_RE = re.compile(r"\{(\w+)(?::([^}]+))?\}")
+
+
+def parse_captures(path: str) -> tuple[str, dict[str, int]]:
+    """Parse {name} and {name:pattern} captures from a path into a regex pattern and capture map."""
+    captures: dict[str, int] = {}
+    group_index = 0
+
+    def _replace(match: re.Match) -> str:
+        nonlocal group_index
+        name = match.group(1)
+        pattern = match.group(2) or "[^/]*"
+        captures[name] = group_index
+        group_index += 1
+        return f"({pattern})"
+
+    regex_pattern = _CAPTURE_RE.sub(_replace, path)
+    return regex_pattern, captures
+
+
+def resolve_path_with_captures(
+    obj: Any, path: str
+) -> list[tuple[str, Any, dict[str, str]]]:
+    """Like resolve_path but extracts captured values from {name} placeholders."""
+    pattern, captures = parse_captures(path)
+    flattened = flatten_object(obj)
+    rx = re.compile("^" + pattern + "$")
+    results: list[tuple[str, Any, dict[str, str]]] = []
+    for flat_path, value in flattened:
+        m = rx.match(flat_path)
+        if m:
+            captured = {name: m.group(idx + 1) for name, idx in captures.items()}
+            results.append((flat_path, value, captured))
+    return results
+
+
+def interpolate_captures(template: str, captures: dict[str, str]) -> str:
+    """Replace {name} placeholders in template with values from captures dict."""
+    result = template
+    for name, value in captures.items():
+        result = result.replace(f"{{{name}}}", value)
+    return result
+
+
 _registry: dict[str, type["BaseEvaluable"]] = {}
 
 
