@@ -1,10 +1,39 @@
 import re
 from typing import Annotated, Any, Union
 
+from jinja2 import Environment
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ...file import File
 from ...validation_result import Severity, ValidationResult, ValidationResultGroup
+
+_jinja_env = Environment()
+
+_TARGET_PATTERN = re.compile(
+    r"^variables/(?P<var>[^/]+)/attributes/(?P<attr>[^/]+)"
+    r"|^variables/(?P<var_only>[^/]+)"
+    r"|^attributes/(?P<attr_only>[^/]+)"
+)
+
+
+def render_message(template: str, context: dict) -> str:
+    return _jinja_env.from_string(template).render(context)
+
+
+def clean_target(raw_path: str) -> str:
+    m = _TARGET_PATTERN.search(raw_path)
+    if not m:
+        return ""
+    if m.group("var") and m.group("attr"):
+        var = m.group("var")
+        attr = m.group("attr")
+        return f"{var}/{attr}" if var != ".*" else attr
+    if m.group("var_only"):
+        var = m.group("var_only")
+        return "" if var == ".*" else var
+    if m.group("attr_only"):
+        return m.group("attr_only")
+    return ""
 
 
 def flatten_object(obj: Any) -> list[tuple[str, Any]]:
