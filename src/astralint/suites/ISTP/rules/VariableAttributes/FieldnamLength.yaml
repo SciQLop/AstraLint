@@ -9,9 +9,9 @@ assertions:
   - path: "variables/.*/attributes/FIELDNAM/values/[0-9]*"
     check: length
     max: 30
-    message: "FIELDNAM should be 30 characters or less for proper display in plots"
+    message: "{% if valid %}Attribute FIELDNAM of {{ variable }} (length {{ length }}) is within 30 char limit{% else %}Attribute FIELDNAM of {{ variable }} (length {{ length }}) should be 30 characters or less{% endif %}"
 
   - path: "variables/.*/attributes/FIELDNAM/values/[0-9]*"
     check: not_empty
-    message: "FIELDNAM cannot be empty"
+    message: "{% if valid %}Attribute FIELDNAM of {{ variable }} is not empty{% else %}Attribute FIELDNAM of {{ variable }} cannot be empty{% endif %}"
 

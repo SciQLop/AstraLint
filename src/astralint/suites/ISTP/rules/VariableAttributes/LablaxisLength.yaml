@@ -10,5 +10,5 @@ assertions:
     check: length
     max: 10
     error_if_no_match: false
-    message: "LABLAXIS should be 10 characters or less for proper axis labeling"
+    message: "{% if valid %}Attribute LABLAXIS of {{ variable }} (length {{ length }}) is within 10 char limit{% else %}Attribute LABLAXIS of {{ variable }} (length {{ length }}) should be 10 characters or less{% endif %}"
 

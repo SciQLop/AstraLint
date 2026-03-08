@@ -13,5 +13,5 @@ assertions:
       - support_data
       - metadata
       - ignore_data
-    message: "VAR_TYPE must be 'data', 'support_data', 'metadata', or 'ignore_data'"
+    message: "{% if valid %}Attribute VAR_TYPE of {{ variable }} has value '{{ value }}'{% else %}Attribute VAR_TYPE of {{ variable }} has value '{{ value }}', expected 'data', 'support_data', 'metadata', or 'ignore_data'{% endif %}"
 

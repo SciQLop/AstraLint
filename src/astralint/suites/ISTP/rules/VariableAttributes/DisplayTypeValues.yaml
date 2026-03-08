@@ -18,5 +18,5 @@ assertions:
       - orbit
       - plasmagram
       - movie
-    message: "DISPLAY_TYPE should be a standard value: time_series, spectrogram, stack_plot, image, no_plot, orbit, plasmagram, or movie"
+    message: "{% if valid %}Attribute DISPLAY_TYPE of {{ variable }} has value '{{ value }}'{% else %}Attribute DISPLAY_TYPE of {{ variable }} has value '{{ value }}', expected time_series, spectrogram, stack_plot, image, no_plot, orbit, plasmagram, or movie{% endif %}"
 

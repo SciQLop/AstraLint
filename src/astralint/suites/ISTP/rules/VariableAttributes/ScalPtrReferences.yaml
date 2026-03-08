@@ -9,4 +9,4 @@ assertions:
   - path: "variables/.*/attributes/SCAL_PTR/values/[0-9]*"
     check: reference_variable
     error_if_no_match: false
-    message: "SCAL_PTR must reference an existing variable"
+    message: "{% if valid %}Attribute SCAL_PTR of {{ variable }} references existing variable '{{ value }}'{% else %}Attribute SCAL_PTR of {{ variable }} references non-existent variable '{{ value }}'{% endif %}"

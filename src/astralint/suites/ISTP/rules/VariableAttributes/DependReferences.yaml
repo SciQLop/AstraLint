@@ -10,23 +10,23 @@ assertions:
   - path: "variables/.*/attributes/DEPEND_0/values/0"
     check: reference_variable
     error_if_no_match: false
-    message: "DEPEND_0 references non-existent variable"
+    message: "{% if valid %}Attribute DEPEND_0 of {{ variable }} references existing variable '{{ value }}'{% else %}Attribute DEPEND_0 of {{ variable }} references non-existent variable '{{ value }}'{% endif %}"
 
   # DEPEND_1 must reference existing variable if present
   - path: "variables/.*/attributes/DEPEND_1/values/0"
     check: reference_variable
     error_if_no_match: false
-    message: "DEPEND_1 references non-existent variable"
+    message: "{% if valid %}Attribute DEPEND_1 of {{ variable }} references existing variable '{{ value }}'{% else %}Attribute DEPEND_1 of {{ variable }} references non-existent variable '{{ value }}'{% endif %}"
 
   # DEPEND_2 must reference existing variable if present
   - path: "variables/.*/attributes/DEPEND_2/values/0"
     check: reference_variable
     error_if_no_match: false
-    message: "DEPEND_2 references non-existent variable"
+    message: "{% if valid %}Attribute DEPEND_2 of {{ variable }} references existing variable '{{ value }}'{% else %}Attribute DEPEND_2 of {{ variable }} references non-existent variable '{{ value }}'{% endif %}"
 
   # DEPEND_3 must reference existing variable if present
   - path: "variables/.*/attributes/DEPEND_3/values/0"
     check: reference_variable
     error_if_no_match: false
-    message: "DEPEND_3 references non-existent variable"
+    message: "{% if valid %}Attribute DEPEND_3 of {{ variable }} references existing variable '{{ value }}'{% else %}Attribute DEPEND_3 of {{ variable }} references non-existent variable '{{ value }}'{% endif %}"
 
