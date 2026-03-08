@@ -1,0 +1,35 @@
+name: MetadataVariableAttributes
+description: "Metadata variables must have required attributes per ISTP spec"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/variables.html#Metadata"
+reference: "ISTP-VA-015"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  - check: if_then
+    if:
+      path: "variables/.*/attributes/VAR_TYPE/values/[0-9]*"
+      check: comparison
+      operator: "="
+      value: "metadata"
+    then:
+      check: all_of
+      assertions:
+        - path: "variables/.*/attributes"
+          check: contains_keys
+          keys:
+            - CATDESC
+            - FIELDNAM
+            - VAR_TYPE
+          message: "Metadata variable missing required attribute: {key}"
+        - check: any_of
+          message: "Metadata variable must have FORMAT or FORM_PTR"
+          assertions:
+            - path: "variables/.*/attributes/FORMAT"
+              check: exists
+              error_if_no_match: false
+              message: ""
+            - path: "variables/.*/attributes/FORM_PTR"
+              check: exists
+              error_if_no_match: false
+              message: ""

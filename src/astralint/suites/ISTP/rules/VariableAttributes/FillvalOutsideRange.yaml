@@ -1,0 +1,25 @@
+name: FillvalOutsideRange
+description: "FILLVAL must be outside the [VALIDMIN, VALIDMAX] range"
+url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#FILLVAL"
+reference: "ISTP-VA-019"
+severity: ERROR
+suite: ISTP
+
+assertions:
+  - path: "variables/{var}/attributes/FILLVAL/values/0"
+    check: any_of
+    error_if_no_match: false
+    message: "Variable '{var}': FILLVAL must be outside [VALIDMIN, VALIDMAX] range"
+    assertions:
+      - path: "variables/{var}/attributes/FILLVAL/values/0"
+        check: compare_to
+        operator: "<"
+        other_path: "variables/{var}/attributes/VALIDMIN/values/0"
+        error_if_no_match: false
+        message: ""
+      - path: "variables/{var}/attributes/FILLVAL/values/0"
+        check: compare_to
+        operator: ">"
+        other_path: "variables/{var}/attributes/VALIDMAX/values/0"
+        error_if_no_match: false
+        message: ""
