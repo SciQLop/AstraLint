@@ -219,3 +219,84 @@ def test_range_pass_message(mock_file):
     leaf = result.results[0] if hasattr(result, "results") else result
     assert leaf.valid is True
     assert "within range" in leaf.message
+
+
+from astralint.base.yaml_rules.assertions.collections import (
+    ContainsAssertion,
+    LengthAssertion,
+    NotContainsAssertion,
+    NotEmptyAssertion,
+    RequiresAssertion,
+)
+
+
+def test_contains_fail_message(mock_file):
+    assertion = ContainsAssertion(
+        check="in",
+        path="attributes/global_attr/values/0",
+        values=[1, 2, 3],
+    )
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert "not in" in leaf.message.lower()
+    assert "path" not in leaf.message.lower()
+    assert leaf.target == "global_attr"
+
+
+def test_not_contains_pass_message(mock_file):
+    assertion = NotContainsAssertion(
+        check="not_in",
+        path="attributes/global_attr/values/0",
+        values=[1, 2, 3],
+    )
+    result = assertion.evaluate(mock_file, Severity.WARNING)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert leaf.valid is True
+    assert "not in" in leaf.message.lower()
+
+
+def test_length_min_fail_message():
+    f = File(
+        extension="mock",
+        filename="test.mock",
+        attributes={
+            "TEXT": Attribute(
+                name="TEXT", data_type=[DataType.CHAR], shape=[1], values=["hi"]
+            )
+        },
+        variables={},
+        compression="NONE",
+    )
+    assertion = LengthAssertion(check="length", path="attributes/TEXT/values/0", min=10)
+    result = assertion.evaluate(f, Severity.WARNING)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert "2" in leaf.message
+    assert "10" in leaf.message
+    assert leaf.target == "TEXT"
+
+
+def test_not_empty_fail_message():
+    f = File(
+        extension="mock",
+        filename="test.mock",
+        attributes={
+            "TEXT": Attribute(
+                name="TEXT", data_type=[DataType.CHAR], shape=[1], values=[""]
+            )
+        },
+        variables={},
+        compression="NONE",
+    )
+    assertion = NotEmptyAssertion(check="not_empty", path="attributes/TEXT/values/0")
+    result = assertion.evaluate(f, Severity.WARNING)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert "empty" in leaf.message
+    assert leaf.target == "TEXT"
+
+
+def test_requires_fail_message(mock_file):
+    assertion = RequiresAssertion(check="requires", path="variables", key="MissingVar")
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    leaf = result.results[0] if hasattr(result, "results") else result
+    assert "MissingVar" in leaf.message
+    assert "path" not in leaf.message.lower()
