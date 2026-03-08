@@ -20,6 +20,18 @@ def render_message(template: str, context: dict) -> str:
     return _jinja_env.from_string(template).render(context)
 
 
+def build_context(target: str, raw_path: str, value: Any, **extra: Any) -> dict:
+    ctx: dict = {"value": value, "path": raw_path, "variable": None, "attribute": None}
+    parts = target.split("/")
+    if len(parts) == 2:
+        ctx["variable"], ctx["attribute"] = parts
+    elif len(parts) == 1 and target:
+        ctx["attribute"] = target if raw_path.startswith("attributes/") else None
+        ctx["variable"] = target if raw_path.startswith("variables/") else None
+    ctx.update(extra)
+    return ctx
+
+
 def clean_target(raw_path: str) -> str:
     m = _TARGET_PATTERN.search(raw_path)
     if not m:
