@@ -24,23 +24,21 @@ class ComparisonAssertion(BaseAssertion):
     operator: Literal["=", "!=", "<", "<=", ">", ">="]
     value: _yaml_types
 
-    _default_pass_template: str = "{{ value }} satisfies {{ operator }} {{ expected }}"
-    _default_fail_template: str = "{{ value }} does not satisfy {{ operator }} {{ expected }}"
+    _default_template: str = "{% if valid %}{{ value }} satisfies {{ operator }} {{ expected }}{% else %}{{ value }} does not satisfy {{ operator }} {{ expected }}{% endif %}"
 
     def single_assertion(
         self, file: File, path: str, value: Any, severity: Severity
     ) -> ValidationResult:
         target = clean_target(path)
-        ctx = build_context(target, path, value, operator=self.operator, expected=self.value)
         passed = _operators[self.operator](value, self.value)
-        template = self.message or (
-            self._default_pass_template if passed else self._default_fail_template
+        ctx = build_context(
+            target, path, value, valid=passed, operator=self.operator, expected=self.value
         )
         return ValidationResult(
             valid=passed,
             reference="",
             severity=severity,
-            message=render_message(template, ctx),
+            message=render_message(self.message or self._default_template, ctx),
             target=target,
         )
 
@@ -51,22 +49,18 @@ class RangeAssertion(BaseAssertion):
     min: _yaml_types
     max: _yaml_types
 
-    _default_pass_template: str = "{{ value }} is within range [{{ min }}, {{ max }}]"
-    _default_fail_template: str = "{{ value }} is not within range [{{ min }}, {{ max }}]"
+    _default_template: str = "{% if valid %}{{ value }} is within range [{{ min }}, {{ max }}]{% else %}{{ value }} is not within range [{{ min }}, {{ max }}]{% endif %}"
 
     def single_assertion(
         self, file: File, path: str, value: Any, severity: Severity
     ) -> ValidationResult:
         target = clean_target(path)
-        ctx = build_context(target, path, value, min=self.min, max=self.max)
         passed = self.min <= value <= self.max
-        template = self.message or (
-            self._default_pass_template if passed else self._default_fail_template
-        )
+        ctx = build_context(target, path, value, valid=passed, min=self.min, max=self.max)
         return ValidationResult(
             valid=passed,
             reference="",
             severity=severity,
-            message=render_message(template, ctx),
+            message=render_message(self.message or self._default_template, ctx),
             target=target,
         )

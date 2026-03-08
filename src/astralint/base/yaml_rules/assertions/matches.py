@@ -13,17 +13,16 @@ class MatchesAssertion(BaseAssertion):
     check: Literal["matches"] = "matches"  # type: ignore[assignment]
     pattern: re.Pattern
 
-    _default_pass_template: str = "'{{ value }}' matches pattern '{{ pattern }}'"
-    _default_fail_template: str = "'{{ value }}' does not match pattern '{{ pattern }}'"
+    _default_template: str = "{% if valid %}'{{ value }}' matches pattern '{{ pattern }}'{% else %}'{{ value }}' does not match pattern '{{ pattern }}'{% endif %}"
     _not_string_template: str = "expected a string value, got {{ value.__class__.__name__ }}"
 
     def single_assertion(
         self, file: File, path: str, value: str, severity: Severity
     ) -> ValidationResult:
         target = clean_target(path)
-        ctx = build_context(target, path, value, pattern=self.pattern.pattern)
 
         if not isinstance(value, str):
+            ctx = build_context(target, path, value, valid=False, pattern=self.pattern.pattern)
             return ValidationResult(
                 valid=False,
                 reference="",
@@ -31,19 +30,13 @@ class MatchesAssertion(BaseAssertion):
                 message=render_message(self._not_string_template, ctx),
                 target=target,
             )
-        elif not re.match(self.pattern, value):
-            return ValidationResult(
-                valid=False,
-                reference="",
-                severity=severity,
-                message=render_message(self.message or self._default_fail_template, ctx),
-                target=target,
-            )
-        else:
-            return ValidationResult(
-                valid=True,
-                reference="",
-                message=render_message(self.message or self._default_pass_template, ctx),
-                severity=severity,
-                target=target,
-            )
+
+        passed = bool(re.match(self.pattern, value))
+        ctx = build_context(target, path, value, valid=passed, pattern=self.pattern.pattern)
+        return ValidationResult(
+            valid=passed,
+            reference="",
+            severity=severity,
+            message=render_message(self.message or self._default_template, ctx),
+            target=target,
+        )

@@ -12,19 +12,14 @@ class ReferencesVariableAssertion(BaseAssertion):
     check: Literal["reference_variable"] = "reference_variable"  # type: ignore[assignment]
     variable: str | None = None
 
-    _pass_specific_template: str = "correctly references variable '{{ value }}'"
-    _pass_any_template: str = "references existing variable '{{ value }}'"
-    _fail_undefined_template: str = "references undefined variable '{{ value }}'"
-    _fail_wrong_var_template: str = (
-        "is '{{ value }}', expected reference to '{{ expected_variable }}'"
-    )
+    _default_template: str = "{% if valid %}references existing variable '{{ value }}'{% else %}{% if expected_variable is not none and value != expected_variable %}is '{{ value }}', expected reference to '{{ expected_variable }}'{% else %}references undefined variable '{{ value }}'{% endif %}{% endif %}"
     _not_string_template: str = "expected a string value to reference a variable"
 
     def single_assertion(
         self, file: File, path: str, value: Any, severity: Severity
     ) -> ValidationResult:
         target = clean_target(path)
-        ctx = build_context(target, path, value, expected_variable=self.variable)
+        ctx = build_context(target, path, value, valid=False, expected_variable=self.variable)
 
         if type(value) is not str:
             return ValidationResult(
@@ -36,53 +31,18 @@ class ReferencesVariableAssertion(BaseAssertion):
             )
 
         if self.variable is not None:
-            if value == self.variable:
-                if value in file.variables:
-                    return ValidationResult(
-                        valid=True,
-                        reference="",
-                        severity=severity,
-                        message=render_message(
-                            self.message or self._pass_specific_template, ctx
-                        ),
-                        target=target,
-                    )
-                else:
-                    return ValidationResult(
-                        valid=False,
-                        reference="",
-                        severity=severity,
-                        message=render_message(
-                            self.message or self._fail_undefined_template, ctx
-                        ),
-                        target=target,
-                    )
+            if value == self.variable and value in file.variables:
+                passed = True
             else:
-                return ValidationResult(
-                    valid=False,
-                    reference="",
-                    severity=severity,
-                    message=render_message(
-                        self.message or self._fail_wrong_var_template, ctx
-                    ),
-                    target=target,
-                )
-
-        if value in file.variables:
-            return ValidationResult(
-                valid=True,
-                reference="",
-                severity=severity,
-                message=render_message(self.message or self._pass_any_template, ctx),
-                target=target,
-            )
+                passed = False
         else:
-            return ValidationResult(
-                valid=False,
-                reference="",
-                severity=severity,
-                message=render_message(
-                    self.message or self._fail_undefined_template, ctx
-                ),
-                target=target,
-            )
+            passed = value in file.variables
+
+        ctx["valid"] = passed
+        return ValidationResult(
+            valid=passed,
+            reference="",
+            severity=severity,
+            message=render_message(self.message or self._default_template, ctx),
+            target=target,
+        )

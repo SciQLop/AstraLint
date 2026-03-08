@@ -4,7 +4,7 @@ from pydantic import ConfigDict
 
 from ...file import File
 from ...validation_result import Severity, ValidationResult
-from .base import BaseAssertion
+from .base import BaseAssertion, build_context, clean_target, render_message
 
 
 class ContainsKeysAssertion(BaseAssertion):
@@ -12,32 +12,36 @@ class ContainsKeysAssertion(BaseAssertion):
     check: Literal["contains_keys"] = "contains_keys"  # type: ignore[assignment]
     keys: frozenset[str]
 
+    _default_template: str = "{% if valid %}all required keys present{% else %}missing keys: {{ missing_keys | join(', ') }}{% endif %}"
+    _not_dict_template: str = "value is not an object"
+
     def single_assertion(
         self, file: File, path: str, value: Any, severity: Severity
     ) -> ValidationResult:
-        if isinstance(value, dict):
-            missing_keys = self.keys - value.keys()
-            if missing_keys:
-                return ValidationResult(
-                    valid=False,
-                    reference="",
-                    severity=severity,
-                    message=f"Value at path '{path}' is missing keys: {missing_keys}",
-                    target=self.path,
-                )
-            else:
-                return ValidationResult(
-                    valid=True,
-                    reference="",
-                    severity=severity,
-                    message=f"Value at path '{path}' contains all required keys.",
-                    target=self.path,
-                )
-        else:
+        target = clean_target(path)
+        if not isinstance(value, dict):
+            ctx = build_context(target, path, value, valid=False, keys=self.keys)
             return ValidationResult(
                 valid=False,
                 reference="",
                 severity=severity,
-                message=f"Value at path '{path}' is not an object.",
-                target=self.path,
+                message=render_message(self._not_dict_template, ctx),
+                target=target,
             )
+        missing_keys = self.keys - value.keys()
+        passed = not missing_keys
+        ctx = build_context(
+            target,
+            path,
+            value,
+            valid=passed,
+            keys=self.keys,
+            missing_keys=missing_keys,
+        )
+        return ValidationResult(
+            valid=passed,
+            reference="",
+            severity=severity,
+            message=render_message(self.message or self._default_template, ctx),
+            target=target,
+        )

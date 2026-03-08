@@ -18,6 +18,7 @@ from astralint.base.yaml_rules.assertions.comparisons import (
     ComparisonAssertion,
     RangeAssertion,
 )
+from astralint.base.yaml_rules.assertions.contains_keys import ContainsKeysAssertion
 from astralint.base.yaml_rules.assertions.exists import ExistsAssertion
 from astralint.base.yaml_rules.assertions.is_type import IsTypeAssertion
 from astralint.base.yaml_rules.assertions.matches import MatchesAssertion
@@ -435,3 +436,31 @@ def test_ref_variable_pass_message() -> None:
     assert result.valid is True
     assert "Epoch" in result.message
     assert "path" not in result.message.lower()
+
+
+# =============================================================================
+# ContainsKeysAssertion tests
+# =============================================================================
+
+
+def test_contains_keys_fail_message(mock_file: Any) -> None:
+    assertion = ContainsKeysAssertion(
+        check="contains_keys",
+        path="variables/var1/attributes",
+        keys=frozenset({"CATDESC", "UNITS"}),
+    )
+    result = _leaf(assertion.evaluate(mock_file, Severity.WARNING))
+    assert not result.valid
+    assert "CATDESC" in result.message or "UNITS" in result.message
+    assert result.target == "var1"
+
+
+def test_contains_keys_custom_message(mock_file: Any) -> None:
+    assertion = ContainsKeysAssertion(
+        check="contains_keys",
+        path="variables/var1/attributes",
+        keys=frozenset({"CATDESC"}),
+        message="{% if valid %}Variable {{ variable }} has all required attributes{% else %}Variable {{ variable }} is missing {{ missing_keys | join(', ') }} attribute{% endif %}",
+    )
+    result = _leaf(assertion.evaluate(mock_file, Severity.WARNING))
+    assert result.message == "Variable var1 is missing CATDESC attribute"

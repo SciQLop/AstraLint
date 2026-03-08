@@ -22,8 +22,7 @@ _operators = {
     ">=": lambda a, b: a >= b,
 }
 
-_NO_MATCH_FAIL = "{{ target or path }} did not match any values"
-_NO_MATCH_OK = "{{ target or path }} did not match any values (not required)"
+_NO_MATCH_TEMPLATE = "{% if valid %}{{ target or path }} did not match any values (not required){% else %}{{ target or path }} did not match any values{% endif %}"
 
 
 class CompareToAssertion(BaseEvaluable):
@@ -35,39 +34,29 @@ class CompareToAssertion(BaseEvaluable):
     error_if_no_match: bool = Field(default=True)
     message: str = Field(default="")
 
-    _default_pass_template: str = "{{ value }} {{ operator }} {{ other_value }}"
-    _default_fail_template: str = "{{ value }} does not satisfy {{ operator }} {{ other_value }}"
+    _default_template: str = "{% if valid %}{{ value }} {{ operator }} {{ other_value }}{% else %}{{ value }} does not satisfy {{ operator }} {{ other_value }}{% endif %}"
     _other_not_found_template: str = "comparison target not found"
 
     def evaluate(self, file: File, severity: Severity) -> ValidationResult | ValidationResultGroup:
         matches = resolve_path_with_captures(file, self.path)
         if not matches:
             target = clean_target(self.path)
-            ctx = {"target": target, "path": self.path}
-            if self.error_if_no_match:
-                return ValidationResult(
-                    valid=False,
-                    reference="",
-                    severity=Severity.ERROR,
-                    message=render_message(_NO_MATCH_FAIL, ctx),
-                    target=target,
-                )
+            valid = not self.error_if_no_match
+            ctx = {"target": target, "path": self.path, "valid": valid}
             return ValidationResult(
-                valid=True,
+                valid=valid,
                 reference="",
-                severity=Severity.INFO,
-                message=render_message(_NO_MATCH_OK, ctx),
+                severity=Severity.ERROR if not valid else Severity.INFO,
+                message=render_message(_NO_MATCH_TEMPLATE, ctx),
                 target=target,
             )
 
         results: list[ValidationResult | ValidationResultGroup] = []
         for path, value, captures in matches:
             target = clean_target(path)
-            # Still use interpolate_captures for path resolution (not messages)
             resolved_other = interpolate_captures(self.other_path, captures)
             other_matches = resolve_path(file, resolved_other)
 
-            # Build context: merge captures + standard fields
             ctx = {
                 "value": value,
                 "operator": self.operator,
@@ -75,6 +64,7 @@ class CompareToAssertion(BaseEvaluable):
                 "target": target,
                 "variable": None,
                 "attribute": None,
+                "valid": False,
                 **captures,
             }
             parts = target.split("/")
@@ -91,9 +81,7 @@ class CompareToAssertion(BaseEvaluable):
                         valid=False,
                         reference="",
                         severity=severity,
-                        message=render_message(
-                            self.message or self._other_not_found_template, ctx
-                        ),
+                        message=render_message(self.message or self._other_not_found_template, ctx),
                         target=target,
                     )
                 )
@@ -106,15 +94,13 @@ class CompareToAssertion(BaseEvaluable):
             except TypeError:
                 passed = False
 
-            template = self.message or (
-                self._default_pass_template if passed else self._default_fail_template
-            )
+            ctx["valid"] = passed
             results.append(
                 ValidationResult(
                     valid=passed,
                     reference="",
                     severity=severity,
-                    message=render_message(template, ctx),
+                    message=render_message(self.message or self._default_template, ctx),
                     target=target,
                 )
             )
