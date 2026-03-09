@@ -1513,3 +1513,117 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     assert result.valid
+
+
+# =============================================================================
+# Combinator custom message tests
+# =============================================================================
+
+
+def test_any_of_custom_message(mock_file):
+    """AnyOf with custom message should use it when all assertions fail."""
+    from pydantic import TypeAdapter
+
+    from astralint.base.validation_result import Severity
+    from astralint.base.yaml_rules.assertions.base import get_assertion_union
+
+    rule_yaml = {
+        "check": "any_of",
+        "message": "Must have FORMAT or FORM_PTR",
+        "assertions": [
+            {
+                "path": "variables/.*/attributes/FORMAT",
+                "check": "exists",
+                "error_if_no_match": False,
+                "message": "",
+            },
+            {
+                "path": "variables/.*/attributes/FORM_PTR",
+                "check": "exists",
+                "error_if_no_match": False,
+                "message": "",
+            },
+        ],
+    }
+    adapter = TypeAdapter(get_assertion_union())
+    assertion = adapter.validate_python(rule_yaml)
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    assert not result.valid
+    assert result.message == "Must have FORMAT or FORM_PTR"
+
+
+def test_any_of_default_message_when_no_custom(mock_file):
+    """AnyOf without custom message should use the default fallback."""
+    from pydantic import TypeAdapter
+
+    from astralint.base.validation_result import Severity
+    from astralint.base.yaml_rules.assertions.base import get_assertion_union
+
+    rule_yaml = {
+        "check": "any_of",
+        "assertions": [
+            {
+                "path": "variables/.*/attributes/FORMAT",
+                "check": "exists",
+                "error_if_no_match": False,
+                "message": "",
+            },
+        ],
+    }
+    adapter = TypeAdapter(get_assertion_union())
+    assertion = adapter.validate_python(rule_yaml)
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    assert not result.valid
+    assert "any_of" in result.message
+
+
+def test_all_of_custom_message(mock_file):
+    """AllOf with custom message should use it when an assertion fails."""
+    from pydantic import TypeAdapter
+
+    from astralint.base.validation_result import Severity
+    from astralint.base.yaml_rules.assertions.base import get_assertion_union
+
+    rule_yaml = {
+        "check": "all_of",
+        "message": "All conditions must be met",
+        "assertions": [
+            {
+                "path": "variables/.*/attributes/NONEXISTENT",
+                "check": "exists",
+                "error_if_no_match": False,
+                "message": "",
+            },
+        ],
+    }
+    adapter = TypeAdapter(get_assertion_union())
+    assertion = adapter.validate_python(rule_yaml)
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    assert not result.valid
+    assert result.message == "All conditions must be met"
+
+
+def test_all_of_custom_message_on_success(mock_file):
+    """AllOf with custom message should use it when all assertions pass."""
+    from pydantic import TypeAdapter
+
+    from astralint.base.validation_result import Severity
+    from astralint.base.yaml_rules.assertions.base import get_assertion_union
+
+    rule_yaml = {
+        "check": "all_of",
+        "message": "{% if valid %}All checks passed{% else %}Some checks failed{% endif %}",
+        "assertions": [
+            {
+                "path": "attributes/global_attr",
+                "check": "exists",
+                "error_if_no_match": False,
+                "message": "",
+            },
+        ],
+    }
+    adapter = TypeAdapter(get_assertion_union())
+    assertion = adapter.validate_python(rule_yaml)
+    result = assertion.evaluate(mock_file, Severity.ERROR)
+    assert result.valid
+    assert result.message == "All checks passed"

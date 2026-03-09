@@ -199,6 +199,12 @@ class BaseAssertion(BaseEvaluable):
 class BaseAssertionGroup(BaseEvaluable):
     model_config = ConfigDict(frozen=True)
     assertions: list[Any]
+    message: str = Field(default="")
+
+    def _result_message(self, valid: bool, default: str) -> str:
+        if self.message:
+            return render_message(self.message, {"valid": valid})
+        return default
 
     @model_validator(mode="before")
     @classmethod

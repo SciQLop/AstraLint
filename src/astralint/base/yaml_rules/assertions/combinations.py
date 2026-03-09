@@ -20,14 +20,14 @@ class AllOf(BaseAssertionGroup):
                     valid=False,
                     reference="",
                     severity=severity,
-                    message="Assertion failed in 'all_of'",
+                    message=self._result_message(False, "Assertion failed in 'all_of'"),
                     target="",
                 )
         return ValidationResult(
             valid=True,
             reference="",
             severity=severity,
-            message="All assertions in 'all_of' passed successfully.",
+            message=self._result_message(True, "All assertions in 'all_of' passed successfully."),
             target="",
         )
 
@@ -44,14 +44,16 @@ class AnyOf(BaseAssertionGroup):
                     valid=True,
                     reference="",
                     severity=severity,
-                    message="At least one assertion in 'any_of' passed successfully.",
+                    message=self._result_message(
+                        True, "At least one assertion in 'any_of' passed successfully."
+                    ),
                     target="",
                 )
         return ValidationResult(
             valid=False,
             reference="",
             severity=severity,
-            message="All assertions in 'any_of' failed.",
+            message=self._result_message(False, "All assertions in 'any_of' failed."),
             target="",
         )
 
@@ -68,14 +70,16 @@ class NoneOf(BaseAssertionGroup):
                     valid=False,
                     reference="",
                     severity=severity,
-                    message="At least one assertion in 'none_of' passed, which is not expected",
+                    message=self._result_message(
+                        False, "At least one assertion in 'none_of' passed, which is not expected"
+                    ),
                     target="",
                 )
         return ValidationResult(
             valid=True,
             reference="",
             severity=severity,
-            message="All assertions in 'none_of' failed as expected.",
+            message=self._result_message(True, "All assertions in 'none_of' failed as expected."),
             target="",
         )
 
@@ -217,14 +221,17 @@ class OneOf(BaseAssertionGroup):
                 valid=True,
                 reference="",
                 severity=severity,
-                message="Exactly one assertion passed in 'one_of'.",
+                message=self._result_message(True, "Exactly one assertion passed in 'one_of'."),
                 target="",
             )
         return ValidationResult(
             valid=False,
             reference="",
             severity=severity,
-            message=f"Expected exactly 1 assertion to pass in 'one_of', but {passing_count} passed.",
+            message=self._result_message(
+                False,
+                f"Expected exactly 1 assertion to pass in 'one_of', but {passing_count} passed.",
+            ),
             target="",
         )
 
@@ -245,14 +252,19 @@ class AtLeast(BaseAssertionGroup):
                 valid=True,
                 reference="",
                 severity=severity,
-                message=f"At least {self.count} assertions passed ({passing_count} passed).",
+                message=self._result_message(
+                    True, f"At least {self.count} assertions passed ({passing_count} passed)."
+                ),
                 target="",
             )
         return ValidationResult(
             valid=False,
             reference="",
             severity=severity,
-            message=f"Expected at least {self.count} assertions to pass, but only {passing_count} passed.",
+            message=self._result_message(
+                False,
+                f"Expected at least {self.count} assertions to pass, but only {passing_count} passed.",
+            ),
             target="",
         )
 
@@ -273,14 +285,19 @@ class AtMost(BaseAssertionGroup):
                 valid=True,
                 reference="",
                 severity=severity,
-                message=f"At most {self.count} assertions passed ({passing_count} passed).",
+                message=self._result_message(
+                    True, f"At most {self.count} assertions passed ({passing_count} passed)."
+                ),
                 target="",
             )
         return ValidationResult(
             valid=False,
             reference="",
             severity=severity,
-            message=f"Expected at most {self.count} assertions to pass, but {passing_count} passed.",
+            message=self._result_message(
+                False,
+                f"Expected at most {self.count} assertions to pass, but {passing_count} passed.",
+            ),
             target="",
         )
 
@@ -301,13 +318,16 @@ class Exactly(BaseAssertionGroup):
                 valid=True,
                 reference="",
                 severity=severity,
-                message=f"Exactly {self.count} assertions passed.",
+                message=self._result_message(True, f"Exactly {self.count} assertions passed."),
                 target="",
             )
         return ValidationResult(
             valid=False,
             reference="",
             severity=severity,
-            message=f"Expected exactly {self.count} assertions to pass, but {passing_count} passed.",
+            message=self._result_message(
+                False,
+                f"Expected exactly {self.count} assertions to pass, but {passing_count} passed.",
+            ),
             target="",
         )
