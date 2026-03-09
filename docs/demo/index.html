@@ -16,6 +16,52 @@
             --color-text: #1e293b;
             --color-text-muted: #64748b;
             --color-primary: #6366f1;
+            --color-header-from: #1e293b;
+            --color-header-to: #334155;
+            --color-group-header: #f1f5f9;
+            --color-group-hover: #e2e8f0;
+            --color-highlight: #f0f0ff;
+            --color-code-bg: #f1f5f9;
+        }
+
+        [data-theme="dark"] {
+            --color-success: #4ade80;
+            --color-error: #f87171;
+            --color-warning: #fbbf24;
+            --color-info: #60a5fa;
+            --color-bg: #1a1a2e;
+            --color-card: #22223a;
+            --color-border: #33334d;
+            --color-text: #c9c9d9;
+            --color-text-muted: #8888a0;
+            --color-primary: #818cf8;
+            --color-header-from: #12122a;
+            --color-header-to: #1a1a3e;
+            --color-group-header: #2a2a44;
+            --color-group-hover: #33334d;
+            --color-highlight: #2a2a50;
+            --color-code-bg: #2a2a44;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --color-success: #4ade80;
+                --color-error: #f87171;
+                --color-warning: #fbbf24;
+                --color-info: #60a5fa;
+                --color-bg: #1a1a2e;
+                --color-card: #22223a;
+                --color-border: #33334d;
+                --color-text: #c9c9d9;
+                --color-text-muted: #8888a0;
+                --color-primary: #818cf8;
+                --color-header-from: #12122a;
+                --color-header-to: #1a1a3e;
+                --color-group-header: #2a2a44;
+                --color-group-hover: #33334d;
+                --color-highlight: #2a2a50;
+                --color-code-bg: #2a2a44;
+            }
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,11 +77,28 @@
         .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
 
         header {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            background: linear-gradient(135deg, var(--color-header-from) 0%, var(--color-header-to) 100%);
             color: white;
             padding: 2rem;
             text-align: center;
+            position: relative;
         }
+
+        .theme-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background 0.2s;
+        }
+
+        .theme-toggle:hover { background: rgba(255,255,255,0.25); }
 
         header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
         header p { opacity: 0.8; }
@@ -53,7 +116,7 @@
 
         .upload-zone:hover, .upload-zone.dragover {
             border-color: var(--color-primary);
-            background: #f0f0ff;
+            background: var(--color-highlight);
         }
 
         .upload-zone input { display: none; }
@@ -110,7 +173,7 @@
         .suite-select label:hover { border-color: var(--color-primary); }
         .suite-select input:checked + label {
             border-color: var(--color-primary);
-            background: #f0f0ff;
+            background: var(--color-highlight);
         }
 
         .suite-select input { display: none; }
@@ -148,7 +211,7 @@
 
         .group-header {
             padding: 1rem 1.5rem;
-            background: #f1f5f9;
+            background: var(--color-group-header);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -156,7 +219,7 @@
             user-select: none;
         }
 
-        .group-header:hover { background: #e2e8f0; }
+        .group-header:hover { background: var(--color-group-hover); }
         .group-header .arrow { transition: transform 0.2s; color: var(--color-text-muted); }
         .group.collapsed .arrow { transform: rotate(-90deg); }
         .group.collapsed .group-content { display: none; }
@@ -173,6 +236,14 @@
 
         .badge.pass { background: #dcfce7; color: #166534; }
         .badge.fail { background: #fee2e2; color: #991b1b; }
+
+        [data-theme="dark"] .badge.pass { background: #14532d; color: #86efac; }
+        [data-theme="dark"] .badge.fail { background: #7f1d1d; color: #fca5a5; }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .badge.pass { background: #14532d; color: #86efac; }
+            :root:not([data-theme="light"]) .badge.fail { background: #7f1d1d; color: #fca5a5; }
+        }
 
         .group-content { padding-left: 1.5rem; }
 
@@ -205,6 +276,16 @@
         .severity.ERROR { background: #fee2e2; color: #991b1b; }
         .severity.WARNING { background: #fef3c7; color: #92400e; }
         .severity.INFO { background: #dbeafe; color: #1e40af; }
+
+        [data-theme="dark"] .severity.ERROR { background: #7f1d1d; color: #fca5a5; }
+        [data-theme="dark"] .severity.WARNING { background: #78350f; color: #fde68a; }
+        [data-theme="dark"] .severity.INFO { background: #1e3a5f; color: #93c5fd; }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .severity.ERROR { background: #7f1d1d; color: #fca5a5; }
+            :root:not([data-theme="light"]) .severity.WARNING { background: #78350f; color: #fde68a; }
+            :root:not([data-theme="light"]) .severity.INFO { background: #1e3a5f; color: #93c5fd; }
+        }
 
         footer {
             text-align: center;
@@ -261,6 +342,8 @@
             font-size: 0.875rem;
             font-family: monospace;
             transition: border-color 0.2s;
+            background: var(--color-card);
+            color: var(--color-text);
         }
 
         .url-input:focus {
@@ -281,7 +364,7 @@
         }
 
         .url-button:hover {
-            background: #4f46e5;
+            opacity: 0.85;
         }
 
         .url-button:disabled {
@@ -296,7 +379,7 @@
         }
 
         .demo-hint code {
-            background: #f1f5f9;
+            background: var(--color-code-bg);
             padding: 0.125rem 0.375rem;
             border-radius: 4px;
             font-size: 0.7rem;
@@ -305,6 +388,7 @@
 </head>
 <body>
     <header>
+        <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
         <div style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
             <img src="https://raw.githubusercontent.com/SciQLop/AstraLint/main/logo.png" alt="AstraLint Logo" style="height: 100px;">
             <div>
@@ -398,7 +482,7 @@
                 await pyodide.runPythonAsync(`
 from astralint.base import get_suite, list_all_suites
 from astralint.base.codec import load_file, Codec
-from astralint.reports.html import generate_html
+from astralint.reports.html import generate_html_fragment
 
 def validate_file_bytes(data: bytes, filename: str, suite_name: str = "ISTP") -> str:
     """Validate file from bytes (for local file uploads)."""
@@ -416,7 +500,7 @@ def validate_file_bytes(data: bytes, filename: str, suite_name: str = "ISTP") ->
             return f'<div class="status error">Suite "{suite_name}" not found. Available: {list_all_suites()}</div>'
 
         results = suite.run(file)
-        return generate_html(results)
+        return generate_html_fragment(results)
 
     except Exception as e:
         import traceback
@@ -437,7 +521,7 @@ def validate_file_url(url: str, suite_name: str = "ISTP") -> str:
             return f'<div class="status error">Suite "{suite_name}" not found. Available: {list_all_suites()}</div>'
 
         results = suite.run(file)
-        return generate_html(results)
+        return generate_html_fragment(results)
 
     except Exception as e:
         import traceback
@@ -526,8 +610,27 @@ validate_file_url(file_url, selected_suite)
             }
         }
 
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('theme-toggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('astralint-theme', theme);
+        }
+
+        function isDarkPreferred() {
+            const saved = localStorage.getItem('astralint-theme');
+            if (saved) return saved === 'dark';
+            return window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+
         // File upload handling
         document.addEventListener('DOMContentLoaded', () => {
+            // Theme toggle
+            if (isDarkPreferred()) applyTheme('dark');
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                const current = document.documentElement.getAttribute('data-theme');
+                applyTheme(current === 'dark' ? 'light' : 'dark');
+            });
+
             const uploadZone = document.getElementById('upload-zone');
             const fileInput = document.getElementById('file-input');
 
