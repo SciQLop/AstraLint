@@ -278,7 +278,7 @@ Compare a value at one path against a value at another path in the same file. Su
   check: compare_to
   operator: "<"
   other_path: "variables/{var}/attributes/VALIDMIN/values/0"
-  message: "Variable '{var}': FILLVAL must be less than VALIDMIN"
+  message: "Variable '{{ var }}': FILLVAL must be less than VALIDMIN"
 ```
 
 ```yaml
@@ -761,7 +761,7 @@ Capture path segments for reuse in `other_path` and `message` fields using `{nam
 
 Captured names can be used in:
 - `other_path` — to reference the same captured value in a different location
-- `message` — for descriptive error messages
+- `message` — as Jinja2 variables (e.g. `{{ var }}`), available in all assertion types
 
 ```yaml
 # Capture variable name, reuse in other_path and message
@@ -769,12 +769,12 @@ Captured names can be used in:
   check: compare_to
   operator: "<"
   other_path: "variables/{var}/attributes/VALIDMIN/values/0"
-  message: "Variable '{var}': FILLVAL must be less than VALIDMIN"
+  message: "Variable '{{ var }}': FILLVAL must be less than VALIDMIN"
 
 # Capture with custom regex filter
 - path: "variables/{var:LFR_.*}/attributes/UNITS/values/0"
   check: not_empty
-  message: "LFR variable '{var}' must have non-empty UNITS"
+  message: "LFR variable '{{ var }}' must have non-empty UNITS"
 ```
 
 
