@@ -76,6 +76,11 @@ def test_render_message_with_none_default() -> None:
     assert result == "unknown is empty"
 
 
+def test_render_message_bad_template_does_not_crash() -> None:
+    result = render_message("{% if broken %", {"valid": True})
+    assert "[template error" in result
+
+
 def test_render_message_with_attribute() -> None:
     result = render_message(
         "{{ attribute or path }} is empty", {"attribute": "CATDESC", "path": "x/y"}
@@ -453,6 +458,23 @@ def test_contains_keys_fail_message(mock_file: Any) -> None:
     assert not result.valid
     assert "CATDESC" in result.message or "UNITS" in result.message
     assert result.target == "var1"
+
+
+def test_contains_keys_missing_keys_sorted(mock_file: Any) -> None:
+    """Missing keys should appear in sorted order for deterministic output."""
+    assertion = ContainsKeysAssertion(
+        check="contains_keys",
+        path="variables/.*/attributes",
+        keys=frozenset({"ZEBRA", "APPLE", "MANGO"}),
+    )
+    result = assertion.evaluate(mock_file, Severity.WARNING)
+    leaf = _leaf(result)
+    # All three should be missing, and in sorted order
+    assert "APPLE" in leaf.message
+    idx_a = leaf.message.index("APPLE")
+    idx_m = leaf.message.index("MANGO")
+    idx_z = leaf.message.index("ZEBRA")
+    assert idx_a < idx_m < idx_z
 
 
 def test_contains_keys_custom_message(mock_file: Any) -> None:
