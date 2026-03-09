@@ -17,12 +17,19 @@ class MatchesAssertion(BaseAssertion):
     _not_string_template: str = "expected a string value, got {{ value.__class__.__name__ }}"
 
     def single_assertion(
-        self, file: File, path: str, value: str, severity: Severity, captures: dict[str, str] | None = None
+        self,
+        file: File,
+        path: str,
+        value: str,
+        severity: Severity,
+        captures: dict[str, str] | None = None,
     ) -> ValidationResult:
         target = clean_target(path)
 
         if not isinstance(value, str):
-            ctx = build_context(target, path, value, valid=False, pattern=self.pattern.pattern, **(captures or {}))
+            ctx = build_context(
+                target, path, value, valid=False, pattern=self.pattern.pattern, **(captures or {})
+            )
             return ValidationResult(
                 valid=False,
                 reference="",
@@ -32,7 +39,9 @@ class MatchesAssertion(BaseAssertion):
             )
 
         passed = bool(re.match(self.pattern, value))
-        ctx = build_context(target, path, value, valid=passed, pattern=self.pattern.pattern, **(captures or {}))
+        ctx = build_context(
+            target, path, value, valid=passed, pattern=self.pattern.pattern, **(captures or {})
+        )
         return ValidationResult(
             valid=passed,
             reference="",

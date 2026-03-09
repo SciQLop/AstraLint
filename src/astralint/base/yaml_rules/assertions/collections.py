@@ -15,11 +15,18 @@ class ContainsAssertion(BaseAssertion):
     _default_template: str = "{% if valid %}'{{ value }}' is in the expected values{% else %}'{{ value }}' is not in the expected values{% endif %}"
 
     def single_assertion(
-        self, file: File, path: str, value: Any, severity: Severity, captures: dict[str, str] | None = None
+        self,
+        file: File,
+        path: str,
+        value: Any,
+        severity: Severity,
+        captures: dict[str, str] | None = None,
     ) -> ValidationResult:
         target = clean_target(path)
         passed = value in self.values
-        ctx = build_context(target, path, value, valid=passed, values=self.values, **(captures or {}))
+        ctx = build_context(
+            target, path, value, valid=passed, values=self.values, **(captures or {})
+        )
         return ValidationResult(
             valid=passed,
             reference="",
@@ -37,11 +44,18 @@ class NotContainsAssertion(BaseAssertion):
     _default_template: str = "{% if valid %}'{{ value }}' is not in the disallowed values{% else %}'{{ value }}' is in the disallowed values{% endif %}"
 
     def single_assertion(
-        self, file: File, path: str, value: Any, severity: Severity, captures: dict[str, str] | None = None
+        self,
+        file: File,
+        path: str,
+        value: Any,
+        severity: Severity,
+        captures: dict[str, str] | None = None,
     ) -> ValidationResult:
         target = clean_target(path)
         passed = value not in self.values
-        ctx = build_context(target, path, value, valid=passed, values=self.values, **(captures or {}))
+        ctx = build_context(
+            target, path, value, valid=passed, values=self.values, **(captures or {})
+        )
         return ValidationResult(
             valid=passed,
             reference="",
@@ -62,7 +76,12 @@ class LengthAssertion(BaseAssertion):
     _no_length_template: str = "value does not have a length"
 
     def single_assertion(
-        self, file: File, path: str, value: Any, severity: Severity, captures: dict[str, str] | None = None
+        self,
+        file: File,
+        path: str,
+        value: Any,
+        severity: Severity,
+        captures: dict[str, str] | None = None,
     ) -> ValidationResult:
         target = clean_target(path)
         try:
@@ -111,7 +130,12 @@ class NotEmptyAssertion(BaseAssertion):
     _no_length_template: str = "value does not have a length"
 
     def single_assertion(
-        self, file: File, path: str, value: Any, severity: Severity, captures: dict[str, str] | None = None
+        self,
+        file: File,
+        path: str,
+        value: Any,
+        severity: Severity,
+        captures: dict[str, str] | None = None,
     ) -> ValidationResult:
         target = clean_target(path)
         try:
@@ -143,7 +167,12 @@ class RequiresAssertion(BaseAssertion):
     _default_template: str = "{% if valid %}required key '{{ key }}' present{% else %}missing required key '{{ key }}'{% endif %}"
 
     def single_assertion(
-        self, file: File, path: str, value: Any, severity: Severity, captures: dict[str, str] | None = None
+        self,
+        file: File,
+        path: str,
+        value: Any,
+        severity: Severity,
+        captures: dict[str, str] | None = None,
     ) -> ValidationResult:
         target = clean_target(path)
         passed = self.key in value
@@ -170,10 +199,17 @@ class ArrayShapeAssertion(BaseAssertion):
     )
 
     def single_assertion(
-        self, file: File, path: str, value: Any, severity: Severity, captures: dict[str, str] | None = None
+        self,
+        file: File,
+        path: str,
+        value: Any,
+        severity: Severity,
+        captures: dict[str, str] | None = None,
     ) -> ValidationResult:
         target = clean_target(path)
-        ctx = build_context(target, path, value, valid=False, expected_shape=self.shape, **(captures or {}))
+        ctx = build_context(
+            target, path, value, valid=False, expected_shape=self.shape, **(captures or {})
+        )
         if not isinstance(value, list):
             return ValidationResult(
                 valid=False,
