@@ -163,7 +163,7 @@ class BaseAssertion(BaseEvaluable):
     message: str = Field(default="")
 
     def evaluate(self, file: File, severity: Severity) -> ValidationResult | ValidationResultGroup:
-        matches = resolve_path(file, self.path)
+        matches = resolve_path_with_captures(file, self.path)
         results: list[ValidationResult | ValidationResultGroup] = []
         if not matches:
             target = clean_target(self.path)
@@ -176,8 +176,8 @@ class BaseAssertion(BaseEvaluable):
                 message=render_message(_NO_MATCH_TEMPLATE, ctx),
                 target=target,
             )
-        for path, value in matches:
-            result = self.single_assertion(file, path, value, severity=severity)
+        for path, value, captures in matches:
+            result = self.single_assertion(file, path, value, severity=severity, captures=captures)
             results.append(result)
         return ValidationResultGroup(
             name=self.__class__.__name__,
@@ -187,7 +187,7 @@ class BaseAssertion(BaseEvaluable):
         )
 
     def single_assertion(
-        self, file: File, path: str, value: Any, severity: Severity
+        self, file: File, path: str, value: Any, severity: Severity, captures: dict[str, str] | None = None
     ) -> ValidationResult: ...
 
 

@@ -16,11 +16,11 @@ class ContainsKeysAssertion(BaseAssertion):
     _not_dict_template: str = "value is not an object"
 
     def single_assertion(
-        self, file: File, path: str, value: Any, severity: Severity
+        self, file: File, path: str, value: Any, severity: Severity, captures: dict[str, str] | None = None
     ) -> ValidationResult:
         target = clean_target(path)
         if not isinstance(value, dict):
-            ctx = build_context(target, path, value, valid=False, keys=self.keys)
+            ctx = build_context(target, path, value, valid=False, keys=self.keys, **(captures or {}))
             return ValidationResult(
                 valid=False,
                 reference="",
@@ -37,6 +37,7 @@ class ContainsKeysAssertion(BaseAssertion):
             valid=passed,
             keys=self.keys,
             missing_keys=missing_keys,
+            **(captures or {}),
         )
         return ValidationResult(
             valid=passed,
