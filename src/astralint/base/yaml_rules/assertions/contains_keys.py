@@ -43,7 +43,7 @@ class ContainsKeysAssertion(BaseAssertion):
             value,
             valid=passed,
             keys=self.keys,
-            missing_keys=missing_keys,
+            missing_keys=sorted(missing_keys),
             **(captures or {}),
         )
         return ValidationResult(
