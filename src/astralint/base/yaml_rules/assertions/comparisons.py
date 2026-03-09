@@ -27,12 +27,23 @@ class ComparisonAssertion(BaseAssertion):
     _default_template: str = "{% if valid %}{{ value }} satisfies {{ operator }} {{ expected }}{% else %}{{ value }} does not satisfy {{ operator }} {{ expected }}{% endif %}"
 
     def single_assertion(
-        self, file: File, path: str, value: Any, severity: Severity, captures: dict[str, str] | None = None
+        self,
+        file: File,
+        path: str,
+        value: Any,
+        severity: Severity,
+        captures: dict[str, str] | None = None,
     ) -> ValidationResult:
         target = clean_target(path)
         passed = _operators[self.operator](value, self.value)
         ctx = build_context(
-            target, path, value, valid=passed, operator=self.operator, expected=self.value, **(captures or {})
+            target,
+            path,
+            value,
+            valid=passed,
+            operator=self.operator,
+            expected=self.value,
+            **(captures or {}),
         )
         return ValidationResult(
             valid=passed,
@@ -52,11 +63,18 @@ class RangeAssertion(BaseAssertion):
     _default_template: str = "{% if valid %}{{ value }} is within range [{{ min }}, {{ max }}]{% else %}{{ value }} is not within range [{{ min }}, {{ max }}]{% endif %}"
 
     def single_assertion(
-        self, file: File, path: str, value: Any, severity: Severity, captures: dict[str, str] | None = None
+        self,
+        file: File,
+        path: str,
+        value: Any,
+        severity: Severity,
+        captures: dict[str, str] | None = None,
     ) -> ValidationResult:
         target = clean_target(path)
         passed = self.min <= value <= self.max
-        ctx = build_context(target, path, value, valid=passed, min=self.min, max=self.max, **(captures or {}))
+        ctx = build_context(
+            target, path, value, valid=passed, min=self.min, max=self.max, **(captures or {})
+        )
         return ValidationResult(
             valid=passed,
             reference="",

@@ -187,7 +187,12 @@ class BaseAssertion(BaseEvaluable):
         )
 
     def single_assertion(
-        self, file: File, path: str, value: Any, severity: Severity, captures: dict[str, str] | None = None
+        self,
+        file: File,
+        path: str,
+        value: Any,
+        severity: Severity,
+        captures: dict[str, str] | None = None,
     ) -> ValidationResult: ...
 
 

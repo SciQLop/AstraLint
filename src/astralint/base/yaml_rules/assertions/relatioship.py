@@ -16,10 +16,17 @@ class ReferencesVariableAssertion(BaseAssertion):
     _not_string_template: str = "expected a string value to reference a variable"
 
     def single_assertion(
-        self, file: File, path: str, value: Any, severity: Severity, captures: dict[str, str] | None = None
+        self,
+        file: File,
+        path: str,
+        value: Any,
+        severity: Severity,
+        captures: dict[str, str] | None = None,
     ) -> ValidationResult:
         target = clean_target(path)
-        ctx = build_context(target, path, value, valid=False, expected_variable=self.variable, **(captures or {}))
+        ctx = build_context(
+            target, path, value, valid=False, expected_variable=self.variable, **(captures or {})
+        )
 
         if type(value) is not str:
             return ValidationResult(
