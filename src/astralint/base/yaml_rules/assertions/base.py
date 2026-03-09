@@ -1,7 +1,7 @@
 import re
 from typing import Annotated, Any, Union
 
-from jinja2 import Environment, TemplateSyntaxError, UndefinedError
+from jinja2 import Environment, TemplateError
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ...file import File
@@ -19,7 +19,7 @@ _TARGET_PATTERN = re.compile(
 def render_message(template: str, context: dict) -> str:
     try:
         return _jinja_env.from_string(template).render(context)
-    except (TemplateSyntaxError, UndefinedError) as e:
+    except TemplateError as e:
         return f"[template error: {e}] template: {template}"
 
 
