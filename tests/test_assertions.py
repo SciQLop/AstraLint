@@ -42,11 +42,8 @@ def test_parse_captures_no_captures():
 
 
 def test_parse_captures_duplicate_name_raises():
-    import re as re_mod
-
-    with pytest.raises(re_mod.error):
-        pattern, _ = parse_captures("variables/{var}/other/{var}")
-        re_mod.compile("^" + pattern + "$")
+    with pytest.raises(ValueError, match="Duplicate capture name"):
+        parse_captures("variables/{var}/other/{var}")
 
 
 def test_parse_captures_inner_groups():

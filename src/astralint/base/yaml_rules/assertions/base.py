@@ -103,6 +103,8 @@ def parse_captures(path: str) -> tuple[str, list[str]]:
 
     def _replace(match: re.Match) -> str:
         name = match.group(1)
+        if name in capture_names:
+            raise ValueError(f"Duplicate capture name: '{name}'")
         pattern = match.group(2) or "[^/]*"
         capture_names.append(name)
         return f"(?P<{name}>{pattern})"
