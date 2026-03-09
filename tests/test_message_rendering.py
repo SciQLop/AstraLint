@@ -464,3 +464,34 @@ def test_contains_keys_custom_message(mock_file: Any) -> None:
     )
     result = _leaf(assertion.evaluate(mock_file, Severity.WARNING))
     assert result.message == "Variable var1 is missing CATDESC attribute"
+
+
+# =============================================================================
+# Path captures in non-compare_to assertions
+# =============================================================================
+
+
+def test_exists_assertion_with_path_captures(mock_file_with_range: Any) -> None:
+    """Path captures like {var} should work in any assertion, not just compare_to."""
+    assertion = ExistsAssertion(
+        check="exists",
+        path="variables/{var}/attributes/VALIDMIN",
+        message="{% if valid %}{{ var }} has VALIDMIN{% else %}{{ var }} missing VALIDMIN{% endif %}",
+    )
+    result = assertion.evaluate(mock_file_with_range, Severity.WARNING)
+    leaf = _leaf(result)
+    assert "var1" in leaf.message
+
+
+def test_comparison_assertion_with_path_captures(mock_file_with_range: Any) -> None:
+    """Path captures should be available in comparison assertion messages."""
+    assertion = ComparisonAssertion(
+        check="comparison",
+        path="variables/{var}/attributes/VALIDMIN/values/0",
+        operator=">=",
+        value=0,
+        message="{% if valid %}{{ var }} VALIDMIN is non-negative{% else %}{{ var }} VALIDMIN is negative{% endif %}",
+    )
+    result = assertion.evaluate(mock_file_with_range, Severity.WARNING)
+    leaf = _leaf(result)
+    assert "var1" in leaf.message

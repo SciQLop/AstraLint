@@ -16,14 +16,14 @@ class IsTypeAssertion(BaseAssertion):
     _not_datatype_template: str = "value is not a valid DataType, got '{{ value }}'"
 
     def single_assertion(
-        self, file: File, path: str, value: Any, severity: Severity
+        self, file: File, path: str, value: Any, severity: Severity, captures: dict[str, str] | None = None
     ) -> ValidationResult:
         target = clean_target(path)
         if not isinstance(value, DataType):
             if isinstance(value, Variable):
                 value = value.data_type
             else:
-                ctx = build_context(target, path, value, valid=False)
+                ctx = build_context(target, path, value, valid=False, **(captures or {}))
                 return ValidationResult(
                     valid=False,
                     reference="",
@@ -34,7 +34,7 @@ class IsTypeAssertion(BaseAssertion):
         expected_type = DataType(self.type)
         passed = value == expected_type
         ctx = build_context(
-            target, path, value, valid=passed, expected_type=expected_type, actual_type=value
+            target, path, value, valid=passed, expected_type=expected_type, actual_type=value, **(captures or {})
         )
         return ValidationResult(
             valid=passed,
