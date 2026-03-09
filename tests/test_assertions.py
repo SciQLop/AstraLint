@@ -1,3 +1,6 @@
+import re
+
+import pytest
 from yaml import safe_load
 
 from astralint.base.yaml_rules.assertions.base import (
@@ -16,27 +19,43 @@ from . import *  # isort:skip # noqa: F403
 
 
 def test_parse_captures_simple():
-    pattern, captures = parse_captures("variables/{var}/attributes/FILLVAL")
-    assert pattern == "variables/([^/]*)/attributes/FILLVAL"
-    assert captures == {"var": 0}
+    pattern, capture_names = parse_captures("variables/{var}/attributes/FILLVAL")
+    assert capture_names == ["var"]
+    assert "(?P<var>[^/]*)" in pattern
 
 
 def test_parse_captures_with_regex():
-    pattern, captures = parse_captures("variables/{var:LFR_.*}/attributes")
-    assert pattern == "variables/(LFR_.*)/attributes"
-    assert captures == {"var": 0}
+    pattern, capture_names = parse_captures("variables/{var:LFR_.*}/attributes/UNITS")
+    assert capture_names == ["var"]
+    assert "(?P<var>LFR_.*)" in pattern
 
 
 def test_parse_captures_multiple():
-    pattern, captures = parse_captures("{a}/attributes/{b:X.*}")
-    assert pattern == "([^/]*)/attributes/(X.*)"
-    assert captures == {"a": 0, "b": 1}
+    pattern, capture_names = parse_captures("variables/{var}/attributes/{attr}")
+    assert capture_names == ["var", "attr"]
 
 
 def test_parse_captures_no_captures():
-    pattern, captures = parse_captures("variables/.*/attributes")
+    pattern, capture_names = parse_captures("variables/.*/attributes")
     assert pattern == "variables/.*/attributes"
-    assert captures == {}
+    assert capture_names == []
+
+
+def test_parse_captures_duplicate_name_raises():
+    import re as re_mod
+
+    with pytest.raises(re_mod.error):
+        pattern, _ = parse_captures("variables/{var}/other/{var}")
+        re_mod.compile("^" + pattern + "$")
+
+
+def test_parse_captures_inner_groups():
+    pattern, capture_names = parse_captures("variables/{var:(LFR|HFR)_.*}/attributes/UNITS")
+    assert capture_names == ["var"]
+    rx = re.compile("^" + pattern + "$")
+    m = rx.match("variables/LFR_test/attributes/UNITS")
+    assert m is not None
+    assert m.group("var") == "LFR_test"
 
 
 def test_resolve_path_with_captures_basic(mock_file):
