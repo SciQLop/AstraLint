@@ -128,14 +128,12 @@ def load_suite_from_yaml(path: str) -> ConformanceSuiteYaml:
 
 
 def parents_rules(parents: list[str]) -> list[Rule]:
-    rules = []
+    rules: list[Rule] = []
     for parent_suite_name in parents:
         parent_suite = get_suite(parent_suite_name)
         if parent_suite is None:
             raise ValueError(f"Cannot inherit from suite '{parent_suite_name}': suite not found")
         log.debug(f"Inheriting {len(parent_suite.rules)} rules from suite '{parent_suite_name}'")
-        if isinstance(parent_suite, ConformanceSuiteYaml):
-            rules.extend(parents_rules(parent_suite.inherit_from))
         rules.extend(parent_suite.rules)
     return rules
 

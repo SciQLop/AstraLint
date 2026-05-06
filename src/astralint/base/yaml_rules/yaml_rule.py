@@ -63,7 +63,5 @@ def register_yaml_rule(yaml_path: Path):
     with open(yaml_path) as f:
         data = yaml.safe_load(f)
     suite = data["suite"]
-    rule = load_yaml_rule(yaml_path)
-    if suite not in RULES:
-        RULES[suite] = []
-    RULES[suite].append(rule)
+    rule = YamlRule(**data)
+    RULES.setdefault(suite, []).append(rule)
