@@ -55,7 +55,7 @@ jobs:
         version: '0.29.3'
         to: pyodide-dist
 
-    - name: restore speasy wheel artifact
+    - name: restore astralint wheel artifact
       uses: actions/download-artifact@v7
       with:
         name: astralint-wheel

@@ -22,7 +22,7 @@ from astralint.base.yaml_rules.assertions.contains_keys import ContainsKeysAsser
 from astralint.base.yaml_rules.assertions.exists import ExistsAssertion
 from astralint.base.yaml_rules.assertions.is_type import IsTypeAssertion
 from astralint.base.yaml_rules.assertions.matches import MatchesAssertion
-from astralint.base.yaml_rules.assertions.relatioship import ReferencesVariableAssertion
+from astralint.base.yaml_rules.assertions.relationship import ReferencesVariableAssertion
 
 from . import *  # isort:skip # noqa: F403
 
