@@ -7,7 +7,7 @@ dependencies. First, be sure you
 [have uv installed](https://docs.astral.sh/uv/getting-started/installation/).
 
 Then
-[fork the jeandet/AstraLint repo](https://github.com/jeandet/AstraLint/fork)
+[fork the SciQLop/AstraLint repo](https://github.com/SciQLop/AstraLint/fork)
 (having your own fork will make it easier to contribute) and
 [clone it](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).
 
