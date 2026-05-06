@@ -3,7 +3,11 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from ..base.validation_result import Severity
+
+_OVERRIDABLE_SEVERITIES = {Severity.ERROR, Severity.WARNING, Severity.INFO}
 
 
 class OutputConfig(BaseModel):
@@ -32,7 +36,18 @@ class AstraLintConfig(BaseModel):
     ignore: list[str] = Field(default_factory=list)
 
     # Severity overrides (rule_reference -> new_severity)
-    severity_overrides: dict[str, str] = Field(default_factory=dict)
+    severity_overrides: dict[str, Severity] = Field(default_factory=dict)
+
+    @field_validator("severity_overrides")
+    @classmethod
+    def _validate_severities(cls, v: dict[str, Severity]) -> dict[str, Severity]:
+        for ref, sev in v.items():
+            if sev not in _OVERRIDABLE_SEVERITIES:
+                raise ValueError(
+                    f"severity_overrides[{ref!r}]: {sev.value!r} is not an overridable "
+                    f"severity (allowed: ERROR, WARNING, INFO)"
+                )
+        return v
 
     # Custom rule paths (load additional YAML rules)
     extra_rules: list[Path] = Field(default_factory=list)
