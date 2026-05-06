@@ -56,11 +56,12 @@ class FitsCodec(Codec):
             else:
                 file = BytesIO(file)
                 fname = "<bytes input>"
-        if fits_file := fits.open(file):
+        with fits.open(file) as fits_file:
             global_attributes: dict[str, Attribute] = {}
             variables: dict[str, Variable] = {}
-            ext_hdu_count = {}
-            for _, hdu in enumerate(fits_file):
+            ext_hdu_count: dict[type, int] = {}
+            hdu: AnyHDU
+            for hdu in fits_file:  # type: ignore[assignment]
                 if isinstance(hdu, fits.PrimaryHDU):
                     global_attributes = _parse_headers(hdu)
                     name: str = _hdu_type_name(hdu)
@@ -91,5 +92,3 @@ class FitsCodec(Codec):
                 attributes=global_attributes,
                 variables=variables,
             )
-        else:
-            raise ValueError(f"Could not load file {file} as FITS.")
