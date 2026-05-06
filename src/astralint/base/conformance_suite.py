@@ -1,4 +1,3 @@
-import os
 import re
 from collections.abc import Iterable, Sequence
 from pathlib import Path
@@ -11,8 +10,7 @@ from .loader import load_rules_from_dir, load_suite_from_dir
 from .rule import Rule, get_rules_for_suite
 from .validation_result import Severity, ValidationResultGroup
 
-__HERE__ = os.path.dirname(__file__)
-__SUITES_DIR__ = os.path.abspath(os.path.join(__HERE__, "../suites"))
+_SUITES_DIR = (Path(__file__).parent / ".." / "suites").resolve()
 
 log = get_logger(__name__)
 
@@ -183,7 +181,7 @@ def register_suite(
 
 def get_suite(name: str) -> ConformanceSuite | None:
     if name not in SUITES:
-        load_suite_from_dir(__SUITES_DIR__, name)
+        load_suite_from_dir(_SUITES_DIR, name)
     if ctor := SUITES.get(name):
         return ctor()
     return None
@@ -194,9 +192,8 @@ def list_loaded_suites() -> list[str]:
 
 
 def list_all_suites() -> list[str]:
-    suites = os.listdir(__SUITES_DIR__)
     return [
-        suite
-        for suite in suites
-        if os.path.isdir(os.path.join(__SUITES_DIR__, suite)) and not suite.startswith("_")
+        entry.name
+        for entry in _SUITES_DIR.iterdir()
+        if entry.is_dir() and not entry.name.startswith("_")
     ]
