@@ -78,3 +78,20 @@ class ValidationResultGroup(BaseModel):
     def valid(self) -> bool:
         """Check if all validations passed (compatibility with ValidationResult)."""
         return self.is_passing()
+
+    def without_passed(self) -> "ValidationResultGroup":
+        """Return a copy of this tree with passed leaves removed and emptied groups pruned.
+
+        A leaf is considered "passed" when ``valid`` is True and severity is not SKIPPED,
+        matching the definition used by ``count_by_severity``.
+        """
+        kept: list[ValidationResult | ValidationResultGroup] = []
+        for child in self.results:
+            if isinstance(child, ValidationResult):
+                if not child.valid or child.severity == Severity.SKIPPED:
+                    kept.append(child)
+            else:
+                pruned = child.without_passed()
+                if pruned.results:
+                    kept.append(pruned)
+        return self.model_copy(update={"results": kept})

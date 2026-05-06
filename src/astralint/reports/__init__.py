@@ -2,8 +2,10 @@ from .console import report as console_report
 from .html import report as html_report
 
 
-def report(results, output="console", dest=None):
+def report(results, output="console", dest=None, show_passed: bool = True):
     """The main entry point called by the CLI."""
+    if not show_passed:
+        results = results.without_passed()
     if output == "console":
         return console_report(results, dest)
     elif output == "html":
