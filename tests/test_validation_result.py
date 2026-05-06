@@ -209,3 +209,59 @@ class TestIsPassing:
 
     def test_not_passing_nested(self, nested_results):
         assert nested_results.is_passing() is False
+
+
+class TestWithoutPassed:
+    """Tests for without_passed method (drives the show_passed config option)."""
+
+    def test_drops_passed_leaves(self, failing_results_with_errors):
+        filtered = failing_results_with_errors.without_passed()
+        refs = [r.reference for r in filtered.results if isinstance(r, ValidationResult)]
+        assert "TEST-001" not in refs  # passed leaf dropped
+        assert "TEST-002" in refs  # ERROR kept
+        assert "TEST-003" in refs  # WARNING kept
+
+    def test_keeps_skipped_leaves(self):
+        group = ValidationResultGroup(
+            name="Suite",
+            rule_reference="",
+            severity=Severity.INFO,
+            results=[
+                ValidationResult(
+                    valid=True,
+                    reference="PASS",
+                    severity=Severity.INFO,
+                    message="passed",
+                ),
+                ValidationResult(
+                    valid=True,
+                    reference="SKIP",
+                    severity=Severity.SKIPPED,
+                    message="skipped",
+                ),
+            ],
+        )
+        filtered = group.without_passed()
+        refs = [r.reference for r in filtered.results if isinstance(r, ValidationResult)]
+        assert refs == ["SKIP"]
+
+    def test_prunes_emptied_groups(self, passing_results):
+        filtered = passing_results.without_passed()
+        assert filtered.results == []
+
+    def test_keeps_groups_with_remaining_failures(self, nested_results):
+        filtered = nested_results.without_passed()
+        groups = [r for r in filtered.results if isinstance(r, ValidationResultGroup)]
+        # Group 1 had a passed and a failed leaf — keep group, drop the passed leaf
+        group1 = next(g for g in groups if g.name == "Group 1")
+        leaves1 = [r for r in group1.results if isinstance(r, ValidationResult)]
+        assert [r.reference for r in leaves1] == ["TEST-002"]
+        # Group 2 had only a WARNING — kept
+        group2 = next(g for g in groups if g.name == "Group 2")
+        leaves2 = [r for r in group2.results if isinstance(r, ValidationResult)]
+        assert [r.reference for r in leaves2] == ["TEST-003"]
+
+    def test_does_not_mutate_original(self, failing_results_with_errors):
+        before = len(failing_results_with_errors.results)
+        failing_results_with_errors.without_passed()
+        assert len(failing_results_with_errors.results) == before

@@ -221,9 +221,9 @@ _REPORT_BODY = """
 """
 
 HTML_TEMPLATE = (
-    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n"
-    "    <meta charset=\"UTF-8\">\n"
-    "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+    '<!DOCTYPE html>\n<html lang="en">\n<head>\n'
+    '    <meta charset="UTF-8">\n'
+    '    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
     "    <title>AstraLint Report</title>\n"
     "    <style>\n"
     "        * { box-sizing: border-box; margin: 0; padding: 0; }\n"
@@ -236,7 +236,7 @@ HTML_TEMPLATE = (
     "        }\n"
     "        .container { max-width: 1000px; margin: 0 auto; }\n"
     + _REPORT_CSS
-    + "    </style>\n</head>\n<body>\n    <div class=\"container\">\n"
+    + '    </style>\n</head>\n<body>\n    <div class="container">\n'
     + _REPORT_BODY
     + "    </div>\n</body>\n</html>\n"
 )
