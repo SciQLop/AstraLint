@@ -13,6 +13,7 @@ from .base import (
     list_all_suites,
     load_file,
 )
+from .base.conformance_suite import load_extra_rules
 from .config import (
     find_config_file,
     find_project_root,
@@ -20,6 +21,7 @@ from .config import (
     validate_config_file,
 )
 from .config.loader import generate_starter_config
+from .config.paths import expand_lint_paths
 from .reports import report
 
 app = App()
@@ -125,6 +127,7 @@ def lint(
     output: str | None = None,
     dest: Path | None = None,
     verbose: bool = False,
+    show_passed: bool | None = None,
     strict: bool = False,
 ):
     """Lint the given file or directory against the specified conformance suite.
@@ -147,6 +150,8 @@ def lint(
         Destination file path for the report.
     verbose : bool
         Show detailed output including config file used.
+    show_passed : bool, optional
+        Show passed assertions in the report. Overrides config file.
     strict : bool
         Exit with error code on warnings too, not just errors.
     """
@@ -160,7 +165,7 @@ def lint(
         cli_overrides["select"] = select
     if ignore:
         cli_overrides["ignore"] = ignore
-    if output or dest or verbose:
+    if output or dest or verbose or show_passed is not None:
         cli_overrides["output"] = {}
         if output:
             cli_overrides["output"]["format"] = output
@@ -168,6 +173,8 @@ def lint(
             cli_overrides["output"]["dest"] = dest
         if verbose:
             cli_overrides["output"]["verbose"] = True
+        if show_passed is not None:
+            cli_overrides["output"]["show_passed"] = show_passed
 
     # Load merged config
     cfg = load_config(
@@ -185,20 +192,38 @@ def lint(
             console.print(f"[dim]Ignore: {cfg.ignore}[/]")
         console.print()
 
+    # Load any extra rule directories before constructing the suite
+    if cfg.extra_rules:
+        project_root = find_project_root()
+        load_extra_rules([p if p.is_absolute() else project_root / p for p in cfg.extra_rules])
+
+    # Expand directories using cfg.include/exclude glob patterns
+    files_to_lint = expand_lint_paths(path, include=cfg.include, exclude=cfg.exclude)
+
     # Run linting
     checker: ConformanceSuite | None = get_suite(cfg.suite)
     if checker:
         results = []
-        for p in path:
+        for p in files_to_lint:
             if file := load_file(str(p)):
                 results.append(
-                    checker.run(file, select=cfg.select or None, ignore=cfg.ignore or None)
+                    checker.run(
+                        file,
+                        select=cfg.select or None,
+                        ignore=cfg.ignore or None,
+                        severity_overrides=cfg.severity_overrides or None,
+                    )
                 )
 
         results = ValidationResultGroup(
             name="AstraLint Results", rule_reference="", results=results, severity=Severity.INFO
         )
-        report(results, output=cfg.output.format, dest=cfg.output.dest)
+        report(
+            results,
+            output=cfg.output.format,
+            dest=cfg.output.dest,
+            show_passed=cfg.output.show_passed,
+        )
 
         # Exit with error code if validation failed
         if results.has_errors():

@@ -1,5 +1,7 @@
 import os
 import re
+from collections.abc import Iterable, Sequence
+from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -33,6 +35,32 @@ def filter_rules(
     return rules
 
 
+def load_extra_rules(directories: Iterable[Path]) -> None:
+    """Load YAML rules from additional directories (cfg.extra_rules).
+
+    Each YAML rule self-declares its target suite via the ``suite`` field,
+    so loaded rules join the appropriate suite the next time it is constructed.
+    """
+    for directory in directories:
+        path = Path(directory)
+        if not path.is_dir():
+            raise FileNotFoundError(f"extra_rules path is not a directory: {path}")
+        load_rules_from_dir(str(path))
+
+
+def apply_severity_overrides(
+    rules: Sequence[Rule], overrides: dict[str, Severity]
+) -> Sequence[Rule]:
+    if not overrides:
+        return rules
+    return [
+        rule.model_copy(update={"severity": overrides[rule.reference]})
+        if rule.reference in overrides
+        else rule
+        for rule in rules
+    ]
+
+
 class ConformanceSuite(BaseModel):
     model_config = ConfigDict(frozen=True)
     name: str
@@ -58,10 +86,15 @@ url: {suite.url}
         )
 
     def run(
-        self, file: File, select: list[str] | None = None, ignore: list[str] | None = None
+        self,
+        file: File,
+        select: list[str] | None = None,
+        ignore: list[str] | None = None,
+        severity_overrides: dict[str, Severity] | None = None,
     ) -> ValidationResultGroup:
         results = []
         rules = filter_rules(self.rules, select, ignore)
+        rules = apply_severity_overrides(rules, severity_overrides or {})
         for rule in rules:
             log.debug(f"Validating rule {rule.name}")
             results.append(rule.check(file))

@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
+from astralint.base.validation_result import Severity
 from astralint.config import AstraLintConfig, load_config, validate_config_file
 from astralint.config.loader import generate_starter_config, merge_configs
 
@@ -30,12 +31,12 @@ class TestAstraLintConfig:
             suite="PDS4",
             select=["rule1", "rule2"],
             ignore=["deprecated"],
-            severity_overrides={"RULE-001": "WARNING"},
+            severity_overrides={"RULE-001": "WARNING"},  # type: ignore[arg-type]
         )
         assert cfg.suite == "PDS4"
         assert cfg.select == ["rule1", "rule2"]
         assert cfg.ignore == ["deprecated"]
-        assert cfg.severity_overrides == {"RULE-001": "WARNING"}
+        assert cfg.severity_overrides == {"RULE-001": Severity.WARNING}
 
     def test_config_rejects_unknown_fields(self):
         """Config with unknown fields raises error."""
@@ -202,5 +203,5 @@ class TestValidateConfigFile:
 @pytest.mark.parametrize("severity", ["ERROR", "WARNING", "INFO"])
 def test_severity_overrides_valid_values(severity):
     """Severity overrides accept valid severity values."""
-    cfg = AstraLintConfig(severity_overrides={"RULE-001": severity})
-    assert cfg.severity_overrides["RULE-001"] == severity
+    cfg = AstraLintConfig(severity_overrides={"RULE-001": severity})  # type: ignore[arg-type]
+    assert cfg.severity_overrides["RULE-001"] == Severity(severity)
