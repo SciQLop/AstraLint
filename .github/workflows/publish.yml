@@ -26,7 +26,7 @@ jobs:
         with:
           version: "0.9.25"
           enable-cache: true
-          python-version: "3.12"
+          python-version: "3.13"
 
       - name: Set up Python (using uv)
         run: uv python install

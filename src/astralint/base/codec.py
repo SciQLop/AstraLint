@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Protocol
 
 from .file import File
 
@@ -32,8 +31,15 @@ def is_remote_file(url: str) -> bool:
     return url.startswith("http://") or url.startswith("https://")
 
 
-class Codec(Protocol):
-    _registry = {}
+class Codec:
+    """Base class for file-format codecs.
+
+    Subclasses are auto-registered for their declared extensions via
+    ``__init_subclass__`` — defining a subclass and importing its module is
+    enough to make the codec available through ``load_file``.
+    """
+
+    _registry: dict[str, type["Codec"]] = {}
 
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
@@ -48,25 +54,19 @@ class Codec(Protocol):
     def get_codec_for_extension(cls, extension: str) -> type["Codec"]:
         if extension in cls._registry:
             return cls._registry[extension]
-        else:
-            raise ValueError(f"No codec registered for extension '{extension}'.")
+        raise ValueError(f"No codec registered for extension '{extension}'.")
 
     @classmethod
-    def supported_extensions(cls) -> list[str]: ...
+    def supported_extensions(cls) -> list[str]:
+        raise NotImplementedError
 
     @staticmethod
     def load(file_url_or_bytes: str | bytes) -> File | None:
-        """Load a file from the given URL or bytes and return a File object representing its structure. The codec should determine if it can handle the file format based on the content or the URL, and return None if it cannot.
+        """Load a file and return a ``File`` object representing its structure.
 
-        Parameters:
-        file_url_or_bytes (str | bytes): The URL of the file to load, or the file content as bytes. If a URL is provided, the codec should determine if it can handle the file format based on the URL or by fetching the file content. If bytes are provided, the codec should determine if it can handle the file format based on the content.
-
-        Returns:
-        File | None: A File object representing the structure of the loaded file, or None if the file cannot be loaded or parsed, or if the codec does not support the file format.
-
+        Returns ``None`` if the codec cannot handle the input.
         """
-
-        ...
+        raise NotImplementedError
 
 
 def load_file(url: str | Path) -> File | None:

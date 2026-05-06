@@ -1,12 +1,13 @@
 import importlib
 import inspect
-import os
-from glob import glob
+import os.path
 from pathlib import Path
 
 from ..logger import get_logger
 
 log = get_logger(__name__)
+
+_BASE_DIR = Path(__file__).parent
 
 
 def _caller_package():
@@ -14,57 +15,57 @@ def _caller_package():
     module = inspect.getmodule(frame[0])
     if module is None:
         raise RuntimeError("Could not determine caller package")
-    else:
-        return module.__package__
+    return module.__package__
 
 
-def _make_relative_import_path(module_path: str, package_path: str) -> str:
-    relative_path = os.path.relpath(module_path, package_path)
-    relative_path = relative_path.replace("../", "..")
-    relative_path = relative_path.replace("/", ".")
-    return relative_path
+def _make_relative_import_path(module_path: Path, package_path: Path) -> str:
+    # os.path.relpath handles paths that traverse sibling trees ('..'), which
+    # Path.relative_to does not in Python <3.12. Once 3.12 is the minimum
+    # supported version, switch to Path.relative_to(..., walk_up=True).
+    relative = os.path.relpath(module_path, package_path)
+    return relative.replace("../", "..").replace("/", ".")
 
 
-def load_rules_from_dir(path: str):
-    modules = glob(os.path.join(path, "**/rules_*.py"), recursive=True)
-    for module in modules:
+def load_rules_from_dir(path: str | Path):
+    root = Path(path)
+    for module in root.rglob("rules_*.py"):
         log.debug(f"Loading rule from {module}")
-        relative_import_path = _make_relative_import_path(module[:-3], os.path.dirname(__file__))
-        importlib.import_module(relative_import_path, package=__package__)
+        importlib.import_module(
+            _make_relative_import_path(module.with_suffix(""), _BASE_DIR),
+            package=__package__,
+        )
 
-    yaml_rules = glob(os.path.join(path, "**/*.yaml"), recursive=True) + glob(
-        os.path.join(path, "**/*.yml"), recursive=True
-    )
-    log.debug(f"Found {len(yaml_rules)} YAML rule files in {path}")
+    yaml_rules = list(root.rglob("*.yaml")) + list(root.rglob("*.yml"))
+    log.debug(f"Found {len(yaml_rules)} YAML rule files in {root}")
     for yaml_rule in yaml_rules:
         from .yaml_rules import register_yaml_rule
 
         log.debug(f"Loading YAML rule from {yaml_rule}")
-        register_yaml_rule(Path(yaml_rule))
+        register_yaml_rule(yaml_rule)
 
 
-def load_suite_from_dir(path: str, suite_name: str):
-    log.debug(f"Looking for suite {suite_name} in {path}")
-    suite_dir = os.path.join(path, suite_name)
-    yaml_suite = glob(os.path.join(suite_dir, "*.yaml")) + glob(os.path.join(suite_dir, "*.yml"))
-    if len(yaml_suite) == 0 and os.path.exists(os.path.join(path, "__init__.py")):
+def load_suite_from_dir(path: str | Path, suite_name: str):
+    root = Path(path)
+    log.debug(f"Looking for suite {suite_name} in {root}")
+    suite_dir = root / suite_name
+    yaml_suite = list(suite_dir.glob("*.yaml")) + list(suite_dir.glob("*.yml"))
+    if not yaml_suite and (root / "__init__.py").exists():
         try:
-            relative_import_path = _make_relative_import_path(
-                os.path.join(suite_dir), os.path.dirname(__file__)
+            importlib.import_module(
+                _make_relative_import_path(suite_dir, _BASE_DIR), package=__package__
             )
-            importlib.import_module(relative_import_path, package=__package__)
         except ModuleNotFoundError:
-            log.error(f"Suite {suite_name} not found in {path}")
+            log.error(f"Suite {suite_name} not found in {root}")
     elif len(yaml_suite) == 1:
         from . import register_suite
         from .conformance_suite import load_suite_from_yaml
 
         log.debug(f"Loading suite from {yaml_suite[0]}")
-        suite = load_suite_from_yaml(yaml_suite[0])
+        suite = load_suite_from_yaml(str(yaml_suite[0]))
         register_suite(
             description=suite.description,
             url=suite.url,
-            rules_lookup_dir=os.path.join(suite_dir, "rules"),
+            rules_lookup_dir=str(suite_dir / "rules"),
             name=suite.name,
             inherit_from=suite.inherit_from,
         )
