@@ -1,7 +1,7 @@
 # ---- Project Info and Dependencies ----
 
 [project.urls]
-Repository = "https://github.com/jeandet/AstraLint"
+Repository = "https://github.com/SciQLop/AstraLint"
 # Homepage = "https://..."
 # Documentation = "https://..."
 

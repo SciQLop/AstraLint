@@ -254,34 +254,39 @@ assertions:
 | **Value** | `comparison`, `range`, `is_type` |
 | **String** | `matches` |
 | **Collection** | `contains_keys`, `in`, `not_in`, `length`, `not_empty`, `requires`, `array_shape` |
-| **Relationship** | `reference_variable` |
-| **Combinators** | `all_of`, `any_of`, `not` |
+| **Relationship** | `reference_variable`, `compare_to` |
+| **Combinators** | `all_of`, `any_of`, `none_of`, `not`, `one_of`, `at_least`, `at_most`, `exactly` |
+| **Conditional** | `if_then`, `if_then_else` |
 
 📖 **[Full Assertions Reference →](docs/assertions.md)**
 
 ## Supported File Formats
 
-| Format | Extension | Library                                       |
-|--------|-----------|-----------------------------------------------|
-| CDF    | `.cdf`    | [pycdfpp](https://github.com/SciQLop/pycdfpp) |
+| Format | Extension                | Library                                       |
+|--------|--------------------------|-----------------------------------------------|
+| CDF    | `.cdf`                   | [pycdfpp](https://github.com/SciQLop/pycdfpp) |
+| FITS   | `.fits`, `.fit`, `.fts`  | [astropy](https://www.astropy.org/)           |
 
 ## Available Conformance Suites (WIP/Demo)
 
 - **ISTP** - [ISTP Metadata Guidelines](https://spdf.gsfc.nasa.gov/istp_guide/)
 - **PDS4** - [Planetary Data System v4](https://pds.nasa.gov/datastandards/documents/)
+- **SOLARNET** - [SOLARNET Metadata Recommendations](https://solarnet.readthedocs.io/en/stable/index.html)
 
 ## Extending AstraLint
 
 ### Adding a New Codec
 
-Create a new codec in `src/astralint/codecs/`:
+Create a new codec in `src/astralint/codecs/`. Subclasses register themselves
+automatically via `__init_subclass__`, so simply defining the class and importing
+the module is enough to make the codec available:
 
 ```python
-from astralint.base import Codec, File, classproperty
+from astralint.base import Codec, File
 
 
 class MyCodec(Codec):
-    @classproperty
+    @classmethod
     def supported_extensions(cls) -> list[str]:
         return ["ext"]
 
@@ -291,26 +296,38 @@ class MyCodec(Codec):
         ...
 ```
 
-For remote files, AstraLint provides a `get_remote_file` function that handles downloading remote files and `is_remote_file` checks if a file is remote.
+For remote files, AstraLint provides `get_remote_file(url) -> bytes` to fetch
+remote content and `is_remote_file(url) -> bool` to detect URLs.
 
 ### Adding a New Assertion Type
 
-Create a new assertion in `src/astralint/base/yaml_rules/assertions/`:
+Create a new assertion in `src/astralint/base/yaml_rules/assertions/`. Subclasses
+of `BaseAssertion` are auto-registered into the discriminated union via the
+`check` field's Literal value:
 
 ```python
-from typing import Literal, Any
-from .base import BaseAssertion, resolve_path, ValidationResult, File
+from typing import Any, Literal
+
+from astralint.base import File, Severity, ValidationResult
+from astralint.base.yaml_rules.assertions.base import BaseAssertion
 
 
 class MyAssertion(BaseAssertion):
     check: Literal["my_check"] = "my_check"
 
-    # Add custom fields as needed, they will be populated from the YAML rule definition
-    # e.g., expected_value: Any
+    # Add custom fields as needed; they are populated from the YAML rule definition.
+    # expected_value: Any
 
-    def single_assertion(self, file: File, path: str, value: Any) -> ValidationResult:
-        # Implement your validation logic here, this method will be called for each path/value pair that matches the base assertion's path pattern
-        # path is the resolved path in the File model, value is the value at that path
+    def single_assertion(
+        self,
+        file: File,
+        path: str,
+        value: Any,
+        severity: Severity,
+        captures: dict[str, str] | None = None,
+    ) -> ValidationResult:
+        # Called once per (path, value) pair that matched the base assertion's path
+        # pattern. `captures` holds named groups from {name} placeholders, if any.
         ...
 ```
 
