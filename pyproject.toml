@@ -62,6 +62,7 @@ dev = [
     "rich>=14.2.0",
     "basedpyright[pydantic]>=1.37.1",
     "funlog>=0.2.1",
+    "pytest-cov>=7.1.0",
 ]
 
 [project.scripts]
@@ -180,3 +181,18 @@ testpaths = [
 ]
 norecursedirs = []
 filterwarnings = []
+
+[tool.coverage.run]
+source = ["src/astralint"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+fail_under = 80
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "\\.\\.\\.",
+]
