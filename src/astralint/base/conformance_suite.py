@@ -90,9 +90,12 @@ url: {suite.url}
         ignore: list[str] | None = None,
         severity_overrides: dict[str, Severity] | None = None,
     ) -> ValidationResultGroup:
+        from .yaml_rules.assertions.base import clear_flatten_cache
+
         results = []
         rules = filter_rules(self.rules, select, ignore)
         rules = apply_severity_overrides(rules, severity_overrides or {})
+        clear_flatten_cache()
         for rule in rules:
             log.debug(f"Validating rule {rule.name}")
             results.append(rule.check(file))
