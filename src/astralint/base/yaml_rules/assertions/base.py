@@ -51,42 +51,52 @@ def clean_target(raw_path: str) -> str:
     return ""
 
 
+import weakref
+
+# Cache for flatten_object keyed on id(obj). A weakref.finalize on each cached
+# object ensures its entry is removed before its id can be reused, so id()
+# collisions never return stale data. Objects that can't hold weak references
+# (e.g., dicts, lists) are simply not cached.
+_FLATTEN_CACHE: dict[int, list[tuple[str, Any]]] = {}
+
+
+def clear_flatten_cache() -> None:
+    _FLATTEN_CACHE.clear()
+
+
 def flatten_object(obj: Any) -> list[tuple[str, Any]]:
     """Flatten an object into (path, value) pairs."""
-    results = []
+    key = id(obj)
+    cached = _FLATTEN_CACHE.get(key)
+    if cached is not None:
+        return cached
+
+    results: list[tuple[str, Any]] = []
     if isinstance(obj, dict):
-        for k, v in obj.items():
-            if not callable(v):
-                results.append((k, v))
-                results.extend(
-                    [
-                        (f"{k}/{sub_k}", sub_v)
-                        for sub_k, sub_v in flatten_object(v)
-                        if not sub_k.startswith("_")
-                    ]
-                )
+        items = obj.items()
     elif isinstance(obj, list):
-        for i, v in enumerate(obj):
-            if not callable(v):
-                results.append((f"{i}", v))
-                results.extend(
-                    [
-                        (f"{i}/{sub_k}", sub_v)
-                        for sub_k, sub_v in flatten_object(v)
-                        if not sub_k.startswith("_")
-                    ]
-                )
+        items = enumerate(obj)
     elif hasattr(obj, "__dict__"):
-        for k, v in vars(obj).items():
-            if not callable(v):
-                results.append((k, v))
-                results.extend(
-                    [
-                        (f"{k}/{sub_k}", sub_v)
-                        for sub_k, sub_v in flatten_object(v)
-                        if not sub_k.startswith("_")
-                    ]
-                )
+        items = vars(obj).items()
+    else:
+        return results
+
+    for k, v in items:
+        if callable(v):
+            continue
+        path_key = str(k)
+        results.append((path_key, v))
+        results.extend(
+            (f"{path_key}/{sub_k}", sub_v)
+            for sub_k, sub_v in flatten_object(v)
+            if not sub_k.startswith("_")
+        )
+
+    try:
+        weakref.finalize(obj, _FLATTEN_CACHE.pop, key, None)
+        _FLATTEN_CACHE[key] = results
+    except TypeError:
+        pass  # Not weakref-able — skip caching for this object.
     return results
 
 
