@@ -32,7 +32,10 @@ def _render_result(res: ValidationResult) -> Text:
     )
 
     text = Text.from_markup(f"{icon} [bold]{res.reference}[/]: {escape(res.message)}")
-    text.append(f" ({res.severity.value})", style=f"bold {color}")
+
+    # Severity only muddies passing lines; surface it only when the check failed (#11).
+    if not res.valid:
+        text.append(f" ({res.severity.value})", style=f"bold {color}")
 
     # Show target if it's not the generic 'Global'
     if res.target != "Global":
@@ -51,6 +54,9 @@ def _render_group(group: ValidationResultGroup) -> Tree:
     header = Text.assemble(
         (f" {group.name} ", header_style), (f"[{group.rule_reference}]", "italic dim")
     )
+    if group.url:
+        header.append("\n  ↳ ", style="dim")
+        header.append(group.url, style=f"dim link {group.url}")
 
     tree = Tree(header)
     for item in group.results:

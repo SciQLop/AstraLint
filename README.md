@@ -48,6 +48,9 @@ astralint lint myfile.cdf --suite ISTP --select "ISTP-MD-003" --select ".*Global
 # Ignore specific rules by reference ID or name, regex supported
 astralint lint myfile.cdf --suite ISTP --ignore "ISTP-MD-00[0-9]" --ignore "MandatoryGlobalAttributes"
 
+# Show only failed assertions (hide passed and skipped)
+astralint lint myfile.cdf --failed-only
+
 # List available suites
 astralint list-suites
 
@@ -221,7 +224,7 @@ Lists are accessed using numeric indices: `path/to/list/0`, `path/to/list/1`, et
 ## Defining Rules in YAML
 
 Rules can be defined declaratively in YAML files. Example from [
-`MandatoryAttributes.yaml`](src/astralint/suites/ISTP/rules/MandatoryAttributes.yaml):
+`MandatoryGlobalAttributes.yaml`](src/astralint/suites/ISTP/rules/GlobalAttributes/MandatoryGlobalAttributes.yaml):
 
 ```yaml
 name: MandatoryGlobalAttributes

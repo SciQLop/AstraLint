@@ -128,6 +128,7 @@ def lint(
     dest: Path | None = None,
     verbose: bool = False,
     show_passed: bool | None = None,
+    failed_only: bool = False,
     strict: bool = False,
 ):
     """Lint the given file or directory against the specified conformance suite.
@@ -152,6 +153,8 @@ def lint(
         Show detailed output including config file used.
     show_passed : bool, optional
         Show passed assertions in the report. Overrides config file.
+    failed_only : bool
+        Show only failed assertions, hiding passed and skipped ones.
     strict : bool
         Exit with error code on warnings too, not just errors.
     """
@@ -223,6 +226,7 @@ def lint(
             output=cfg.output.format,
             dest=cfg.output.dest,
             show_passed=cfg.output.show_passed,
+            failed_only=failed_only,
         )
 
         # Exit with error code if validation failed
