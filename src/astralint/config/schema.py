@@ -15,7 +15,8 @@ class OutputConfig(BaseModel):
 
     format: Literal["console", "html", "json"] = "console"
     verbose: bool = False
-    show_passed: bool = True
+    # None = reporter default (console is quiet/failures-only; HTML/JSON stay comprehensive).
+    show_passed: bool | None = None
     dest: Path | None = None
 
 

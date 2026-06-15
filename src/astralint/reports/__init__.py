@@ -10,16 +10,24 @@ _REPORTERS = {
 
 
 def report(
-    results, output="console", dest=None, show_passed: bool = True, failed_only: bool = False
+    results, output="console", dest=None, show_passed: bool | None = None, failed_only: bool = False
 ):
-    """The main entry point called by the CLI."""
-    if failed_only:
-        results = results.failures_only()
-    elif not show_passed:
-        results = results.without_passed()
+    """The main entry point called by the CLI.
+
+    Console output is quiet by default (failures + verdict) and computes its
+    verdict from the full results, so filtering is delegated to it. HTML and
+    JSON stay comprehensive unless explicitly narrowed.
+    """
+    if output == "console":
+        return console_report(results, dest, show_passed=show_passed, failed_only=failed_only)
+
     reporter = _REPORTERS.get(output)
     if reporter is None:
         raise ValueError(
             f"Unknown output format '{output}'. Supported formats: {', '.join(sorted(_REPORTERS))}."
         )
+    if failed_only:
+        results = results.failures_only()
+    elif show_passed is False:
+        results = results.without_passed()
     return reporter(results, dest)
