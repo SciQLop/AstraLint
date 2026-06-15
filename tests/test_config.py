@@ -23,7 +23,7 @@ class TestAstraLintConfig:
         assert cfg.ignore == []
         assert cfg.output.format == "console"
         assert cfg.output.verbose is False
-        assert cfg.output.show_passed is True
+        assert cfg.output.show_passed is None  # None = reporter default (console quiet)
 
     def test_config_with_values(self):
         """Config accepts valid values."""

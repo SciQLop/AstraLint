@@ -43,7 +43,7 @@ exclude: []
 output:
   format: console  # console | html | json
   verbose: false
-  show_passed: true
+  # show_passed: true   # console is quiet (failures only) by default; set true to list passing checks
 """
 
 

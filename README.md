@@ -48,8 +48,8 @@ astralint lint myfile.cdf --suite ISTP --select "ISTP-MD-003" --select ".*Global
 # Ignore specific rules by reference ID or name, regex supported
 astralint lint myfile.cdf --suite ISTP --ignore "ISTP-MD-00[0-9]" --ignore "MandatoryGlobalAttributes"
 
-# Show only failed assertions (hide passed and skipped)
-astralint lint myfile.cdf --failed-only
+# Show every check, including the ones that passed (full tree)
+astralint lint myfile.cdf --show-passed
 
 # List available suites
 astralint list-suites
@@ -57,6 +57,12 @@ astralint list-suites
 # Strict mode: exit with error on warnings too
 astralint lint myfile.cdf --strict
 ```
+
+By default the console output is **quiet**, like a typical linter: it lists only
+the errors and warnings that need attention, sorted by severity, and ends with a
+one-line verdict (e.g. `✗ Found 7 problems (3 errors, 4 warnings), plus 13 info
+findings`). Use `--show-passed` to see the full nested tree of every check, and
+`--output html` for an interactive, filterable report.
 
 AstraLint returns exit code `1` on validation errors (or warnings with `--strict`), making it suitable for CI/CD pipelines.
 
