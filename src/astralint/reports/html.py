@@ -92,6 +92,35 @@ _REPORT_CSS = """
         .alr .stat.failed .count { color: var(--alr-error); }
         .alr .stat.warnings .count { color: var(--alr-warning); }
 
+        .alr .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .alr .filter-bar input[type="search"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.6rem 0.9rem;
+            border: 1px solid var(--alr-border);
+            border-radius: 8px;
+            background: var(--alr-card);
+            color: var(--alr-text);
+            font-size: 0.9rem;
+        }
+
+        .alr .filter-bar .failed-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.875rem;
+            color: var(--alr-text-muted);
+            user-select: none;
+            cursor: pointer;
+        }
+
         .alr .results { background: var(--alr-card); border-radius: 12px; border: 1px solid var(--alr-border); }
 
         .alr .group { border-bottom: 1px solid var(--alr-border); }
@@ -119,6 +148,14 @@ _REPORT_CSS = """
 
         .alr .group-header .name { font-weight: 600; }
         .alr .group-header .ref { color: var(--alr-text-muted); font-size: 0.875rem; }
+
+        .alr .group-header .doc-link {
+            font-size: 0.75rem;
+            color: var(--alr-info);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .alr .group-header .doc-link:hover { text-decoration: underline; }
 
         .alr .group-header .badge {
             margin-left: auto;
@@ -202,6 +239,13 @@ _REPORT_BODY = """
             </div>
         </div>
 
+        <div class="filter-bar">
+            <input type="search" id="alr-filter" placeholder="Filter results by text…" autocomplete="off">
+            <label class="failed-toggle">
+                <input type="checkbox" id="alr-failed-only"> Show only failed
+            </label>
+        </div>
+
         <div class="results">
             {{ render_item(results) }}
         </div>
@@ -217,6 +261,25 @@ _REPORT_BODY = """
                 header.parentElement.classList.toggle('collapsed');
             });
         });
+
+        function applyFilter() {
+            const q = document.getElementById('alr-filter').value.toLowerCase();
+            const failedOnly = document.getElementById('alr-failed-only').checked;
+            document.querySelectorAll('.alr .result').forEach(r => {
+                const matchesText = !q || r.textContent.toLowerCase().includes(q);
+                const matchesState = !failedOnly || r.classList.contains('invalid');
+                r.style.display = (matchesText && matchesState) ? '' : 'none';
+            });
+            document.querySelectorAll('.alr .group').forEach(g => {
+                const visible = [...g.querySelectorAll('.result')]
+                    .some(r => r.style.display !== 'none');
+                g.style.display = visible ? '' : 'none';
+                if (visible && (q || failedOnly)) g.classList.remove('collapsed');
+            });
+        }
+
+        document.getElementById('alr-filter').addEventListener('input', applyFilter);
+        document.getElementById('alr-failed-only').addEventListener('change', applyFilter);
     </script>
 """
 
@@ -253,7 +316,7 @@ RESULT_TEMPLATE = """
         <div class="target">@ {{ result.target }}</div>
         {% endif %}
     </div>
-    <span class="severity {{ result.severity.value }}">{{ result.severity.value }}</span>
+    {% if not result.valid %}<span class="severity {{ result.severity.value }}">{{ result.severity.value }}</span>{% endif %}
 </div>
 """
 
@@ -263,6 +326,7 @@ GROUP_TEMPLATE = """
         <span class="arrow">▼</span>
         <span class="name">{{ group.name }}</span>
         {% if group.rule_reference %}<span class="ref">[{{ group.rule_reference }}]</span>{% endif %}
+        {% if group.url %}<a class="doc-link" href="{{ group.url }}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>{% endif %}
         <span class="badge {{ 'pass' if all_valid else 'fail' }}">
             {{ 'PASS' if all_valid else 'FAIL' }}
         </span>

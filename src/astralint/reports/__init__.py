@@ -9,9 +9,13 @@ _REPORTERS = {
 }
 
 
-def report(results, output="console", dest=None, show_passed: bool = True):
+def report(
+    results, output="console", dest=None, show_passed: bool = True, failed_only: bool = False
+):
     """The main entry point called by the CLI."""
-    if not show_passed:
+    if failed_only:
+        results = results.failures_only()
+    elif not show_passed:
         results = results.without_passed()
     reporter = _REPORTERS.get(output)
     if reporter is None:

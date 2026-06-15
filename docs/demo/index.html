@@ -554,6 +554,39 @@ def validate_file_url(url: str, suite_name: str = "ISTP") -> str:
             }
         }
 
+        // Embedded report <script> tags don't run when injected via innerHTML,
+        // so wire up collapse + filtering here after each render.
+        function wireReport() {
+            document.querySelectorAll('.group-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    header.parentElement.classList.toggle('collapsed');
+                });
+            });
+
+            const filterInput = document.getElementById('alr-filter');
+            const failedOnly = document.getElementById('alr-failed-only');
+            if (!filterInput || !failedOnly) return;
+
+            function applyFilter() {
+                const q = filterInput.value.toLowerCase();
+                const onlyFailed = failedOnly.checked;
+                document.querySelectorAll('.alr .result').forEach(r => {
+                    const matchesText = !q || r.textContent.toLowerCase().includes(q);
+                    const matchesState = !onlyFailed || r.classList.contains('invalid');
+                    r.style.display = (matchesText && matchesState) ? '' : 'none';
+                });
+                document.querySelectorAll('.alr .group').forEach(g => {
+                    const visible = [...g.querySelectorAll('.result')]
+                        .some(r => r.style.display !== 'none');
+                    g.style.display = visible ? '' : 'none';
+                    if (visible && (q || onlyFailed)) g.classList.remove('collapsed');
+                });
+            }
+
+            filterInput.addEventListener('input', applyFilter);
+            failedOnly.addEventListener('change', applyFilter);
+        }
+
         // Validate raw bytes. suiteName defaults to the currently-checked radio.
         // Shared by local uploads (processFile) and the postMessage handoff.
         async function validateBytes(uint8Array, name, suiteName) {
@@ -572,12 +605,7 @@ validate_file_bytes(file_bytes.to_py(), file_name, selected_suite)
 
                 results.innerHTML = html;
 
-                // Add click handlers for collapsible groups
-                document.querySelectorAll('.group-header').forEach(header => {
-                    header.addEventListener('click', () => {
-                        header.parentElement.classList.toggle('collapsed');
-                    });
-                });
+                wireReport();
 
             } catch (error) {
                 results.innerHTML = '<div class="status error">✗ Error: ' + error.message + '</div>';
@@ -613,12 +641,7 @@ validate_file_url(file_url, selected_suite)
 
                 results.innerHTML = html;
 
-                // Add click handlers for collapsible groups
-                document.querySelectorAll('.group-header').forEach(header => {
-                    header.addEventListener('click', () => {
-                        header.parentElement.classList.toggle('collapsed');
-                    });
-                });
+                wireReport();
 
             } catch (error) {
                 results.innerHTML = '<div class="status error">✗ Error loading from URL: ' + error.message + '</div>';

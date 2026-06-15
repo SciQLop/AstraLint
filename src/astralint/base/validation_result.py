@@ -24,6 +24,7 @@ class ValidationResultGroup(BaseModel):
     severity: Severity
     results: "list[ValidationResult | ValidationResultGroup]"
     message: str = ""
+    url: str = ""
 
     def extend(
         self,
@@ -92,6 +93,23 @@ class ValidationResultGroup(BaseModel):
                     kept.append(child)
             else:
                 pruned = child.without_passed()
+                if pruned.results:
+                    kept.append(pruned)
+        return self.model_copy(update={"results": kept})
+
+    def failures_only(self) -> "ValidationResultGroup":
+        """Return a copy of this tree with only failing leaves (``valid`` is False).
+
+        Stricter than ``without_passed``: passed *and* skipped leaves are dropped,
+        and groups left empty are pruned. Matches "show only failed assertions".
+        """
+        kept: list[ValidationResult | ValidationResultGroup] = []
+        for child in self.results:
+            if isinstance(child, ValidationResult):
+                if not child.valid:
+                    kept.append(child)
+            else:
+                pruned = child.failures_only()
                 if pruned.results:
                     kept.append(pruned)
         return self.model_copy(update={"results": kept})

@@ -50,6 +50,7 @@ class YamlRule(Rule):
             rule_reference=self.reference,
             results=results,
             severity=self.severity,
+            url=self.url,
         )
 
 
