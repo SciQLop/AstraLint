@@ -533,6 +533,8 @@ def validate_file_url(url: str, suite_name: str = "ISTP") -> str:
                 status.innerHTML = '✓ Ready! Upload a file or load from URL to validate.';
                 document.getElementById('app').style.display = 'block';
 
+                autoRunFromQuery();
+
             } catch (error) {
                 status.className = 'status error';
                 status.innerHTML = '✗ Failed to initialize: ' + error.message;
@@ -608,6 +610,25 @@ validate_file_url(file_url, selected_suite)
             } finally {
                 loadBtn.disabled = false;
             }
+        }
+
+        // Deep-link support: ?url=<file>&suite=<SUITE> prefills and auto-validates.
+        // Lets other tools (e.g. the CDFpp WASM demo) hand a CDF off to AstraLint.
+        function autoRunFromQuery() {
+            const params = new URLSearchParams(window.location.search);
+            const url = params.get('url');
+            if (!url) return;
+
+            const urlInput = document.getElementById('url-input');
+            if (urlInput) urlInput.value = url;
+
+            const suite = params.get('suite');
+            if (suite) {
+                const radio = document.querySelector(`input[name="suite"][value="${suite}"]`);
+                if (radio) radio.checked = true;
+            }
+
+            processFileFromUrl(url);
         }
 
         function applyTheme(theme) {
