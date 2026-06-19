@@ -12,7 +12,10 @@ try:
     @copy_files_to_pyodide(
         file_list=[(_FILE_PATH, _DEST_PATH)], install_wheels=True, recurse_directories=True
     )
-    @run_in_pyodide(packages=["micropip", "pycdfpp"])
+    # pycdfpp ships emscripten wheels on PyPI but is not part of the Pyodide
+    # distribution, so it cannot be loadPackage'd; it is resolved from PyPI by
+    # micropip when the astralint wheel is installed (install_wheels=True).
+    @run_in_pyodide(packages=["micropip"])
     async def test_import_astralint(selenium):
         from astralint.base import list_all_suites
 
