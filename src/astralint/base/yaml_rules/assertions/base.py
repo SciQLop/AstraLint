@@ -191,6 +191,10 @@ class BaseAssertion(BaseEvaluable):
             )
         for path, value, captures in matches:
             result = self.single_assertion(file, path, value, severity=severity, captures=captures)
+            # Surface the actual checked value for display, for scalar checks only
+            # (skip dicts/lists like contains_keys targets).
+            if isinstance(value, (str, int, float, bool)) and not result.value:
+                result = result.model_copy(update={"value": str(value)})
             results.append(result)
         return ValidationResultGroup(
             name=self.__class__.__name__,

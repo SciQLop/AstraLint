@@ -195,6 +195,11 @@ _REPORT_CSS = """
             font-size: 0.8rem; color: var(--alr-text-muted); font-family: monospace;
             margin-left: 0.5rem; white-space: nowrap;
         }
+        .alr .result .value { font-size: 0.8rem; color: var(--alr-text-muted); margin-left: 0.5rem; }
+        .alr .result .value code {
+            font-family: monospace; background: var(--alr-code-bg, rgba(127,127,127,0.15));
+            padding: 0.05rem 0.35rem; border-radius: 4px; color: var(--alr-text); word-break: break-all;
+        }
 
         .alr .severity {
             font-size: 0.625rem;
@@ -320,6 +325,9 @@ RESULT_TEMPLATE = """
         {% if result.reference %}<span class="reference">{{ result.reference }}</span>: {% endif %}<span class="message">{{ result.message }}</span>
         {% if result.target and result.target != 'Global' %}
         <span class="target">@ {{ result.target }}</span>
+        {% endif %}
+        {% if result.value and not result.valid and result.value not in result.message %}
+        <span class="value">got <code>{{ result.value }}</code></span>
         {% endif %}
     </div>
     {% if not result.valid %}<span class="severity {{ result.severity.value }}">{{ result.severity.value }}</span>{% endif %}
