@@ -1,6 +1,6 @@
 name: CDAWebEntryLimits
 description: "CDAWeb allows at most five entries for multi-valued instrument/link attributes"
-url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#instrument_type"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#instrument_type"
 reference: "CDAWEB-GA-001"
 severity: ERROR
 suite: CDAWeb

@@ -1,6 +1,6 @@
 name: LogicalFileIdFormat
 description: "Logical_file_id must match the filename and include date and version"
-url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#logical_file_id"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#logical_file_id"
 reference: "ISTP-GA-004"
 severity: ERROR
 suite: ISTP

@@ -1,6 +1,6 @@
 name: EpochRecommendedAttributes
 description: "Time (epoch) variables should carry recommended time-documentation attributes"
-url: "https://istp-metadata.readthedocs.io/en/latest/04_metadata-variables.html#epoch"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/04_metadata-variables.html#epoch"
 reference: "ISTP-VAR-003"
 severity: WARNING
 suite: ISTP

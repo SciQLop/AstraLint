@@ -1,6 +1,6 @@
 name: FieldnamMaxLength
 description: "FIELDNAM must not exceed 50 characters (hard limit)"
-url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#fieldnam"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#fieldnam"
 reference: "ISTP-VA-021"
 severity: ERROR
 suite: ISTP

@@ -1,6 +1,6 @@
 name: DataVariableAttributes
 description: "Data variables (VAR_TYPE=data) must have additional required attributes"
-url: "https://istp-metadata.readthedocs.io/en/latest/04_metadata-variables.html#data-variables"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/04_metadata-variables.html#data-variables"
 reference: "ISTP-VA-002"
 severity: ERROR
 suite: ISTP

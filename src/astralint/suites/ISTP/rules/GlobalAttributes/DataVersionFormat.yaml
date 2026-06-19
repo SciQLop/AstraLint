@@ -1,6 +1,6 @@
 name: DataVersionFormat
 description: "Data_version must be a valid version string"
-url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#data_version"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#data_version"
 reference: "ISTP-GA-005"
 severity: ERROR
 suite: ISTP

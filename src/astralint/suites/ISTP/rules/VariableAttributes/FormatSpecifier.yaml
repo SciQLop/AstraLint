@@ -1,6 +1,6 @@
 name: FormatSpecifier
 description: "FORMAT must be a valid Fortran format specifier"
-url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#format"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#format"
 reference: "ISTP-VA-010"
 severity: WARNING
 suite: ISTP

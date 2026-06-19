@@ -1,6 +1,6 @@
 name: MandatoryGlobalAttributes
 description: "All mandatory global attributes must be present (ISTP/SPDF required)"
-url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html"
 reference: "ISTP-GA-001"
 severity: ERROR
 suite: ISTP

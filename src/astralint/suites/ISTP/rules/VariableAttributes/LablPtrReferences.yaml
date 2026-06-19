@@ -1,6 +1,6 @@
 name: LablPtrReferences
 description: "LABL_PTR_1, LABL_PTR_2, LABL_PTR_3 must reference existing variables"
-url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#labl_ptr_i"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#labl_ptr_i"
 reference: "ISTP-VA-012"
 severity: ERROR
 suite: ISTP

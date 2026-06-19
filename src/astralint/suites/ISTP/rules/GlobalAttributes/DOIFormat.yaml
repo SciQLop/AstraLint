@@ -1,6 +1,6 @@
 name: DOIFormat
 description: "DOI must use the standard https://doi.org/ format"
-url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#doi"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#doi"
 reference: "ISTP-GA-014"
 severity: WARNING
 suite: ISTP

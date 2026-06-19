@@ -1,6 +1,6 @@
 name: DataTypeFormat
 description: "Data_type must follow ISTP convention: ABBREV>Full_description"
-url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#data_type"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#data_type"
 reference: "ISTP-GA-006"
 severity: ERROR
 suite: ISTP

@@ -1,6 +1,6 @@
 name: RecommendedGlobalAttributes
 description: "Recommended global attributes should be present for better data discoverability"
-url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html"
 reference: "ISTP-GA-002"
 severity: WARNING
 suite: ISTP
