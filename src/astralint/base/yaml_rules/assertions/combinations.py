@@ -90,6 +90,24 @@ def _evaluate_per_capture(
     return ValidationResultGroup(name=name, rule_reference="", results=results, severity=severity)
 
 
+def _first_failure(
+    result: ValidationResult | ValidationResultGroup,
+) -> tuple[str, str] | None:
+    """The (message, target) of the first genuinely-failing leaf under ``result``.
+
+    Lets a combinator report the actual reason it failed instead of a generic
+    summary like "Assertion failed in 'all_of'"."""
+    if isinstance(result, ValidationResultGroup):
+        for child in result.results:
+            found = _first_failure(child)
+            if found is not None:
+                return found
+        return None
+    if not result.valid and result.severity != Severity.SKIPPED:
+        return result.message, result.target
+    return None
+
+
 class AllOf(BaseAssertionGroup):
     model_config = ConfigDict(frozen=True)
     check: Literal["all_of"] = "all_of"  # type: ignore[assignment]
@@ -98,12 +116,14 @@ class AllOf(BaseAssertionGroup):
         for assertion in self.assertions:
             result = assertion.evaluate(file, severity)
             if not result.valid:
+                detail = _first_failure(result)
+                message, target = detail if detail else ("Assertion failed in 'all_of'", "")
                 return ValidationResult(
                     valid=False,
                     reference="",
                     severity=severity,
-                    message=self._result_message(False, "Assertion failed in 'all_of'"),
-                    target="",
+                    message=self._result_message(False, message),
+                    target=target,
                 )
         return ValidationResult(
             valid=True,

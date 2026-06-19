@@ -181,6 +181,9 @@ _REPORT_CSS = """
 
         .alr .result:last-child { border-bottom: none; }
 
+        .alr .result.sev-ERROR { border-left: 3px solid var(--alr-error); padding-left: calc(1.5rem - 3px); }
+        .alr .result.sev-WARNING { border-left: 3px solid var(--alr-warning); padding-left: calc(1.5rem - 3px); }
+
         .alr .result .icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
         .alr .result.valid .icon { color: var(--alr-success); }
         .alr .result.invalid .icon { color: var(--alr-error); }
@@ -188,7 +191,10 @@ _REPORT_CSS = """
         .alr .result .content { flex: 1; min-width: 0; }
         .alr .result .message { word-break: break-word; }
         .alr .result .reference { font-weight: 600; color: var(--alr-text); }
-        .alr .result .target { font-size: 0.875rem; color: var(--alr-info); font-family: monospace; }
+        .alr .result .target {
+            font-size: 0.8rem; color: var(--alr-text-muted); font-family: monospace;
+            margin-left: 0.5rem; white-space: nowrap;
+        }
 
         .alr .severity {
             font-size: 0.625rem;
@@ -308,13 +314,12 @@ HTML_TEMPLATE = (
 EMBED_TEMPLATE = "<style>" + _REPORT_CSS + "</style>\n" + _REPORT_BODY
 
 RESULT_TEMPLATE = """
-<div class="result {{ 'valid' if result.valid else 'invalid' }}">
+<div class="result {{ 'valid' if result.valid else 'invalid' }}{% if not result.valid and result.severity.value in ('ERROR', 'WARNING') %} sev-{{ result.severity.value }}{% endif %}">
     <span class="icon">{{ '✓' if result.valid else '✗' }}</span>
     <div class="content">
-        <span class="reference">{{ result.reference }}</span>: 
-        <span class="message">{{ result.message }}</span>
+        {% if result.reference %}<span class="reference">{{ result.reference }}</span>: {% endif %}<span class="message">{{ result.message }}</span>
         {% if result.target and result.target != 'Global' %}
-        <div class="target">@ {{ result.target }}</div>
+        <span class="target">@ {{ result.target }}</span>
         {% endif %}
     </div>
     {% if not result.valid %}<span class="severity {{ result.severity.value }}">{{ result.severity.value }}</span>{% endif %}
@@ -333,7 +338,7 @@ GROUP_TEMPLATE = """
         </span>
     </div>
     <div class="group-content">
-        {% for item in group.results %}
+        {% for item in children %}
             {{ render_item(item) }}
         {% endfor %}
     </div>
@@ -387,11 +392,30 @@ def _render_item(item: ValidationResult | ValidationResultGroup) -> Markup:
     return Markup(
         template.render(
             group=item,
+            children=_display_children(item),
             all_valid=_is_all_valid(item),
             render_item=_render_item,
             doc_url=_safe_doc_url(item.url),
         )
     )
+
+
+def _display_children(
+    group: ValidationResultGroup,
+) -> list[ValidationResult | ValidationResultGroup]:
+    """Children to render directly under ``group``.
+
+    Internal wrapper groups — the per-assertion ``…Assertion``/``IfThen`` groups,
+    identifiable by an empty ``rule_reference`` — are flattened away so a rule's
+    findings render directly beneath it instead of under a noisy extra layer.
+    """
+    items: list[ValidationResult | ValidationResultGroup] = []
+    for child in group.results:
+        if isinstance(child, ValidationResultGroup) and not child.rule_reference:
+            items.extend(_display_children(child))
+        else:
+            items.append(child)
+    return items
 
 
 def _render_report(template_str: str, results: ValidationResultGroup) -> str:
