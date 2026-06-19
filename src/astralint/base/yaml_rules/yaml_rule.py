@@ -65,4 +65,12 @@ def register_yaml_rule(yaml_path: Path):
         data = yaml.safe_load(f)
     suite = data["suite"]
     rule = YamlRule(**data)
-    RULES.setdefault(suite, []).append(rule)
+    # Idempotent: a suite may be (re)loaded several times — directly and as a
+    # parent of an inheriting suite — so replace any rule of the same name
+    # instead of appending a duplicate.
+    rules = RULES.setdefault(suite, [])
+    for index, existing in enumerate(rules):
+        if existing.name == rule.name:
+            rules[index] = rule
+            return
+    rules.append(rule)

@@ -118,6 +118,10 @@ class ConformanceSuiteYaml(BaseModel):
     inherit_from: list[str] = Field(
         default_factory=list, description="List of suite names to inherit rules from."
     )
+    severity_overrides: dict[str, str] = Field(
+        default_factory=dict,
+        description="Override the severity of inherited rules, keyed by rule reference.",
+    )
 
 
 def load_suite_from_yaml(path: str) -> ConformanceSuiteYaml:
@@ -141,15 +145,24 @@ def parents_rules(parents: list[str]) -> list[Rule]:
 
 class _ConformanceSuiteProtocolCtor:
     def __init__(
-        self, name: str, rules_lookup_dir: str, inherit_from: list[str] | None = None, **kwargs
+        self,
+        name: str,
+        rules_lookup_dir: str,
+        inherit_from: list[str] | None = None,
+        severity_overrides: dict[str, str] | None = None,
+        **kwargs,
     ):
         self.kwargs = kwargs
         self.name = name
         self.rules_lookup_dir = rules_lookup_dir
         self.inherit_from = inherit_from or []
+        self.severity_overrides = severity_overrides or {}
 
     def __call__(self) -> ConformanceSuite:
         inherited_rules = parents_rules(self.inherit_from)
+        if self.severity_overrides:
+            overrides = {ref: Severity(value) for ref, value in self.severity_overrides.items()}
+            inherited_rules = list(apply_severity_overrides(inherited_rules, overrides))
 
         load_rules_from_dir(self.rules_lookup_dir)
         own_rules = get_rules_for_suite(self.name)
@@ -167,6 +180,7 @@ def register_suite(
     rules_lookup_dir: str,
     alternative_names: list[str] | None = None,
     inherit_from: list[str] | None = None,
+    severity_overrides: dict[str, str] | None = None,
 ) -> _ConformanceSuiteProtocolCtor:
     ctor = _ConformanceSuiteProtocolCtor(
         description=description,
@@ -174,6 +188,7 @@ def register_suite(
         name=name,
         rules_lookup_dir=rules_lookup_dir,
         inherit_from=inherit_from,
+        severity_overrides=severity_overrides,
     )
     SUITES[name] = ctor
     if alternative_names:

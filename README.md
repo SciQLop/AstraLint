@@ -282,6 +282,7 @@ assertions:
 ## Available Conformance Suites (WIP/Demo)
 
 - **ISTP** - [ISTP Metadata Guidelines](https://istp-metadata.readthedocs.io/)
+- **CDAWeb** - [CDAWeb](https://cdaweb.gsfc.nasa.gov/) ingestion profile: inherits ISTP and promotes the CDAWeb-required attributes (`Instrument_type`, `Mission_group`) to errors, plus CDAWeb-specific entry limits
 - **PDS4** - [Planetary Data System v4](https://pds.nasa.gov/datastandards/documents/)
 - **SOLARNET** - [SOLARNET Metadata Recommendations](https://solarnet.readthedocs.io/en/stable/index.html)
 

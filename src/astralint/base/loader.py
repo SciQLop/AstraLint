@@ -68,4 +68,5 @@ def load_suite_from_dir(path: str | Path, suite_name: str):
             rules_lookup_dir=str(suite_dir / "rules"),
             name=suite.name,
             inherit_from=suite.inherit_from,
+            severity_overrides=suite.severity_overrides,
         )
