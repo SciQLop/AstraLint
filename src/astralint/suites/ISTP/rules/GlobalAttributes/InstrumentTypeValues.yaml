@@ -1,6 +1,6 @@
 name: InstrumentTypeValues
 description: "Instrument_type should use standard ISTP values"
-url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#instrument_type"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#instrument-type"
 reference: "ISTP-GA-010"
 severity: WARNING
 suite: ISTP

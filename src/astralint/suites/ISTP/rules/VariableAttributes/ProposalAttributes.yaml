@@ -1,6 +1,6 @@
 name: ProposalAttributes
 description: "ISTP proposal attributes (informational)"
-url: "https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#coordinate_system"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#coordinate-system"
 reference: "ISTP-INFO-001"
 severity: INFO
 suite: ISTP

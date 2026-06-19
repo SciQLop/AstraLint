@@ -1,6 +1,6 @@
 name: CDAWebRequiredGlobalAttributes
 description: "Global attributes that are ISTP-recommended but required by CDAWeb"
-url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#instrument_type"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#instrument-type"
 reference: "ISTP-GA-016"
 # Recommended by ISTP, required for ingestion into CDAWeb -> warning, not error.
 severity: WARNING
