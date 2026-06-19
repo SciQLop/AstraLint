@@ -187,6 +187,7 @@ _REPORT_CSS = """
         .alr .result .icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
         .alr .result.valid .icon { color: var(--alr-success); }
         .alr .result.invalid .icon { color: var(--alr-error); }
+        .alr .result.sev-WARNING .icon { color: var(--alr-warning); }
 
         .alr .result .content { flex: 1; min-width: 0; }
         .alr .result .message { word-break: break-word; }

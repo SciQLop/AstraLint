@@ -91,6 +91,13 @@ def test_failed_results_get_a_severity_accent_class():
     assert "sev-ERROR" in html
 
 
+def test_warning_icon_styled_amber_not_red():
+    """A WARNING row's ✗ icon must use the warning colour, not the error colour,
+    so warnings don't read as errors."""
+    html = generate_html_fragment(_rule_with_wrapper())
+    assert ".alr .result.sev-WARNING .icon { color: var(--alr-warning); }" in html
+
+
 def _rule_with_leaf(message: str, value: str) -> ValidationResultGroup:
     leaf = ValidationResult(
         valid=False, reference="", severity=Severity.ERROR, message=message, value=value
