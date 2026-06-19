@@ -408,18 +408,25 @@ def _render_item(item: ValidationResult | ValidationResultGroup) -> Markup:
     )
 
 
+def _is_internal_wrapper(group: ValidationResultGroup) -> bool:
+    """An internal per-assertion ``…Assertion``/``IfThen`` wrapper, as opposed to a
+    rule group (has a ``rule_reference``) or a per-file/suite group (carries a
+    ``message`` and/or ``url``). Only these are flattened away."""
+    return not group.rule_reference and not group.message and not group.url
+
+
 def _display_children(
     group: ValidationResultGroup,
 ) -> list[ValidationResult | ValidationResultGroup]:
     """Children to render directly under ``group``.
 
-    Internal wrapper groups — the per-assertion ``…Assertion``/``IfThen`` groups,
-    identifiable by an empty ``rule_reference`` — are flattened away so a rule's
-    findings render directly beneath it instead of under a noisy extra layer.
+    Internal wrapper groups are flattened away so a rule's findings render directly
+    beneath it instead of under a noisy extra layer, while real groupings (rule
+    groups and per-file suite groups) are preserved.
     """
     items: list[ValidationResult | ValidationResultGroup] = []
     for child in group.results:
-        if isinstance(child, ValidationResultGroup) and not child.rule_reference:
+        if isinstance(child, ValidationResultGroup) and _is_internal_wrapper(child):
             items.extend(_display_children(child))
         else:
             items.append(child)
