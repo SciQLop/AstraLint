@@ -87,6 +87,34 @@ class TestUrlPropagation:
         assert 'href="https://example.org/istp#DOI"' in html
 
 
+class TestHtmlEscaping:
+    def _group(self, url: str = "", message: str = "msg") -> ValidationResultGroup:
+        return ValidationResultGroup(
+            name="R",
+            rule_reference="R-1",
+            url=url,
+            severity=Severity.ERROR,
+            results=[
+                ValidationResult(
+                    valid=False, reference="R-1", severity=Severity.ERROR, message=message
+                )
+            ],
+        )
+
+    def test_message_with_html_is_escaped(self):
+        html = generate_html(self._group(message="<script>alert(1)</script>"))
+        assert "<script>alert(1)</script>" not in html
+        assert "&lt;script&gt;" in html
+
+    def test_url_with_quotes_is_escaped(self):
+        html = generate_html(self._group(url='https://x.org/"><img src=x onerror=alert(1)>'))
+        assert '"><img' not in html
+
+    def test_javascript_scheme_url_is_not_linked(self):
+        html = generate_html(self._group(url="javascript:alert(1)"))
+        assert "javascript:alert(1)" not in html
+
+
 class TestSeverityOnlyOnFailure:
     def _group(self) -> ValidationResultGroup:
         return ValidationResultGroup(

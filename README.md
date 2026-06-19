@@ -51,6 +51,9 @@ astralint lint myfile.cdf --suite ISTP --ignore "ISTP-MD-00[0-9]" --ignore "Mand
 # Show every check, including the ones that passed (full tree)
 astralint lint myfile.cdf --show-passed
 
+# Show only failed assertions, pruning passed and skipped from the full tree
+astralint lint myfile.cdf --show-passed --failed-only
+
 # List available suites
 astralint list-suites
 
