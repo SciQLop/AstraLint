@@ -449,6 +449,30 @@ def test_epoch_recommended_tt2000_does_not_require_time_base():
     assert rule.check(f).valid
 
 
+# --- any_match existential semantics -----------------------------------------
+
+
+def test_any_match_fails_on_zero_matches_even_when_lenient():
+    """An existential quantifier must fail when nothing matches, regardless of a
+    lenient error_if_no_match on the wrapped assertion."""
+    from astralint.base.validation_result import Severity
+    from astralint.base.yaml_rules.assertions.combinations import AnyMatch
+
+    f = make_file(variables={"B": var("B", "data")})
+    am = AnyMatch.model_validate(
+        {
+            "check": "any_match",
+            "assertion": {
+                "path": "variables/Nonexistent/data_type",
+                "check": "in",
+                "values": ["TT2000"],
+                "error_if_no_match": False,
+            },
+        }
+    )
+    assert not am.evaluate(f, Severity.ERROR).valid
+
+
 # --- URLs point to the ReadTheDocs guidelines --------------------------------
 
 

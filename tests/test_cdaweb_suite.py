@@ -2,8 +2,14 @@
 
 from pathlib import Path
 
+import pytest
+
 import astralint
-from astralint.base.conformance_suite import ConformanceSuite, get_suite
+from astralint.base.conformance_suite import (
+    ConformanceSuite,
+    _ConformanceSuiteProtocolCtor,
+    get_suite,
+)
 from astralint.base.file import Attribute, DataType, File
 from astralint.base.validation_result import ValidationResultGroup
 from astralint.base.yaml_rules.yaml_rule import load_yaml_rule
@@ -75,3 +81,15 @@ def test_suite_construction_is_idempotent():
     first = len(suite("ISTP").rules)
     second = len(suite("ISTP").rules)
     assert first == second
+
+
+def test_invalid_severity_override_raises_contextual_error():
+    ctor = _ConformanceSuiteProtocolCtor(
+        name="BadSuite",
+        rules_lookup_dir="/nonexistent",
+        severity_overrides={"ISTP-GA-016": "CRITICAL"},
+        description="x",
+        url="x",
+    )
+    with pytest.raises(ValueError, match="BadSuite"):
+        ctor()
