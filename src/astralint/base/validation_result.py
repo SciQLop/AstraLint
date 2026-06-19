@@ -16,6 +16,7 @@ class ValidationResult(BaseModel):
     severity: Severity
     message: str
     target: str = "Global"
+    value: str = ""  # the actual checked value, for display (scalar checks only)
 
 
 class ValidationResultGroup(BaseModel):
