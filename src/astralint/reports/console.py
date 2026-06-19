@@ -47,8 +47,8 @@ def _render_result(res: ValidationResult) -> Text:
     if not res.valid:
         text.append(f" ({res.severity.value})", style=f"bold {color}")
 
-    # Show target if it's not the generic 'Global'
-    if res.target != "Global":
+    # Show target if it's a concrete one (not the generic 'Global' nor an empty target).
+    if res.target and res.target != "Global":
         text.append(f" @ {res.target}", style="italic cyan")
 
     return text
@@ -193,6 +193,14 @@ def _render_quiet(results: ValidationResultGroup, console: Console):
     console.print(_summary_text(counts))
 
 
+def _emit(results: ValidationResultGroup, console: Console, show_passed: bool | None):
+    if show_passed:
+        console_report(results, console)
+        console.print(_summary_text(results.count_by_severity()))
+    else:
+        _render_quiet(results, console)
+
+
 def report(
     results: ValidationResultGroup,
     dest: Path | None = None,
@@ -202,11 +210,15 @@ def report(
     """The main entry point called by the CLI.
 
     Quiet by default (failures + verdict, linter-style). ``show_passed=True``
-    restores the full nested tree.
+    restores the full nested tree; ``failed_only`` prunes passing/skipped leaves
+    even in that tree. With ``dest`` the (uncolored) output is written to a file.
     """
-    console = Console()
-    if show_passed:
-        console_report(results, console)
-        console.print(_summary_text(results.count_by_severity()))
+    if failed_only:
+        results = results.failures_only()
+
+    if dest:
+        with dest.open("w") as fh:
+            _emit(results, Console(file=fh, color_system=None), show_passed)
+        print(f"Report saved to: {dest}")
     else:
-        _render_quiet(results, console)
+        _emit(results, Console(), show_passed)

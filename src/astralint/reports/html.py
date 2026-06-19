@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 
 from jinja2 import Template
+from markupsafe import Markup
 
 from ..base import Severity, ValidationResult, ValidationResultGroup
 
@@ -312,7 +313,7 @@ RESULT_TEMPLATE = """
     <div class="content">
         <span class="reference">{{ result.reference }}</span>: 
         <span class="message">{{ result.message }}</span>
-        {% if result.target != 'Global' %}
+        {% if result.target and result.target != 'Global' %}
         <div class="target">@ {{ result.target }}</div>
         {% endif %}
     </div>
@@ -326,7 +327,7 @@ GROUP_TEMPLATE = """
         <span class="arrow">▼</span>
         <span class="name">{{ group.name }}</span>
         {% if group.rule_reference %}<span class="ref">[{{ group.rule_reference }}]</span>{% endif %}
-        {% if group.url %}<a class="doc-link" href="{{ group.url }}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>{% endif %}
+        {% if doc_url %}<a class="doc-link" href="{{ doc_url }}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>{% endif %}
         <span class="badge {{ 'pass' if all_valid else 'fail' }}">
             {{ 'PASS' if all_valid else 'FAIL' }}
         </span>
@@ -368,18 +369,33 @@ def _is_all_valid(item: ValidationResult | ValidationResultGroup) -> bool:
     return all(_is_all_valid(child) for child in item.results)
 
 
-def _render_item(item: ValidationResult | ValidationResultGroup) -> str:
-    """Render a single item (result or group) to HTML."""
+def _safe_doc_url(url: str) -> str:
+    """Only allow http(s) links; block javascript:/data: and other schemes."""
+    return url if url.startswith(("http://", "https://")) else ""
+
+
+def _render_item(item: ValidationResult | ValidationResultGroup) -> Markup:
+    """Render a single item (result or group) to HTML.
+
+    Returns Markup so the autoescaping templates inject already-rendered children
+    without re-escaping, while every data field is escaped.
+    """
     if isinstance(item, ValidationResult):
-        template = Template(RESULT_TEMPLATE)
-        return template.render(result=item)
-    else:
-        template = Template(GROUP_TEMPLATE)
-        return template.render(group=item, all_valid=_is_all_valid(item), render_item=_render_item)
+        template = Template(RESULT_TEMPLATE, autoescape=True)
+        return Markup(template.render(result=item))
+    template = Template(GROUP_TEMPLATE, autoescape=True)
+    return Markup(
+        template.render(
+            group=item,
+            all_valid=_is_all_valid(item),
+            render_item=_render_item,
+            doc_url=_safe_doc_url(item.url),
+        )
+    )
 
 
 def _render_report(template_str: str, results: ValidationResultGroup) -> str:
-    template = Template(template_str)
+    template = Template(template_str, autoescape=True)
     stats = _count_stats(results)
     return template.render(
         results=results,

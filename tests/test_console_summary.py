@@ -146,3 +146,35 @@ class TestHtmlUnaffectedByDefault:
         out = capsys.readouterr().out
         # HTML stays comprehensive (filter box narrows client-side), passing rule present.
         assert "version ok" in out
+
+
+class TestConsoleDestAndFailedOnly:
+    def test_dest_writes_console_output_to_file(self, tmp_path):
+        dest = tmp_path / "report.txt"
+        report(_mixed(), output="console", dest=dest)
+        content = dest.read_text()
+        assert "ISTP-GA-004" in content
+        assert "Found" in content
+
+    def test_failed_only_prunes_tree_even_with_show_passed(self, capsys):
+        report(_mixed(), output="console", show_passed=True, failed_only=True)
+        out = capsys.readouterr().out
+        assert "ISTP-GA-004" in out  # failing rule kept
+        assert "version ok" not in out  # passing leaf pruned despite show_passed
+
+
+class TestTreeEmptyTarget:
+    def test_tree_omits_at_for_empty_target(self, capsys):
+        group = ValidationResultGroup(
+            name="R",
+            rule_reference="R-1",
+            severity=Severity.ERROR,
+            results=[
+                ValidationResult(
+                    valid=False, reference="R-1", severity=Severity.ERROR, message="m", target=""
+                )
+            ],
+        )
+        report(group, output="console", show_passed=True)
+        out = capsys.readouterr().out
+        assert "@ " not in out
