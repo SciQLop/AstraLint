@@ -1,6 +1,6 @@
 name: MetadataVariableAttributes
 description: "Metadata variables must have required attributes per ISTP spec"
-url: "https://istp-metadata.readthedocs.io/en/latest/04_metadata-variables.html#metadata-variables"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/04_metadata-variables.html#metadata-variables"
 reference: "ISTP-VA-015"
 severity: ERROR
 suite: ISTP

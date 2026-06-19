@@ -1,6 +1,6 @@
 name: DescriptorFormat
 description: "Descriptor must follow ISTP convention: ABBREV>Full_description"
-url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#descriptor"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#descriptor"
 reference: "ISTP-GA-008"
 severity: ERROR
 suite: ISTP

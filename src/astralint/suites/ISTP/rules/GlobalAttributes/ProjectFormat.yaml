@@ -1,6 +1,6 @@
 name: ProjectFormat
 description: "Project must follow ISTP convention"
-url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#project"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#project"
 reference: "ISTP-GA-012"
 # Project is a *Recommended* attribute, so a malformed value is a warning, not an error.
 severity: WARNING

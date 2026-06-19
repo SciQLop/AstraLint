@@ -1,6 +1,6 @@
 name: TextNotEmpty
 description: "TEXT attribute must contain meaningful description of the data"
-url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#text"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#text"
 reference: "ISTP-GA-011"
 severity: ERROR
 suite: ISTP

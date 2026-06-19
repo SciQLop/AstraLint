@@ -1,6 +1,6 @@
 name: VarTypeValues
 description: "VAR_TYPE must be one of the allowed ISTP values"
-url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#var_type"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#var_type"
 reference: "ISTP-VA-004"
 severity: ERROR
 suite: ISTP

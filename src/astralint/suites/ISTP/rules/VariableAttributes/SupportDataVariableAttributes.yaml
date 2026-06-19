@@ -1,6 +1,6 @@
 name: SupportDataVariableAttributes
 description: "Support_data variables must have required attributes"
-url: "https://istp-metadata.readthedocs.io/en/latest/04_metadata-variables.html#support_data-variables"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/04_metadata-variables.html#support_data-variables"
 reference: "ISTP-VA-003"
 severity: ERROR
 suite: ISTP

@@ -1,6 +1,6 @@
 name: LogicalSourceFormat
 description: "Logical_source must follow ISTP naming convention: source_descriptor_datatype"
-url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#logical_source"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#logical_source"
 reference: "ISTP-GA-003"
 severity: ERROR
 suite: ISTP

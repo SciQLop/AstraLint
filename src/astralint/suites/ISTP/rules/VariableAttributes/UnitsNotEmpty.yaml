@@ -1,6 +1,6 @@
 name: UnitsNotEmpty
 description: "UNITS attribute must not be empty (use a single blank space ' ' for no units)"
-url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#units"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#units"
 reference: "ISTP-VA-009"
 severity: ERROR
 suite: ISTP

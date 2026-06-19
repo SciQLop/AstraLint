@@ -1,6 +1,6 @@
 name: MandatoryVariableAttributes
 description: "All variables must have required ISTP variable attributes"
-url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html"
 reference: "ISTP-VA-001"
 severity: ERROR
 suite: ISTP

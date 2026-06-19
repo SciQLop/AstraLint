@@ -1,6 +1,6 @@
 name: FillvalOutsideRange
 description: "FILLVAL must be outside the [VALIDMIN, VALIDMAX] range"
-url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#fillval"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#fillval"
 reference: "ISTP-VA-019"
 severity: ERROR
 suite: ISTP

@@ -1,6 +1,6 @@
 name: EpochAttributes
 description: "Time (epoch) variables must be support_data"
-url: "https://istp-metadata.readthedocs.io/en/latest/04_metadata-variables.html#epoch"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/04_metadata-variables.html#epoch"
 reference: "ISTP-VAR-002"
 severity: ERROR
 suite: ISTP

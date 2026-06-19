@@ -1,6 +1,6 @@
 name: GenerationDateFormat
 description: "Generation_date must use yyyymmdd format"
-url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#generation_date"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#generation_date"
 reference: "ISTP-GA-015"
 severity: WARNING
 suite: ISTP

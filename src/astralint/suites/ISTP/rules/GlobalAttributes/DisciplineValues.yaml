@@ -1,6 +1,6 @@
 name: DisciplineValues
 description: "Discipline should use standard ISTP values"
-url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#discipline"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#discipline"
 reference: "ISTP-GA-009"
 severity: WARNING
 suite: ISTP

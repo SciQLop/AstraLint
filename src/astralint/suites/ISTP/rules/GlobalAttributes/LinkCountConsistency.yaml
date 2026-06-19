@@ -1,6 +1,6 @@
 name: LinkCountConsistency
 description: "HTTP_LINK, LINK_TEXT, and LINK_TITLE must have the same number of entries"
-url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#link_text-link_title-http_link"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#link_text-link_title-http_link"
 reference: "ISTP-GA-013"
 severity: ERROR
 suite: ISTP
