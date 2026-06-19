@@ -39,7 +39,9 @@ classifiers = [
 # ---- Main dependencies ----
 
 dependencies = [
-    "astropy<=7.0.1; sys_platform == 'emscripten'",
+    # emscripten: Pyodide bundles astropy (7.0.1 on 0.29.x, 7.2.0 on 314) — accept
+    # both so the constraint is satisfiable on the current and the next Pyodide.
+    "astropy>=7.0.1; sys_platform == 'emscripten'",
     "astropy>=7.2.0; sys_platform != 'emscripten'",
     "cyclopts>=4.5.2",
     "jinja2>=3.1.0",
