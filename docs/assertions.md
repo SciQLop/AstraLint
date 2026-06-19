@@ -26,6 +26,7 @@ Assertions are the building blocks of validation rules. Each assertion checks a 
 | `none_of` | Combinator | None must pass (NOR) |
 | `not` | Combinator | Nested assertion must fail (NOT) |
 | `one_of` | Combinator | Exactly one must pass (XOR) |
+| `any_match` | Combinator | At least one match of a wildcard assertion passes (exists) |
 | `if_then` | Conditional | If condition passes, then assertion must pass |
 | `if_then_else` | Conditional | If-then with else branch |
 | `at_least` | Counting | At least N assertions must pass |
@@ -330,6 +331,24 @@ At least one nested assertion must pass (logical OR).
     - path: "DEPEND_TIME"
       check: exists
       message: ""
+```
+
+### `any_match`
+
+Wraps a single assertion and passes if **at least one** of its matches passes
+(existential quantifier). A wildcard-path assertion (e.g. `variables/.*/data_type`)
+normally only "passes" when *every* matched value satisfies it; `any_match` flips
+that to "passes when at least one match satisfies it". This is the way to express
+"the dataset contains at least one variable of kind X" without assuming a name.
+
+```yaml
+# The dataset must contain at least one CDF time (epoch) variable, under any name.
+- check: any_match
+  message: "{% if valid %}dataset contains a CDF time variable{% else %}dataset must contain a CDF time variable{% endif %}"
+  assertion:
+    path: "variables/.*/data_type"
+    check: in
+    values: [CDFEPOCH, CDFEPOCH16, TT2000]
 ```
 
 ### `none_of`

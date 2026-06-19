@@ -267,7 +267,7 @@ assertions:
 | **String** | `matches` |
 | **Collection** | `contains_keys`, `in`, `not_in`, `length`, `not_empty`, `requires`, `array_shape` |
 | **Relationship** | `reference_variable`, `compare_to` |
-| **Combinators** | `all_of`, `any_of`, `none_of`, `not`, `one_of`, `at_least`, `at_most`, `exactly` |
+| **Combinators** | `all_of`, `any_of`, `any_match`, `none_of`, `not`, `one_of`, `at_least`, `at_most`, `exactly` |
 | **Conditional** | `if_then`, `if_then_else` |
 
 📖 **[Full Assertions Reference →](docs/assertions.md)**

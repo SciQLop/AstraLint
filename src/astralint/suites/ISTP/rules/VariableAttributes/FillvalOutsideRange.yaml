@@ -18,10 +18,17 @@ assertions:
         - CDFEPOCH
         - CDFEPOCH16
     then:
+      # Only meaningful when FILLVAL and both bounds are present; otherwise the
+      # range is undefined and the check is skipped (the missing VALIDMIN/VALIDMAX
+      # are reported by the data/support_data rules instead).
       check: if_then
       if:
-        path: "variables/{var}/attributes/FILLVAL/values/0"
-        check: exists
+        path: "variables/{var}/attributes"
+        check: contains_keys
+        keys:
+          - FILLVAL
+          - VALIDMIN
+          - VALIDMAX
       then:
         check: any_of
         message: "{% if valid %}Attribute FILLVAL of {var} is outside [VALIDMIN, VALIDMAX] range{% else %}Attribute FILLVAL of {var} must be outside [VALIDMIN, VALIDMAX] range (or NaN){% endif %}"

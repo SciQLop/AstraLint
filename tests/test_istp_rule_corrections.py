@@ -318,6 +318,22 @@ def test_fillval_range_check_exempts_time_types():
     assert rule.check(f).valid
 
 
+def test_fillval_range_check_skipped_without_bounds():
+    """When VALIDMIN/VALIDMAX are absent the range is undefined, so the check must
+    be skipped rather than reporting a 'comparison target not found' false error."""
+    f = make_file(
+        variables={
+            "B": var(
+                "B",
+                "data",
+                {"FILLVAL": attr("FILLVAL", [-1e31], DataType.FLOAT64)},  # no VALIDMIN/MAX
+            )
+        }
+    )
+    rule = load_rule("VariableAttributes", "FillvalOutsideRange")
+    assert rule.check(f).valid
+
+
 def test_fillval_nan_is_allowed():
     f = make_file(
         variables={
