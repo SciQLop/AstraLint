@@ -535,6 +535,10 @@ def validate_file_url(url: str, suite_name: str = "ISTP") -> str:
 
                 autoRunFromQuery();
 
+                // Tell an opener (e.g. the CDFpp WASM demo) we're ready to receive
+                // a file via postMessage. See the 'message' listener below.
+                if (window.opener) window.opener.postMessage({ type: 'astralint-ready' }, '*');
+
             } catch (error) {
                 status.className = 'status error';
                 status.innerHTML = '✗ Failed to initialize: ' + error.message;
@@ -542,18 +546,17 @@ def validate_file_url(url: str, suite_name: str = "ISTP") -> str:
             }
         }
 
-        async function processFile(file) {
+        // Validate raw bytes. suiteName defaults to the currently-checked radio.
+        // Shared by local uploads (processFile) and the postMessage handoff.
+        async function validateBytes(uint8Array, name, suiteName) {
             const results = document.getElementById('results');
             results.innerHTML = '<div class="status loading"><div class="spinner"></div><span>Validating...</span></div>';
 
             try {
-                const arrayBuffer = await file.arrayBuffer();
-                const uint8Array = new Uint8Array(arrayBuffer);
-
                 // Pass file to Python
                 pyodide.globals.set('file_bytes', uint8Array);
-                pyodide.globals.set('file_name', file.name);
-                pyodide.globals.set('selected_suite', document.querySelector('input[name="suite"]:checked').value);
+                pyodide.globals.set('file_name', name);
+                pyodide.globals.set('selected_suite', suiteName || document.querySelector('input[name="suite"]:checked').value);
 
                 const html = await pyodide.runPythonAsync(`
 validate_file_bytes(file_bytes.to_py(), file_name, selected_suite)
@@ -572,6 +575,11 @@ validate_file_bytes(file_bytes.to_py(), file_name, selected_suite)
                 results.innerHTML = '<div class="status error">✗ Error: ' + error.message + '</div>';
                 console.error(error);
             }
+        }
+
+        async function processFile(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            await validateBytes(new Uint8Array(arrayBuffer), file.name);
         }
 
         async function processFileFromUrl(url) {
@@ -697,6 +705,21 @@ validate_file_url(file_url, selected_suite)
                 if (e.key === 'Enter' && pyodide) {
                     processFileFromUrl(urlInput.value);
                 }
+            });
+
+            // Accept a CDF handed off via postMessage (e.g. from the CDFpp WASM demo
+            // for local files that can't be passed by ?url=). We replied 'astralint-ready'
+            // to our opener after init, so by the time a file arrives pyodide is ready.
+            window.addEventListener('message', (e) => {
+                const d = e.data;
+                if (!d || d.type !== 'astralint-file' || !d.bytes || !pyodide) return;
+                if (d.suite) {
+                    for (const radio of document.querySelectorAll('input[name="suite"]')) {
+                        if (radio.value === d.suite) { radio.checked = true; break; }
+                    }
+                }
+                const bytes = d.bytes instanceof Uint8Array ? d.bytes : new Uint8Array(d.bytes);
+                validateBytes(bytes, d.name || 'file.cdf', d.suite);
             });
 
             initPyodide();
