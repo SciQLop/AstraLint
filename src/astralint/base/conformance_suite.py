@@ -158,11 +158,25 @@ class _ConformanceSuiteProtocolCtor:
         self.inherit_from = inherit_from or []
         self.severity_overrides = severity_overrides or {}
 
+    def _parse_overrides(self) -> dict[str, Severity]:
+        parsed: dict[str, Severity] = {}
+        for reference, value in self.severity_overrides.items():
+            try:
+                parsed[reference] = Severity(value)
+            except ValueError as error:
+                allowed = ", ".join(level.value for level in Severity)
+                raise ValueError(
+                    f"Invalid severity '{value}' for rule '{reference}' in "
+                    f"severity_overrides of suite '{self.name}'; expected one of: {allowed}"
+                ) from error
+        return parsed
+
     def __call__(self) -> ConformanceSuite:
         inherited_rules = parents_rules(self.inherit_from)
         if self.severity_overrides:
-            overrides = {ref: Severity(value) for ref, value in self.severity_overrides.items()}
-            inherited_rules = list(apply_severity_overrides(inherited_rules, overrides))
+            inherited_rules = list(
+                apply_severity_overrides(inherited_rules, self._parse_overrides())
+            )
 
         load_rules_from_dir(self.rules_lookup_dir)
         own_rules = get_rules_for_suite(self.name)

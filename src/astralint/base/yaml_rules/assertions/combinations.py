@@ -228,7 +228,14 @@ class AnyMatch(BaseEvaluable):
         return data
 
     def evaluate(self, file: File, severity: Severity) -> ValidationResult:
-        result = self.assertion.evaluate(file, severity)
+        # For an existential quantifier, "no matches at all" must be a failure.
+        # Neutralize any lenient `error_if_no_match: false` on the wrapped (path)
+        # assertion so that an empty match set yields a failing leaf rather than a
+        # vacuously-valid one.
+        assertion = self.assertion
+        if getattr(assertion, "error_if_no_match", None) is False:
+            assertion = assertion.model_copy(update={"error_if_no_match": True})
+        result = assertion.evaluate(file, severity)
         if isinstance(result, ValidationResultGroup):
             passed = result.count_by_severity()["passed"] > 0
         else:
