@@ -178,6 +178,20 @@
 
         .suite-select input { display: none; }
 
+        .explorer-button {
+            margin: 1.5rem 0 0;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: var(--color-primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .explorer-button:hover:not(:disabled) { opacity: 0.9; }
+        .explorer-button:disabled { opacity: 0.4; cursor: not-allowed; }
+
         #results {
             margin-top: 2rem;
         }
@@ -448,6 +462,9 @@
                 </p>
             </div>
 
+            <button id="open-explorer-btn" class="explorer-button" disabled
+                    title="Open the loaded file in CDFpp Explorer">Open in CDFpp Explorer ↗</button>
+
             <div id="results"></div>
         </div>
 
@@ -463,6 +480,37 @@
     <script src="https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"></script>
     <script>
         let pyodide = null;
+
+        // "Open in CDFpp Explorer" — the reverse of the Validate handoff.
+        const CDFPP_URL = 'https://sciqlop.github.io/CDFpp/';
+        const CDFPP_ORIGIN = new URL(CDFPP_URL).origin;
+        let lastBytes = null, lastName = null, lastUrl = null;
+
+        function updateOpenExplorerBtn() {
+            const btn = document.getElementById('open-explorer-btn');
+            if (btn) btn.disabled = !(lastBytes || lastUrl);
+        }
+
+        // Deep-link a URL-sourced file; otherwise open Explorer and transfer the
+        // bytes once it posts 'cdfpp-ready' (origin + source checked).
+        function openInExplorer() {
+            if (lastUrl) { window.open(CDFPP_URL + '?url=' + encodeURIComponent(lastUrl), '_blank'); return; }
+            if (!lastBytes) return;
+            const win = window.open(CDFPP_URL, '_blank');
+            if (!win) return;
+            const payload = lastBytes.slice();
+            const cleanup = () => { window.removeEventListener('message', onMsg); clearTimeout(timer); };
+            const onMsg = (e) => {
+                if (e.origin !== CDFPP_ORIGIN || e.source !== win) return;
+                if (e.data && e.data.type === 'cdfpp-ready') {
+                    cleanup();
+                    win.postMessage({ type: 'cdfpp-file', name: lastName || 'file.cdf', bytes: payload },
+                        CDFPP_ORIGIN, [payload.buffer]);
+                }
+            };
+            const timer = setTimeout(cleanup, 60000);
+            window.addEventListener('message', onMsg);
+        }
 
         // Origin of the window that opened us (from the referrer), for targeting the
         // postMessage handshake; '*' when the referrer is unavailable.
@@ -590,6 +638,7 @@ def validate_file_url(url: str, suite_name: str = "ISTP") -> str:
         // Validate raw bytes. suiteName defaults to the currently-checked radio.
         // Shared by local uploads (processFile) and the postMessage handoff.
         async function validateBytes(uint8Array, name, suiteName) {
+            lastBytes = uint8Array; lastName = name; lastUrl = null; updateOpenExplorerBtn();
             const results = document.getElementById('results');
             results.innerHTML = '<div class="status loading"><div class="spinner"></div><span>Validating...</span></div>';
 
@@ -629,6 +678,7 @@ validate_file_bytes(file_bytes.to_py(), file_name, selected_suite)
 
             results.innerHTML = '<div class="status loading"><div class="spinner"></div><span>Loading and validating...</span></div>';
             loadBtn.disabled = true;
+            lastUrl = url; lastBytes = null; lastName = null; updateOpenExplorerBtn();
 
             try {
                 // Pass URL directly to Python - codec handles the download
@@ -759,6 +809,8 @@ validate_file_url(file_url, selected_suite)
                 const bytes = d.bytes instanceof Uint8Array ? d.bytes : new Uint8Array(d.bytes);
                 validateBytes(bytes, d.name || 'file.cdf', suiteName);
             });
+
+            document.getElementById('open-explorer-btn').addEventListener('click', openInExplorer);
 
             initPyodide();
         });
