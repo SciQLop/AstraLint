@@ -39,6 +39,39 @@ def _rule_with_wrapper() -> ValidationResultGroup:
     )
 
 
+def _multi_file_results() -> ValidationResultGroup:
+    """Mirrors the CLI multi-file shape: an outer 'AstraLint Results' group whose
+    children are per-file suite groups (empty rule_reference but a message)."""
+
+    def per_file(name: str) -> ValidationResultGroup:
+        leaf = ValidationResult(valid=False, reference="", severity=Severity.ERROR, message="bad")
+        rule = ValidationResultGroup(
+            name="SomeRule", rule_reference="ISTP-GA-001", severity=Severity.ERROR, results=[leaf]
+        )
+        return ValidationResultGroup(
+            name=name,
+            rule_reference="",
+            severity=Severity.INFO,
+            results=[rule],
+            message="Validation completed for suite 'ISTP'",
+        )
+
+    return ValidationResultGroup(
+        name="AstraLint Results",
+        rule_reference="",
+        severity=Severity.INFO,
+        results=[per_file("Results on file a.cdf"), per_file("Results on file b.cdf")],
+    )
+
+
+def test_per_file_groups_are_not_flattened():
+    """Per-file suite groups carry a message, so they must survive flattening — a
+    multi-file report must keep its file sections."""
+    html = generate_html_fragment(_multi_file_results())
+    assert "Results on file a.cdf" in html
+    assert "Results on file b.cdf" in html
+
+
 def test_internal_assertion_wrapper_is_flattened():
     html = generate_html_fragment(_rule_with_wrapper())
     assert "MatchesAssertion" not in html, "internal wrapper layer should be flattened away"
