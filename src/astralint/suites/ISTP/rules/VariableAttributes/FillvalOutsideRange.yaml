@@ -1,25 +1,48 @@
 name: FillvalOutsideRange
 description: "FILLVAL must be outside the [VALIDMIN, VALIDMAX] range"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#FILLVAL"
+url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#fillval"
 reference: "ISTP-VA-019"
 severity: ERROR
 suite: ISTP
 
 assertions:
-  - path: "variables/{var}/attributes/FILLVAL/values/0"
-    check: any_of
-    error_if_no_match: false
-    message: "{% if valid %}Attribute FILLVAL of {{ var }} is outside [VALIDMIN, VALIDMAX] range{% else %}Attribute FILLVAL of {{ var }} must be outside [VALIDMIN, VALIDMAX] range{% endif %}"
-    assertions:
-      - path: "variables/{var}/attributes/FILLVAL/values/0"
-        check: compare_to
-        operator: "<"
-        other_path: "variables/{var}/attributes/VALIDMIN/values/0"
-        error_if_no_match: false
-        message: ""
-      - path: "variables/{var}/attributes/FILLVAL/values/0"
-        check: compare_to
-        operator: ">"
-        other_path: "variables/{var}/attributes/VALIDMAX/values/0"
-        error_if_no_match: false
-        message: ""
+  # CDF time data types are exempt: their FILLVAL is standardized (the maximum
+  # time value, always outside any real range) and the underlying time values
+  # are not order-comparable, so the range check cannot be evaluated for them.
+  - check: if_then
+    if:
+      path: "variables/{var}/data_type"
+      check: not_in
+      values:
+        - TT2000
+        - CDFEPOCH
+        - CDFEPOCH16
+    then:
+      check: if_then
+      if:
+        path: "variables/{var}/attributes/FILLVAL/values/0"
+        check: exists
+      then:
+        check: any_of
+        message: "{% if valid %}Attribute FILLVAL of {var} is outside [VALIDMIN, VALIDMAX] range{% else %}Attribute FILLVAL of {var} must be outside [VALIDMIN, VALIDMAX] range (or NaN){% endif %}"
+        assertions:
+          - path: "variables/{var}/attributes/FILLVAL/values/0"
+            check: compare_to
+            operator: "<"
+            other_path: "variables/{var}/attributes/VALIDMIN/values/0"
+            error_if_no_match: false
+            message: ""
+          - path: "variables/{var}/attributes/FILLVAL/values/0"
+            check: compare_to
+            operator: ">"
+            other_path: "variables/{var}/attributes/VALIDMAX/values/0"
+            error_if_no_match: false
+            message: ""
+          # NaN (IEEE 754) is an allowed FILLVAL for CDF_REAL4/CDF_REAL8.
+          # NaN is the only value not equal to itself.
+          - path: "variables/{var}/attributes/FILLVAL/values/0"
+            check: compare_to
+            operator: "!="
+            other_path: "variables/{var}/attributes/FILLVAL/values/0"
+            error_if_no_match: false
+            message: ""

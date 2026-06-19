@@ -1,6 +1,6 @@
 name: InstrumentTypeValues
 description: "Instrument_type should use standard ISTP values"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html#Instrument_type"
+url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#instrument_type"
 reference: "ISTP-GA-010"
 severity: WARNING
 suite: ISTP
@@ -11,6 +11,7 @@ assertions:
     error_if_no_match: false
     values:
       - "Activity Indices"
+      - "Dust and Debris"
       - "Electric Fields (space)"
       - "Engineering"
       - "Ephemeris/Attitude/Ancillary"

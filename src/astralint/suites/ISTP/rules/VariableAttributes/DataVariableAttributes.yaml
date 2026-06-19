@@ -1,6 +1,6 @@
 name: DataVariableAttributes
 description: "Data variables (VAR_TYPE=data) must have additional required attributes"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html"
+url: "https://istp-metadata.readthedocs.io/en/latest/04_metadata-variables.html#data-variables"
 reference: "ISTP-VA-002"
 severity: ERROR
 suite: ISTP
@@ -8,14 +8,14 @@ suite: ISTP
 assertions:
   - check: if_then
     if:
-      path: "variables/.*/attributes/VAR_TYPE/values/[0-9]*"
+      path: "variables/{var}/attributes/VAR_TYPE/values/0"
       check: comparison
       operator: "="
       value: "data"
     then:
       check: all_of
       assertions:
-        - path: "variables/.*/attributes"
+        - path: "variables/{var}/attributes"
           check: contains_keys
           keys:
             - DEPEND_0
@@ -26,23 +26,18 @@ assertions:
         - check: any_of
           message: "Data variable must have LABLAXIS or LABL_PTR_1"
           assertions:
-            - path: "variables/.*/attributes/LABLAXIS"
+            - path: "variables/{var}/attributes/LABLAXIS"
               check: exists
-              error_if_no_match: false
               message: ""
-            - path: "variables/.*/attributes/LABL_PTR_1"
+            - path: "variables/{var}/attributes/LABL_PTR_1"
               check: exists
-              error_if_no_match: false
               message: ""
         - check: any_of
           message: "Data variable must have UNITS or UNIT_PTR"
           assertions:
-            - path: "variables/.*/attributes/UNITS"
+            - path: "variables/{var}/attributes/UNITS"
               check: exists
-              error_if_no_match: false
               message: ""
-            - path: "variables/.*/attributes/UNIT_PTR"
+            - path: "variables/{var}/attributes/UNIT_PTR"
               check: exists
-              error_if_no_match: false
               message: ""
-

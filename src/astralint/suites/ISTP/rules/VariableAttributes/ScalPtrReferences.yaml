@@ -1,6 +1,6 @@
 name: ScalPtrReferences
 description: "SCAL_PTR must reference an existing variable"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#SCAL_PTR"
+url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#scal_ptr"
 reference: "ISTP-VA-018"
 severity: ERROR
 suite: ISTP

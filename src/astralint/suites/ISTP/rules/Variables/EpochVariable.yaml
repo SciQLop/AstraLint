@@ -1,23 +1,20 @@
 name: EpochVariable
-description: "Files should contain an Epoch variable for time tagging"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/variables.html#Epoch"
+description: "Dataset must contain at least one CDF time (epoch) variable"
+url: "https://istp-metadata.readthedocs.io/en/latest/04_metadata-variables.html#epoch"
 reference: "ISTP-VAR-001"
-severity: WARNING
+severity: ERROR
 suite: ISTP
 
 assertions:
-  # Check that Epoch variable exists
-  - path: "variables/Epoch"
-    check: exists
-    message: "File must contain an 'Epoch' variable for time tagging"
-
-  # Epoch should be CDF_EPOCH, CDF_EPOCH16, or CDF_TIME_TT2000
-  - path: "variables/Epoch/data_type"
-    check: in
-    error_if_no_match: false
-    values:
-      - CDFEPOCH
-      - CDFEPOCH16
-      - TT2000
-    message: "Epoch variable must be of type CDF_EPOCH, CDF_EPOCH16, or CDF_TIME_TT2000"
-
+  # An epoch (time) variable is Required. The ISTP Guidelines do NOT mandate the
+  # name "Epoch" ("any other meaningful name" is allowed), so the check keys on
+  # the CDF time data type, not the variable name.
+  - check: any_match
+    message: "{% if valid %}dataset contains a CDF time (epoch) variable{% else %}dataset must contain at least one variable of a CDF time data type (CDF_EPOCH, CDF_EPOCH16, or CDF_TIME_TT2000){% endif %}"
+    assertion:
+      path: "variables/.*/data_type"
+      check: in
+      values:
+        - CDFEPOCH
+        - CDFEPOCH16
+        - TT2000

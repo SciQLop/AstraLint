@@ -1,6 +1,6 @@
 name: UnitsNotEmpty
-description: "UNITS attribute must not be empty (use 'unitless' or ' ' if no units)"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#UNITS"
+description: "UNITS attribute must not be empty (use a single blank space ' ' for no units)"
+url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#units"
 reference: "ISTP-VA-009"
 severity: ERROR
 suite: ISTP
@@ -9,5 +9,5 @@ assertions:
   - path: "variables/.*/attributes/UNITS/values/[0-9]*"
     check: not_empty
     error_if_no_match: false
-    message: "{% if valid %}Attribute UNITS of {{ variable }} is not empty{% else %}Attribute UNITS of {{ variable }} cannot be empty - use 'unitless' or a single space{% endif %}"
+    message: "{% if valid %}Attribute UNITS of {{ variable }} is not empty{% else %}Attribute UNITS of {{ variable }} cannot be empty - use a single blank space ' ' for variables with no units{% endif %}"
 

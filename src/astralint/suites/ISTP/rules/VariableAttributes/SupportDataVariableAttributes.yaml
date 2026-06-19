@@ -1,6 +1,6 @@
 name: SupportDataVariableAttributes
 description: "Support_data variables must have required attributes"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html"
+url: "https://istp-metadata.readthedocs.io/en/latest/04_metadata-variables.html#support_data-variables"
 reference: "ISTP-VA-003"
 severity: ERROR
 suite: ISTP
@@ -8,52 +8,77 @@ suite: ISTP
 assertions:
   - check: if_then
     if:
-      path: "variables/.*/attributes/VAR_TYPE/values/[0-9]*"
+      path: "variables/{var}/attributes/VAR_TYPE/values/0"
       check: comparison
       operator: "="
       value: "support_data"
     then:
       check: all_of
       assertions:
-        - path: "variables/.*/attributes"
+        - path: "variables/{var}/attributes"
           check: contains_keys
           keys:
             - CATDESC
             - FIELDNAM
-            - VALIDMIN
-            - VALIDMAX
-          message: "{% if valid %}{{ variable }} has all required support_data attributes{% else %}{{ variable }} missing required attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
-        - check: any_of
-          message: "Support_data variable must have FORMAT or FORM_PTR"
-          assertions:
-            - path: "variables/.*/attributes/FORMAT"
-              check: exists
-              error_if_no_match: false
-              message: ""
-            - path: "variables/.*/attributes/FORM_PTR"
-              check: exists
-              error_if_no_match: false
-              message: ""
-        - check: any_of
-          message: "Support_data variable must have UNITS or UNIT_PTR"
-          assertions:
-            - path: "variables/.*/attributes/UNITS"
-              check: exists
-              error_if_no_match: false
-              message: ""
-            - path: "variables/.*/attributes/UNIT_PTR"
-              check: exists
-              error_if_no_match: false
-              message: ""
+          message: "{% if valid %}{{ variable }} has required support_data attributes{% else %}{{ variable }} missing required attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
         - check: any_of
           message: "Support_data variable must have LABLAXIS or LABL_PTR_1"
           assertions:
-            - path: "variables/.*/attributes/LABLAXIS"
+            - path: "variables/{var}/attributes/LABLAXIS"
               check: exists
-              error_if_no_match: false
               message: ""
-            - path: "variables/.*/attributes/LABL_PTR_1"
+            - path: "variables/{var}/attributes/LABL_PTR_1"
               check: exists
-              error_if_no_match: false
               message: ""
-
+        # FORMAT/FORM_PTR required, except for defined CDF time data types.
+        - check: if_then
+          if:
+            path: "variables/{var}/data_type"
+            check: not_in
+            values:
+              - TT2000
+              - CDFEPOCH
+              - CDFEPOCH16
+          then:
+            check: any_of
+            message: "Support_data variable must have FORMAT or FORM_PTR"
+            assertions:
+              - path: "variables/{var}/attributes/FORMAT"
+                check: exists
+                message: ""
+              - path: "variables/{var}/attributes/FORM_PTR"
+                check: exists
+                message: ""
+        # UNITS/UNIT_PTR required, except for CDF time data type variables.
+        - check: if_then
+          if:
+            path: "variables/{var}/data_type"
+            check: not_in
+            values:
+              - TT2000
+              - CDFEPOCH
+              - CDFEPOCH16
+          then:
+            check: any_of
+            message: "Support_data variable must have UNITS or UNIT_PTR"
+            assertions:
+              - path: "variables/{var}/attributes/UNITS"
+                check: exists
+                message: ""
+              - path: "variables/{var}/attributes/UNIT_PTR"
+                check: exists
+                message: ""
+        # VALIDMIN/VALIDMAX required only for record-varying (time-varying) support_data.
+        - check: if_then
+          if:
+            path: "variables/{var}/record_variance"
+            check: comparison
+            operator: "="
+            value: true
+          then:
+            path: "variables/{var}/attributes"
+            check: contains_keys
+            keys:
+              - VALIDMIN
+              - VALIDMAX
+            message: "{% if valid %}{{ variable }} has VALIDMIN/VALIDMAX{% else %}{{ variable }} (record-varying) missing required attribute(s): {{ missing_keys | join(', ') }}{% endif %}"

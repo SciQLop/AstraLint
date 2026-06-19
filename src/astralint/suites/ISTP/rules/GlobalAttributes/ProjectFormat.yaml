@@ -1,18 +1,22 @@
 name: ProjectFormat
 description: "Project must follow ISTP convention"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html#Project"
+url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#project"
 reference: "ISTP-GA-012"
-severity: ERROR
+# Project is a *Recommended* attribute, so a malformed value is a warning, not an error.
+severity: WARNING
 suite: ISTP
 
 assertions:
-  # Project can be multi-valued, format: ABBREV>Full_Name
+  # Project can be multi-valued, format: ABBREV>Full_Name. The short name may
+  # contain spaces and lowercase letters (e.g. "STSP Cluster", "CDAWxx").
   - path: "attributes/Project/values/[0-9]*"
     check: matches
-    pattern: "^[A-Z0-9_-]+>.+$"
+    error_if_no_match: false
+    pattern: "^[A-Za-z0-9_ -]+>.+$"
     message: "Project must follow format: ABBREV>Full_Name (e.g., 'ISTP>International Solar-Terrestrial Physics')"
 
   - path: "attributes/Project/values/[0-9]*"
     check: not_empty
+    error_if_no_match: false
     message: "Project cannot be empty"
 

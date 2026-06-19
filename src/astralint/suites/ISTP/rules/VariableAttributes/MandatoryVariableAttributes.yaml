@@ -1,6 +1,6 @@
 name: MandatoryVariableAttributes
 description: "All variables must have required ISTP variable attributes"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html"
+url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html"
 reference: "ISTP-VA-001"
 severity: ERROR
 suite: ISTP
@@ -14,27 +14,38 @@ assertions:
       - VAR_TYPE
     message: "{% if valid %}{{ variable }} has all mandatory attributes{% else %}{{ variable }} is missing mandatory attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
 
-  - check: one_of
-    assertions:
-      - path: "variables/.*/attributes"
-        check: contains_keys
-        keys:
-          - FORMAT
-        message: "{% if valid %}{{ variable }} has FORMAT attribute{% else %}{{ variable }} must have either FORMAT or FORM_PTR attribute{% endif %}"
-      - path: "variables/.*/attributes"
-        check: contains_keys
-        keys:
-          - FORM_PTR
-        message: "{% if valid %}{{ variable }} has FORM_PTR attribute{% else %}{{ variable }} must have either FORMAT or FORM_PTR attribute{% endif %}"
-
+  # FORMAT/FORM_PTR required for all variables except defined CDF time data types.
   - check: if_then
     if:
-      path: "variables/.*/record_variance"
+      path: "variables/{var}/data_type"
+      check: not_in
+      values:
+        - TT2000
+        - CDFEPOCH
+        - CDFEPOCH16
+    then:
+      check: one_of
+      assertions:
+        - path: "variables/{var}/attributes"
+          check: contains_keys
+          keys:
+            - FORMAT
+          message: "{% if valid %}{{ variable }} has FORMAT attribute{% else %}{{ variable }} must have either FORMAT or FORM_PTR attribute{% endif %}"
+        - path: "variables/{var}/attributes"
+          check: contains_keys
+          keys:
+            - FORM_PTR
+          message: "{% if valid %}{{ variable }} has FORM_PTR attribute{% else %}{{ variable }} must have either FORMAT or FORM_PTR attribute{% endif %}"
+
+  # FILLVAL required for record-varying (time-varying) variables.
+  - check: if_then
+    if:
+      path: "variables/{var}/record_variance"
       check: comparison
       operator: "="
       value: true
     then:
-      path: "variables/.*/attributes"
+      path: "variables/{var}/attributes"
       check: contains_keys
       keys:
         - FILLVAL

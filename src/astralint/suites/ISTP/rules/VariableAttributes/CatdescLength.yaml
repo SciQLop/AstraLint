@@ -1,6 +1,6 @@
 name: CatdescLength
 description: "CATDESC should be descriptive but concise (80 characters max per ISTP)"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#CATDESC"
+url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#catdesc"
 reference: "ISTP-VA-006"
 severity: WARNING
 suite: ISTP

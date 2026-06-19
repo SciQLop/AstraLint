@@ -1,0 +1,16 @@
+name: CDAWebRequiredGlobalAttributes
+description: "Global attributes that are ISTP-recommended but required by CDAWeb"
+url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#instrument_type"
+reference: "ISTP-GA-016"
+# Recommended by ISTP, required for ingestion into CDAWeb -> warning, not error.
+severity: WARNING
+suite: ISTP
+
+assertions:
+  - path: "attributes"
+    check: contains_keys
+    error_if_no_match: false
+    keys:
+      - Instrument_type
+      - Mission_group
+    message: "{% if valid %}all CDAWeb-required global attributes present{% else %}missing CDAWeb-required global attribute(s) (recommended by ISTP): {{ missing_keys | join(', ') }}{% endif %}"

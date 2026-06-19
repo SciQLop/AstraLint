@@ -1,16 +1,49 @@
 name: EpochRecommendedAttributes
-description: "Epoch variable should have recommended ISTP attributes"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/variables.html#Epoch"
+description: "Time (epoch) variables should carry recommended time-documentation attributes"
+url: "https://istp-metadata.readthedocs.io/en/latest/04_metadata-variables.html#epoch"
 reference: "ISTP-VAR-003"
 severity: WARNING
 suite: ISTP
 
 assertions:
-  - path: "variables/Epoch/attributes"
-    check: contains_keys
+  # MONOTON is recommended for every time (epoch) variable, regardless of name.
+  - check: if_then
+    if:
+      path: "variables/{var}/data_type"
+      check: in
+      values:
+        - TT2000
+        - CDFEPOCH
+        - CDFEPOCH16
+    then:
+      path: "variables/{var}/attributes"
+      check: contains_keys
+      keys:
+        - MONOTON
+      message: "{% if valid %}time variable {var} has MONOTON{% else %}time variable {var} should have a MONOTON attribute (INCREASE or DECREASE){% endif %}"
+
+  # If MONOTON is present, its value must be INCREASE or DECREASE.
+  - path: "variables/.*/attributes/MONOTON/values/[0-9]*"
+    check: in
     error_if_no_match: false
-    keys:
-      - MONOTON
-      - TIME_BASE
-      - TIME_SCALE
-    message: "{% if valid %}Epoch has all recommended attributes{% else %}Epoch missing recommended attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
+    values:
+      - INCREASE
+      - DECREASE
+    message: "{% if valid %}Attribute MONOTON of {{ variable }} has value '{{ value }}'{% else %}Attribute MONOTON of {{ variable }} has value '{{ value }}', expected 'INCREASE' or 'DECREASE'{% endif %}"
+
+  # TIME_BASE/TIME_SCALE are recommended for CDF_EPOCH/CDF_EPOCH16, but not needed
+  # for CDF_TIME_TT2000 (which is internally fully defined).
+  - check: if_then
+    if:
+      path: "variables/{var}/data_type"
+      check: in
+      values:
+        - CDFEPOCH
+        - CDFEPOCH16
+    then:
+      path: "variables/{var}/attributes"
+      check: contains_keys
+      keys:
+        - TIME_BASE
+        - TIME_SCALE
+      message: "{% if valid %}time variable {var} documents TIME_BASE/TIME_SCALE{% else %}CDF_EPOCH variable {var} should document {{ missing_keys | join(', ') }}{% endif %}"

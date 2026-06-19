@@ -1,6 +1,6 @@
 name: LablaxisLength
 description: "LABLAXIS should be short for axis labels (10 characters max)"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#LABLAXIS"
+url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#lablaxis"
 reference: "ISTP-VA-008"
 severity: WARNING
 suite: ISTP

@@ -1,6 +1,6 @@
 name: FieldnamLength
 description: "FIELDNAM should be concise for plot labels (30 characters max)"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#FIELDNAM"
+url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#fieldnam"
 reference: "ISTP-VA-007"
 severity: WARNING
 suite: ISTP
