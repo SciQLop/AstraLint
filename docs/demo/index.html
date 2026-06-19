@@ -464,6 +464,13 @@
     <script>
         let pyodide = null;
 
+        // Origin of the window that opened us (from the referrer), for targeting the
+        // postMessage handshake; '*' when the referrer is unavailable.
+        function openerOrigin() {
+            try { return document.referrer ? new URL(document.referrer).origin : '*'; }
+            catch { return '*'; }
+        }
+
         async function initPyodide() {
             const status = document.getElementById('loading-status');
 
@@ -536,8 +543,9 @@ def validate_file_url(url: str, suite_name: str = "ISTP") -> str:
                 autoRunFromQuery();
 
                 // Tell an opener (e.g. the CDFpp WASM demo) we're ready to receive
-                // a file via postMessage. See the 'message' listener below.
-                if (window.opener) window.opener.postMessage({ type: 'astralint-ready' }, '*');
+                // a file via postMessage. Target the opener's origin (from the
+                // referrer) so only it sees the handshake; '*' only as a fallback.
+                if (window.opener) window.opener.postMessage({ type: 'astralint-ready' }, openerOrigin());
 
             } catch (error) {
                 status.className = 'status error';
@@ -710,16 +718,23 @@ validate_file_url(file_url, selected_suite)
             // Accept a CDF handed off via postMessage (e.g. from the CDFpp WASM demo
             // for local files that can't be passed by ?url=). We replied 'astralint-ready'
             // to our opener after init, so by the time a file arrives pyodide is ready.
+            // Only the opener may post here, to keep arbitrary pages out of the pipeline.
             window.addEventListener('message', (e) => {
+                if (e.source !== window.opener) return;
                 const d = e.data;
                 if (!d || d.type !== 'astralint-file' || !d.bytes || !pyodide) return;
+
+                // Select the suite radio only when the requested suite is recognized;
+                // an unknown suite falls back to the currently-checked one.
+                let suiteName;
                 if (d.suite) {
                     for (const radio of document.querySelectorAll('input[name="suite"]')) {
-                        if (radio.value === d.suite) { radio.checked = true; break; }
+                        if (radio.value === d.suite) { radio.checked = true; suiteName = d.suite; break; }
                     }
                 }
+
                 const bytes = d.bytes instanceof Uint8Array ? d.bytes : new Uint8Array(d.bytes);
-                validateBytes(bytes, d.name || 'file.cdf', d.suite);
+                validateBytes(bytes, d.name || 'file.cdf', suiteName);
             });
 
             initPyodide();
