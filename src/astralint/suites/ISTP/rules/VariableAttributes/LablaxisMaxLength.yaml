@@ -1,6 +1,6 @@
 name: LablaxisMaxLength
 description: "LABLAXIS must not exceed 20 characters (hard limit)"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#LABLAXIS"
+url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#lablaxis"
 reference: "ISTP-VA-022"
 severity: ERROR
 suite: ISTP

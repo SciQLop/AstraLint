@@ -1,6 +1,6 @@
 name: ScaleTypValues
 description: "SCALETYP should be 'linear' or 'log' for proper plotting"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#SCALETYP"
+url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#scaletyp"
 reference: "ISTP-VA-013"
 severity: WARNING
 suite: ISTP

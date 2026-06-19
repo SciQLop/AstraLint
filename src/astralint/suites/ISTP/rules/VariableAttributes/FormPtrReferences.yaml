@@ -1,6 +1,6 @@
 name: FormPtrReferences
 description: "FORM_PTR must reference an existing variable"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#FORM_PTR"
+url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#form_ptr"
 reference: "ISTP-VA-017"
 severity: ERROR
 suite: ISTP

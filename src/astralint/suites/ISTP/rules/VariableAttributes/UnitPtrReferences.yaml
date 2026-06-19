@@ -1,6 +1,6 @@
 name: UnitPtrReferences
 description: "UNIT_PTR must reference an existing variable"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#UNIT_PTR"
+url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#unit_ptr"
 reference: "ISTP-VA-016"
 severity: ERROR
 suite: ISTP

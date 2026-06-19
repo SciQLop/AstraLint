@@ -1,16 +1,17 @@
 name: DataTypeFormat
 description: "Data_type must follow ISTP convention: ABBREV>Full_description"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html#Data_type"
+url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#data_type"
 reference: "ISTP-GA-006"
 severity: ERROR
 suite: ISTP
 
 assertions:
-  # Data_type format: ABBREV>Full_description (e.g., "K0>Key Parameters")
+  # Data_type format: ABBREV>Full_description. The short name may contain
+  # hyphens and lowercase letters (e.g. "L2-Summary", "l2-gms-62ms").
   - path: "attributes/Data_type/values/[0-9]*"
     check: matches
-    pattern: "^[A-Z0-9_]+>.+$"
-    message: "Data_type must follow format: ABBREV>Full_description (e.g., 'K0>Key Parameters')"
+    pattern: "^[A-Za-z0-9_-]+>.+$"
+    message: "Data_type must follow format: ABBREV>Full_description (e.g., 'L2-Summary>level 2 summary')"
 
   - path: "attributes/Data_type/values/[0-9]*"
     check: not_empty

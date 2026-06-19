@@ -1,6 +1,6 @@
 name: MetadataVariableAttributes
 description: "Metadata variables must have required attributes per ISTP spec"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/variables.html#Metadata"
+url: "https://istp-metadata.readthedocs.io/en/latest/04_metadata-variables.html#metadata-variables"
 reference: "ISTP-VA-015"
 severity: ERROR
 suite: ISTP
@@ -8,28 +8,25 @@ suite: ISTP
 assertions:
   - check: if_then
     if:
-      path: "variables/.*/attributes/VAR_TYPE/values/[0-9]*"
+      path: "variables/{var}/attributes/VAR_TYPE/values/0"
       check: comparison
       operator: "="
       value: "metadata"
     then:
       check: all_of
       assertions:
-        - path: "variables/.*/attributes"
+        - path: "variables/{var}/attributes"
           check: contains_keys
           keys:
             - CATDESC
             - FIELDNAM
-            - VAR_TYPE
-          message: "{% if valid %}{{ variable }} has all required metadata attributes{% else %}{{ variable }} missing required attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
+          message: "{% if valid %}{{ variable }} has required metadata attributes{% else %}{{ variable }} missing required attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
         - check: any_of
           message: "Metadata variable must have FORMAT or FORM_PTR"
           assertions:
-            - path: "variables/.*/attributes/FORMAT"
+            - path: "variables/{var}/attributes/FORMAT"
               check: exists
-              error_if_no_match: false
               message: ""
-            - path: "variables/.*/attributes/FORM_PTR"
+            - path: "variables/{var}/attributes/FORM_PTR"
               check: exists
-              error_if_no_match: false
               message: ""

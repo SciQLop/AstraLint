@@ -1,39 +1,27 @@
 name: EpochAttributes
-description: "Epoch variable must have required ISTP attributes"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/variables.html#Epoch"
+description: "Time (epoch) variables must be support_data"
+url: "https://istp-metadata.readthedocs.io/en/latest/04_metadata-variables.html#epoch"
 reference: "ISTP-VAR-002"
 severity: ERROR
 suite: ISTP
 
+# Keyed on the CDF time data type (not the variable name). The general
+# Mandatory/SupportData rules already enforce CATDESC/FIELDNAM/FILLVAL/
+# VALIDMIN/VALIDMAX with the correct CDF-time-type exemptions, so the only
+# epoch-specific structural requirement left here is VAR_TYPE = support_data.
 assertions:
-  - path: "variables/Epoch/attributes"
-    check: contains_keys
-    error_if_no_match: false
-    keys:
-      - CATDESC
-      - FIELDNAM
-      - FILLVAL
-      - LABLAXIS
-      - UNITS
-      - VALIDMIN
-      - VALIDMAX
-      - VAR_TYPE
-    message: "{% if valid %}Epoch has all required attributes{% else %}Epoch missing required attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
-
-  # Epoch VAR_TYPE should be support_data
-  - path: "variables/Epoch/attributes/VAR_TYPE/values/[0-9]*"
-    check: comparison
-    operator: "="
-    value: "support_data"
-    error_if_no_match: false
-    message: "{% if valid %}Attribute VAR_TYPE of Epoch has value '{{ value }}'{% else %}Attribute VAR_TYPE of Epoch has value '{{ value }}', expected 'support_data'{% endif %}"
-
-  # Epoch MONOTON should be INCREASE (or rarely DECREASE)
-  - path: "variables/Epoch/attributes/MONOTON/values/[0-9]*"
-    check: in
-    error_if_no_match: false
-    values:
-      - INCREASE
-      - DECREASE
-    message: "{% if valid %}Attribute MONOTON of Epoch has value '{{ value }}'{% else %}Attribute MONOTON of Epoch has value '{{ value }}', expected 'INCREASE' or 'DECREASE'{% endif %}"
-
+  - check: if_then
+    if:
+      path: "variables/{var}/data_type"
+      check: in
+      values:
+        - TT2000
+        - CDFEPOCH
+        - CDFEPOCH16
+    then:
+      path: "variables/{var}/attributes/VAR_TYPE/values/0"
+      check: comparison
+      operator: "="
+      value: "support_data"
+      error_if_no_match: false
+      message: "{% if valid %}time variable {var} has VAR_TYPE='support_data'{% else %}time variable {var} should have VAR_TYPE='support_data' (got '{{ value }}'){% endif %}"

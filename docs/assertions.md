@@ -419,6 +419,29 @@ This implements logical implication: `condition → assertion`
 - Skipped assertions are treated as passing in parent combinators like `all_of`
 - This allows conditional rules that don't fail when the condition doesn't apply
 
+**Per-variable conditionals (path captures):**
+
+When the `if` path contains a named capture like `{var}`, the condition and the
+`then`/`else` branches are evaluated **once per matched binding**, with the
+capture interpolated into every path (and message) of the branch. This correlates
+the condition and the requirement on the *same* variable — without it, a wildcard
+condition such as `variables/.*/.../VAR_TYPE == "data"` would only be satisfied
+when *every* variable shares that type, silently skipping mixed-type files.
+
+```yaml
+# For each variable whose VAR_TYPE is "data", require DEPEND_0 on that variable.
+- check: if_then
+  if:
+    path: "variables/{var}/attributes/VAR_TYPE/values/0"
+    check: comparison
+    operator: "="
+    value: "data"
+  then:
+    path: "variables/{var}/attributes"
+    check: contains_keys
+    keys: [DEPEND_0]
+```
+
 ### `if_then_else`
 
 If the condition passes, run the `then` branch; otherwise, run the `else` branch. Unlike `if_then`, this always runs one of the two branches (never skipped).

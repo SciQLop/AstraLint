@@ -1,6 +1,6 @@
 name: DependReferences
 description: "DEPEND_0, DEPEND_1, DEPEND_2, DEPEND_3 must reference existing variables"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#DEPEND_0"
+url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#depend_0"
 reference: "ISTP-VA-011"
 severity: ERROR
 suite: ISTP

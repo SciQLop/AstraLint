@@ -1,6 +1,6 @@
 name: SourceNameFormat
 description: "Source_name must follow ISTP convention: ABBREV>Full_Name"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html#Source_name"
+url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#source_name"
 reference: "ISTP-GA-007"
 severity: ERROR
 suite: ISTP

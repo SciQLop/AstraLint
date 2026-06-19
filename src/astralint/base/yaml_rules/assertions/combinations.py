@@ -5,7 +5,89 @@ from pydantic import ConfigDict, Field, model_validator
 from ... import ValidationResultGroup
 from ...file import File
 from ...validation_result import Severity, ValidationResult
-from .base import BaseAssertionGroup, BaseEvaluable, get_assertion_union
+from .base import (
+    BaseAssertionGroup,
+    BaseEvaluable,
+    get_assertion_union,
+    interpolate_captures,
+    parse_captures,
+    render_message,
+    resolve_path_with_captures,
+)
+
+
+def _path_capture_names(assertion: Any) -> list[str]:
+    """Names of {capture} placeholders in an assertion's own ``path`` (if any)."""
+    path = getattr(assertion, "path", None)
+    if not isinstance(path, str):
+        return []
+    _, names = parse_captures(path)
+    return names
+
+
+def _concretize(assertion: Any, captures: dict[str, str]) -> Any:
+    """Return a copy of an assertion tree with {capture} placeholders interpolated.
+
+    This is what makes ``if_then`` correlate a condition and its requirement on the
+    *same* variable: the capture bound by the condition's path (e.g. ``{var}``) is
+    substituted into every path of the ``then`` branch.
+    """
+    if not captures:
+        return assertion
+    update: dict[str, Any] = {}
+    for field in ("path", "other_path", "message"):
+        value = getattr(assertion, field, None)
+        if isinstance(value, str):
+            update[field] = interpolate_captures(value, captures)
+    subs = getattr(assertion, "assertions", None)
+    if isinstance(subs, list):
+        update["assertions"] = [_concretize(a, captures) for a in subs]
+    for field in ("assertion", "if_", "then", "else_"):
+        child = getattr(assertion, field, None)
+        if isinstance(child, BaseEvaluable):
+            update[field] = _concretize(child, captures)
+    if not update:
+        return assertion
+    return assertion.model_copy(update=update)
+
+
+def _distinct_bindings(file: File, if_path: str) -> list[dict[str, str]]:
+    bindings: list[dict[str, str]] = []
+    seen: set[tuple[tuple[str, str], ...]] = set()
+    for _path, _value, captures in resolve_path_with_captures(file, if_path):
+        key = tuple(sorted(captures.items()))
+        if key not in seen:
+            seen.add(key)
+            bindings.append(captures)
+    return bindings
+
+
+def _evaluate_per_capture(
+    if_: Any,
+    then: Any,
+    else_: Any | None,
+    file: File,
+    severity: Severity,
+    name: str,
+) -> ValidationResult | ValidationResultGroup:
+    """Evaluate a conditional once per distinct binding of the condition's path
+    captures (e.g. ``{var}``), correlating the requirement with the matched variable."""
+    results: list[Any] = []
+    for captures in _distinct_bindings(file, if_.path):
+        condition = _concretize(if_, captures).evaluate(file, severity)
+        if condition.valid:
+            results.append(_concretize(then, captures).evaluate(file, severity))
+        elif else_ is not None:
+            results.append(_concretize(else_, captures).evaluate(file, severity))
+    if not results:
+        return ValidationResult(
+            valid=True,
+            reference="",
+            severity=Severity.SKIPPED,
+            message="Condition not met for any binding, assertion skipped.",
+            target="",
+        )
+    return ValidationResultGroup(name=name, rule_reference="", results=results, severity=severity)
 
 
 class AllOf(BaseAssertionGroup):
@@ -120,6 +202,51 @@ class Not(BaseEvaluable):
         )
 
 
+class AnyMatch(BaseEvaluable):
+    """Existential quantifier over a wrapped assertion's results.
+
+    A wildcard-path assertion (e.g. ``variables/.*/data_type``) normally only
+    "passes" when *every* matched value satisfies it. ``any_match`` flips that to
+    "passes when *at least one* match satisfies it" — useful for requirements like
+    "the dataset contains at least one CDF time (epoch) variable", which must not
+    assume a particular variable name."""
+
+    model_config = ConfigDict(frozen=True)
+    check: Literal["any_match"] = "any_match"  # type: ignore[assignment]
+    assertion: Any
+    message: str = Field(default="")
+
+    @model_validator(mode="before")
+    @classmethod
+    def parse_assertion(cls, data: dict) -> dict:
+        assertion_union = get_assertion_union()
+        from pydantic import TypeAdapter
+
+        adapter = TypeAdapter(assertion_union)
+        if "assertion" in data:
+            data["assertion"] = adapter.validate_python(data["assertion"])
+        return data
+
+    def evaluate(self, file: File, severity: Severity) -> ValidationResult:
+        result = self.assertion.evaluate(file, severity)
+        if isinstance(result, ValidationResultGroup):
+            passed = result.count_by_severity()["passed"] > 0
+        else:
+            passed = result.valid and result.severity != Severity.SKIPPED
+        default = (
+            "at least one match satisfied the condition"
+            if passed
+            else "no match satisfied the condition"
+        )
+        return ValidationResult(
+            valid=passed,
+            reference="",
+            severity=severity,
+            message=render_message(self.message, {"valid": passed}) if self.message else default,
+            target="",
+        )
+
+
 class IfThen(BaseEvaluable):
     """Conditional assertion: if condition passes, then assertion must pass.
     If condition fails, the assertion is skipped (vacuously true)."""
@@ -144,6 +271,8 @@ class IfThen(BaseEvaluable):
         return data
 
     def evaluate(self, file: File, severity: Severity) -> ValidationResultGroup | ValidationResult:
+        if _path_capture_names(self.if_):
+            return _evaluate_per_capture(self.if_, self.then, None, file, severity, "IfThen")
         condition_result = self.if_.evaluate(file, severity)
         if not condition_result.valid:
             return ValidationResult(
@@ -187,6 +316,10 @@ class IfThenElse(BaseEvaluable):
         return data
 
     def evaluate(self, file: File, severity: Severity) -> ValidationResult | ValidationResultGroup:
+        if _path_capture_names(self.if_):
+            return _evaluate_per_capture(
+                self.if_, self.then, self.else_, file, severity, "IfThenElse"
+            )
         condition_result = self.if_.evaluate(file, severity)
         if condition_result.valid:
             then_result = self.then.evaluate(file, severity)

@@ -1,23 +1,23 @@
 name: MandatoryGlobalAttributes
 description: "All mandatory global attributes must be present (ISTP/SPDF required)"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html"
+url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html"
 reference: "ISTP-GA-001"
 severity: ERROR
 suite: ISTP
 
 assertions:
-  # Required global attributes per ISTP guidelines Section 3
+  # Attributes marked "Required" in the ISTP global-attribute table (Section 3).
+  # Note: Instrument_type and Mission_group are "Recommended, required by CDAWeb"
+  # rather than ISTP-required, so they live in CDAWebRequiredGlobalAttributes.
   - path: "attributes"
     check: contains_keys
     keys:
       - Data_type
       - Data_version
       - Descriptor
-      - Instrument_type
       - Logical_file_id
       - Logical_source
       - Logical_source_description
-      - Mission_group
       - PI_affiliation
       - PI_name
       - Source_name

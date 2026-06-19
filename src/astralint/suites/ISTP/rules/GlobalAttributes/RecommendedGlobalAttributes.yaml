@@ -1,6 +1,6 @@
 name: RecommendedGlobalAttributes
 description: "Recommended global attributes should be present for better data discoverability"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/gattributes.html"
+url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html"
 reference: "ISTP-GA-002"
 severity: WARNING
 suite: ISTP
@@ -13,6 +13,7 @@ assertions:
       - Acknowledgement
       - Discipline
       - DOI
+      - File_naming_convention
       - Generated_by
       - Generation_date
       - HTTP_LINK

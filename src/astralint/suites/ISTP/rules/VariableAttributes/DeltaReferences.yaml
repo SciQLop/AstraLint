@@ -1,6 +1,6 @@
 name: DeltaReferences
 description: "DELTA_PLUS_VAR and DELTA_MINUS_VAR must reference existing variables"
-url: "https://spdf.gsfc.nasa.gov/istp_guide/vattributes.html#DELTA_PLUS_VAR"
+url: "https://istp-metadata.readthedocs.io/en/latest/05_metadata-variable-attributes.html#delta_plus_var-delta_minus_var"
 reference: "ISTP-VA-014"
 severity: ERROR
 suite: ISTP
