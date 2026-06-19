@@ -1,5 +1,8 @@
 import os
 
+import pytest
+import requests
+
 from astralint.base import get_suite, load_file
 
 __HERE__ = os.path.dirname(os.path.abspath(__file__))
@@ -21,7 +24,11 @@ def test_remote_file_in_istp_suite():
     sample_url = (
         "https://cdaweb.gsfc.nasa.gov/pub/software/cdawlib/0MASTERS/ac_h5_swi_00000000_v01.cdf"
     )
-    sample = load_file(sample_url)
+    try:
+        sample = load_file(sample_url)
+    except (requests.exceptions.RequestException, OSError) as exc:
+        # Network-dependent test: a CI runner outage must not be a hard failure.
+        pytest.skip(f"remote resource unreachable: {exc}")
     assert sample is not None, "Validation should return results."
     results = suite.run(sample)
     assert results is not None, "Validation should return results."
