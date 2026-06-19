@@ -624,8 +624,11 @@ validate_file_url(file_url, selected_suite)
 
             const suite = params.get('suite');
             if (suite) {
-                const radio = document.querySelector(`input[name="suite"][value="${suite}"]`);
-                if (radio) radio.checked = true;
+                // Match by value rather than interpolating into a selector (a crafted
+                // ?suite= with quotes/brackets would make querySelector throw).
+                for (const radio of document.querySelectorAll('input[name="suite"]')) {
+                    if (radio.value === suite) { radio.checked = true; break; }
+                }
             }
 
             processFileFromUrl(url);
