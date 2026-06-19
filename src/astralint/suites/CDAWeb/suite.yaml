@@ -1,0 +1,11 @@
+name: CDAWeb
+description: "CDAWeb ingestion profile: ISTP plus the attributes CDAWeb additionally requires"
+url: "https://cdaweb.gsfc.nasa.gov/"
+rules_lookup_dir: "rules"
+inherit_from:
+  - ISTP
+severity_overrides:
+  # Instrument_type and Mission_group are only *recommended* by ISTP, but are
+  # REQUIRED for ingestion into CDAWeb, so the inherited rule is promoted to an
+  # error in this profile.
+  ISTP-GA-016: ERROR

@@ -1,0 +1,28 @@
+name: CDAWebEntryLimits
+description: "CDAWeb allows at most five entries for multi-valued instrument/link attributes"
+url: "https://istp-metadata.readthedocs.io/en/latest/03_metadata-global-attributes.html#instrument_type"
+reference: "CDAWEB-GA-001"
+severity: ERROR
+suite: CDAWeb
+
+assertions:
+  - path: "attributes/Instrument_type/values"
+    check: length
+    max: 5
+    error_if_no_match: false
+    message: "{% if valid %}Instrument_type entry count is within the CDAWeb limit{% else %}Instrument_type has {{ length }} entries; CDAWeb allows at most 5{% endif %}"
+  - path: "attributes/HTTP_LINK/values"
+    check: length
+    max: 5
+    error_if_no_match: false
+    message: "{% if valid %}HTTP_LINK entry count is within the CDAWeb limit{% else %}HTTP_LINK has {{ length }} entries; CDAWeb allows at most 5{% endif %}"
+  - path: "attributes/LINK_TEXT/values"
+    check: length
+    max: 5
+    error_if_no_match: false
+    message: "{% if valid %}LINK_TEXT entry count is within the CDAWeb limit{% else %}LINK_TEXT has {{ length }} entries; CDAWeb allows at most 5{% endif %}"
+  - path: "attributes/LINK_TITLE/values"
+    check: length
+    max: 5
+    error_if_no_match: false
+    message: "{% if valid %}LINK_TITLE entry count is within the CDAWeb limit{% else %}LINK_TITLE has {{ length }} entries; CDAWeb allows at most 5{% endif %}"
