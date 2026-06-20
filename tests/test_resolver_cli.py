@@ -51,3 +51,45 @@ def test_fix_line_escapes_file_derived_markup():
     assert "x\\[red]y" in line  # target_path tag-like bracket escaped
     assert "\\[bad]" in line  # value bracket escaped
     assert "see \\[zap]" in line  # provenance bracket escaped
+
+
+def test_fix_hint_reports_auto_fixes():
+    from astralint.astralint import _fix_hint
+    from astralint.base import get_suite, load_file
+
+    p = Path(_CDF)
+    file = load_file(str(p))
+    suite = get_suite("ISTP")
+    assert file is not None and suite is not None
+    hint = _fix_hint([(p, file, suite.run(file))])
+    assert hint is not None
+    assert "auto-fixable" in hint
+    assert "astralint fix" in hint
+
+
+def test_fix_hint_none_when_nothing_to_fix():
+    from astralint.astralint import _fix_hint
+
+    assert _fix_hint([]) is None
+
+
+def test_fix_hint_skips_non_cdf_files():
+    from astralint.astralint import _fix_hint
+    from astralint.base import get_suite, load_file
+
+    p = Path(_CDF)
+    file = load_file(str(p))
+    suite = get_suite("ISTP")
+    assert file is not None and suite is not None
+    non_cdf = file.model_copy(update={"extension": "fits"})
+    assert _fix_hint([(p, non_cdf, suite.run(file))]) is None
+
+
+def test_lint_prints_fix_hint(capsys):
+    import pytest
+
+    from astralint.astralint import lint
+
+    with pytest.raises(SystemExit):  # the resource file has errors -> exit 1
+        lint([Path(_CDF)], suite="ISTP")
+    assert "astralint fix" in capsys.readouterr().out
