@@ -32,9 +32,7 @@ def _attr_scalar(var: Variable, name: str) -> object:
 
 def _is_pointed_by(file: File, target: str, attr_names: tuple[str, ...]) -> bool:
     return any(
-        _attr_scalar(var, name) == target
-        for var in file.variables.values()
-        for name in attr_names
+        _attr_scalar(var, name) == target for var in file.variables.values() for name in attr_names
     )
 
 
@@ -100,11 +98,7 @@ def display_type_infer(
         return None
     ndim = len(var.shape)  # shape[0] is the record dimension
     if ndim == 1:
-        return ResolverOutput(
-            value="time_series", provenance_note="1-D record-varying variable"
-        )
+        return ResolverOutput(value="time_series", provenance_note="1-D record-varying variable")
     if ndim == 2 and "DEPEND_1" in var.attributes:
-        return ResolverOutput(
-            value="spectrogram", provenance_note="2-D variable with DEPEND_1"
-        )
+        return ResolverOutput(value="spectrogram", provenance_note="2-D variable with DEPEND_1")
     return None

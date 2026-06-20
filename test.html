@@ -1,0 +1,5287 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AstraLint Report</title>
+    <style>
+        :root {
+            --color-success: #22c55e;
+            --color-error: #ef4444;
+            --color-warning: #f59e0b;
+            --color-info: #3b82f6;
+            --color-bg: #f8fafc;
+            --color-card: #ffffff;
+            --color-border: #e2e8f0;
+            --color-text: #1e293b;
+            --color-text-muted: #64748b;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        header h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+        header .meta { opacity: 0.8; font-size: 0.875rem; }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat {
+            background: var(--color-card);
+            border-radius: 8px;
+            padding: 1.25rem;
+            text-align: center;
+            border: 1px solid var(--color-border);
+        }
+        
+        .stat .count { font-size: 2rem; font-weight: 700; }
+        .stat .label { font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted); }
+        .stat.passed .count { color: var(--color-success); }
+        .stat.failed .count { color: var(--color-error); }
+        .stat.warnings .count { color: var(--color-warning); }
+        
+        .results { background: var(--color-card); border-radius: 12px; border: 1px solid var(--color-border); }
+        
+        .group {
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .group:last-child { border-bottom: none; }
+        
+        .group-header {
+            padding: 1rem 1.5rem;
+            background: #f1f5f9;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            user-select: none;
+        }
+        
+        .group-header:hover { background: #e2e8f0; }
+        
+        .group-header .arrow {
+            transition: transform 0.2s;
+            color: var(--color-text-muted);
+        }
+        
+        .group.collapsed .arrow { transform: rotate(-90deg); }
+        .group.collapsed .group-content { display: none; }
+        
+        .group-header .name { font-weight: 600; }
+        .group-header .ref { color: var(--color-text-muted); font-size: 0.875rem; }
+        
+        .group-header .badge {
+            margin-left: auto;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge.pass { background: #dcfce7; color: #166534; }
+        .badge.fail { background: #fee2e2; color: #991b1b; }
+        
+        .group-content { padding-left: 1.5rem; }
+        
+        .result {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .result:last-child { border-bottom: none; }
+        
+        .result .icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+        .result.valid .icon { color: var(--color-success); }
+        .result.invalid .icon { color: var(--color-error); }
+        
+        .result .content { flex: 1; min-width: 0; }
+        .result .message { word-break: break-word; }
+        .result .reference { font-weight: 600; color: var(--color-text); }
+        .result .target { font-size: 0.875rem; color: var(--color-info); font-family: monospace; }
+        
+        .severity {
+            font-size: 0.625rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+        
+        .severity.ERROR { background: #fee2e2; color: #991b1b; }
+        .severity.WARNING { background: #fef3c7; color: #92400e; }
+        .severity.INFO { background: #dbeafe; color: #1e40af; }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--color-text-muted);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔬 AstraLint Conformance Report</h1>
+            <div class="meta">
+                <span>Generated: 2026-02-17 10:36:11</span>
+                 · <span>Suite: ISTP</span>
+            </div>
+        </header>
+        
+        <div class="summary">
+            <div class="stat passed">
+                <div class="count">292</div>
+                <div class="label">Passed</div>
+            </div>
+            <div class="stat failed">
+                <div class="count">28</div>
+                <div class="label">Failed</div>
+            </div>
+            <div class="stat warnings">
+                <div class="count">0</div>
+                <div class="label">Warnings</div>
+            </div>
+            <div class="stat">
+                <div class="count">320</div>
+                <div class="label">Total</div>
+            </div>
+        </div>
+        
+        <div class="results">
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ISTP</span>
+        
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">MandatoryGlobalAttributes</span>
+        <span class="ref">[ISTP-GA-001]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ContainsKeysAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'attributes' contains all required keys.</span>
+        
+        <div class="target">@ attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">RecommendedGlobalAttributes</span>
+        <span class="ref">[ISTP-GA-002]</span>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ContainsKeysAssertion</span>
+        
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'attributes' is missing keys: ['Time_resolution']</span>
+        
+        <div class="target">@ attributes</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">LogicalSourceFormat</span>
+        <span class="ref">[ISTP-GA-003]</span>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">MatchesAssertion</span>
+        
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (solo_L1_rpw-lfr-surv-asm) at path 'attributes/Logical_source/values/0' does not match pattern '^[a-z0-9]+_[a-z0-9_]+_[a-z0-9_]+$'.</span>
+        
+        <div class="target">@ attributes/Logical_source/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">NotEmptyAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'attributes/Logical_source/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ attributes/Logical_source/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">LogicalFileIdFormat</span>
+        <span class="ref">[ISTP-GA-004]</span>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">MatchesAssertion</span>
+        
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (solo_L1_rpw-lfr-surv-asm_20200617_V03) at path 'attributes/Logical_file_id/values/0' does not match pattern '^[a-z0-9_]+_\d{8}(_v\d+)?$'.</span>
+        
+        <div class="target">@ attributes/Logical_file_id/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">NotEmptyAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'attributes/Logical_file_id/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ attributes/Logical_file_id/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DataVersionFormat</span>
+        <span class="ref">[ISTP-GA-005]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">MatchesAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (03) at path 'attributes/Data_version/values/0' matches pattern '^\d+(\.\d+)*$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">NotEmptyAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'attributes/Data_version/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ attributes/Data_version/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DataTypeFormat</span>
+        <span class="ref">[ISTP-GA-006]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">MatchesAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (H0>High Resolution data) at path 'attributes/Data_type/values/0' matches pattern '^[A-Z0-9_]+>.+$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">NotEmptyAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'attributes/Data_type/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ attributes/Data_type/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">SourceNameFormat</span>
+        <span class="ref">[ISTP-GA-007]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">MatchesAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (SOLO>Solar Orbiter) at path 'attributes/Source_name/values/0' matches pattern '^[A-Z0-9_-]+>.+$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">NotEmptyAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'attributes/Source_name/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ attributes/Source_name/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DescriptorFormat</span>
+        <span class="ref">[ISTP-GA-008]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">MatchesAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (RPW-LFR-SURV-ASM>RPW Low Frequency Receiver Average Spectral Matrices data in survey mode) at path 'attributes/Descriptor/values/0' matches pattern '^[A-Za-z0-9_-]+>.+$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">NotEmptyAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'attributes/Descriptor/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ attributes/Descriptor/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DisciplineValues</span>
+        <span class="ref">[ISTP-GA-009]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ContainsAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'attributes/Discipline/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ attributes/Discipline/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">InstrumentTypeValues</span>
+        <span class="ref">[ISTP-GA-010]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ContainsAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'attributes/Instrument_type/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ attributes/Instrument_type/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">TextNotEmpty</span>
+        <span class="ref">[ISTP-GA-011]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">NotEmptyAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'attributes/TEXT/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ attributes/TEXT/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">LengthAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'attributes/TEXT/values/0' has length 70, which is within the specified range.</span>
+        
+        <div class="target">@ attributes/TEXT/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ProjectFormat</span>
+        <span class="ref">[ISTP-GA-012]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">MatchesAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (SOLO>Solar Orbiter) at path 'attributes/Project/values/0' matches pattern '^[A-Z0-9_-]+>.+$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">NotEmptyAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'attributes/Project/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ attributes/Project/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">MandatoryVariableAttributes</span>
+        <span class="ref">[ISTP-VA-001]</span>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ContainsKeysAssertion</span>
+        
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/Epoch/attributes' is missing keys: ['FORMAT']</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_FLAG/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/COMMON_BIA_STATUS_FLAG/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_BITMASK/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SURVEY_MODE/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/FREQ/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_MUX_SET/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_HV_ENABLED/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS1_ENABLED/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS2_ENABLED/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS3_ENABLED/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_ON_OFF/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BW/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP0/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP1/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R0/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R1/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R2/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM_CNT/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME_UNITS/attributes' is missing keys: ['FILLVAL']</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME_LABEL/attributes' is missing keys: ['FILLVAL']</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SCET/attributes' is missing keys: ['FORMAT']</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SYNCHRO_FLAG/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/.*/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DataVariableAttributes</span>
+        <span class="ref">[ISTP-VA-002]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Condition not met, assertion skipped.</span>
+        
+        <div class="target">@ </div>
+        
+    </div>
+    <span class="severity SKIPPED">SKIPPED</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">SupportDataVariableAttributes</span>
+        <span class="ref">[ISTP-VA-003]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Condition not met, assertion skipped.</span>
+        
+        <div class="target">@ </div>
+        
+    </div>
+    <span class="severity SKIPPED">SKIPPED</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">VarTypeValues</span>
+        <span class="ref">[ISTP-VA-004]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ContainsAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/Epoch/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_FLAG/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/COMMON_BIA_STATUS_FLAG/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_BITMASK/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SURVEY_MODE/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/FREQ/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_MUX_SET/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_HV_ENABLED/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS1_ENABLED/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS2_ENABLED/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS3_ENABLED/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_ON_OFF/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BW/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP0/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP1/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R0/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R1/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R2/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM_CNT/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME_UNITS/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME_LABEL/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SCET/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SYNCHRO_FLAG/attributes/VAR_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DisplayTypeValues</span>
+        <span class="ref">[ISTP-VA-005]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ContainsAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/Epoch/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_FLAG/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/COMMON_BIA_STATUS_FLAG/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_BITMASK/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SURVEY_MODE/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/FREQ/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_MUX_SET/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_HV_ENABLED/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS1_ENABLED/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS2_ENABLED/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS3_ENABLED/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_ON_OFF/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BW/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP0/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP1/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R0/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R1/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R2/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM_CNT/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SCET/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SYNCHRO_FLAG/attributes/DISPLAY_TYPE/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">CatdescLength</span>
+        <span class="ref">[ISTP-VA-006]</span>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">LengthAssertion</span>
+        
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/Epoch/attributes/CATDESC/values/0' has length 12, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME/attributes/CATDESC/values/0' has length 48, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_FLAG/attributes/CATDESC/values/0' has length 12, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/COMMON_BIA_STATUS_FLAG/attributes/CATDESC/values/0' has length 57, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_BITMASK/attributes/CATDESC/values/0' has length 12, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SURVEY_MODE/attributes/CATDESC/values/0' has length 15, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/FREQ/attributes/CATDESC/values/0' has length 25, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_MUX_SET/attributes/CATDESC/values/0' has length 28, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_HV_ENABLED/attributes/CATDESC/values/0' has length 36, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS1_ENABLED/attributes/CATDESC/values/0' has length 30, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS2_ENABLED/attributes/CATDESC/values/0' has length 30, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS3_ENABLED/attributes/CATDESC/values/0' has length 30, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_ON_OFF/attributes/CATDESC/values/0' has length 20, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BW/attributes/CATDESC/values/0' has length 36, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP0/attributes/CATDESC/values/0' has length 27, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP1/attributes/CATDESC/values/0' has length 27, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R0/attributes/CATDESC/values/0' has length 27, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R1/attributes/CATDESC/values/0' has length 27, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R2/attributes/CATDESC/values/0' has length 27, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM_CNT/attributes/CATDESC/values/0' has length 70, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM/attributes/CATDESC/values/0' has length 96, which is greater than maximum 80.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME_UNITS/attributes/CATDESC/values/0' has length 45, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME_LABEL/attributes/CATDESC/values/0' has length 26, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SCET/attributes/CATDESC/values/0' has length 33, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SYNCHRO_FLAG/attributes/CATDESC/values/0' has length 25, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">NotEmptyAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/Epoch/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_FLAG/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/COMMON_BIA_STATUS_FLAG/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_BITMASK/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SURVEY_MODE/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/FREQ/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_MUX_SET/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_HV_ENABLED/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS1_ENABLED/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS2_ENABLED/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS3_ENABLED/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_ON_OFF/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BW/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP0/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP1/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R0/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R1/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R2/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM_CNT/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME_UNITS/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME_LABEL/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SCET/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SYNCHRO_FLAG/attributes/CATDESC/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/CATDESC/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">FieldnamLength</span>
+        <span class="ref">[ISTP-VA-007]</span>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">LengthAssertion</span>
+        
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/Epoch/attributes/FIELDNAM/values/0' has length 5, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME/attributes/FIELDNAM/values/0' has length 52, which is greater than maximum 30.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_FLAG/attributes/FIELDNAM/values/0' has length 12, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/COMMON_BIA_STATUS_FLAG/attributes/FIELDNAM/values/0' has length 22, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_BITMASK/attributes/FIELDNAM/values/0' has length 15, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SURVEY_MODE/attributes/FIELDNAM/values/0' has length 11, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/FREQ/attributes/FIELDNAM/values/0' has length 25, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_MUX_SET/attributes/FIELDNAM/values/0' has length 24, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_HV_ENABLED/attributes/FIELDNAM/values/0' has length 24, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS1_ENABLED/attributes/FIELDNAM/values/0' has length 19, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS2_ENABLED/attributes/FIELDNAM/values/0' has length 19, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS3_ENABLED/attributes/FIELDNAM/values/0' has length 19, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_ON_OFF/attributes/FIELDNAM/values/0' has length 11, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BW/attributes/FIELDNAM/values/0' has length 36, which is greater than maximum 30.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP0/attributes/FIELDNAM/values/0' has length 39, which is greater than maximum 30.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP1/attributes/FIELDNAM/values/0' has length 39, which is greater than maximum 30.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R0/attributes/FIELDNAM/values/0' has length 34, which is greater than maximum 30.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R1/attributes/FIELDNAM/values/0' has length 34, which is greater than maximum 30.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R2/attributes/FIELDNAM/values/0' has length 34, which is greater than maximum 30.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM_CNT/attributes/FIELDNAM/values/0' has length 7, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM/attributes/FIELDNAM/values/0' has length 3, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME_UNITS/attributes/FIELDNAM/values/0' has length 22, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME_LABEL/attributes/FIELDNAM/values/0' has length 22, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SCET/attributes/FIELDNAM/values/0' has length 22, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SYNCHRO_FLAG/attributes/FIELDNAM/values/0' has length 12, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">NotEmptyAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/Epoch/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_FLAG/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/COMMON_BIA_STATUS_FLAG/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_BITMASK/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SURVEY_MODE/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/FREQ/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_MUX_SET/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_HV_ENABLED/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS1_ENABLED/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS2_ENABLED/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS3_ENABLED/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_ON_OFF/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BW/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP0/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP1/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R0/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R1/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R2/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM_CNT/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME_UNITS/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME_LABEL/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SCET/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SYNCHRO_FLAG/attributes/FIELDNAM/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/FIELDNAM/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">LablaxisLength</span>
+        <span class="ref">[ISTP-VA-008]</span>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">LengthAssertion</span>
+        
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/Epoch/attributes/LABLAXIS/values/0' has length 5, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_FLAG/attributes/LABLAXIS/values/0' has length 12, which is greater than maximum 10.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/COMMON_BIA_STATUS_FLAG/attributes/LABLAXIS/values/0' has length 22, which is greater than maximum 10.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_BITMASK/attributes/LABLAXIS/values/0' has length 12, which is greater than maximum 10.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SURVEY_MODE/attributes/LABLAXIS/values/0' has length 15, which is greater than maximum 10.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/FREQ/attributes/LABLAXIS/values/0' has length 22, which is greater than maximum 10.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_MUX_SET/attributes/LABLAXIS/values/0' has length 17, which is greater than maximum 10.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_HV_ENABLED/attributes/LABLAXIS/values/0' has length 20, which is greater than maximum 10.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS1_ENABLED/attributes/LABLAXIS/values/0' has length 23, which is greater than maximum 10.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS2_ENABLED/attributes/LABLAXIS/values/0' has length 23, which is greater than maximum 10.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS3_ENABLED/attributes/LABLAXIS/values/0' has length 23, which is greater than maximum 10.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_ON_OFF/attributes/LABLAXIS/values/0' has length 11, which is greater than maximum 10.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BW/attributes/LABLAXIS/values/0' has length 2, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP0/attributes/LABLAXIS/values/0' has length 3, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP1/attributes/LABLAXIS/values/0' has length 3, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R0/attributes/LABLAXIS/values/0' has length 2, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R1/attributes/LABLAXIS/values/0' has length 2, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R2/attributes/LABLAXIS/values/0' has length 2, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM_CNT/attributes/LABLAXIS/values/0' has length 7, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM/attributes/LABLAXIS/values/0' has length 3, which is within the specified range.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SCET/attributes/LABLAXIS/values/0' has length 31, which is greater than maximum 10.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SYNCHRO_FLAG/attributes/LABLAXIS/values/0' has length 15, which is greater than maximum 10.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABLAXIS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">UnitsNotEmpty</span>
+        <span class="ref">[ISTP-VA-009]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">NotEmptyAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/Epoch/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_FLAG/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/COMMON_BIA_STATUS_FLAG/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_BITMASK/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SURVEY_MODE/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/FREQ/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_MUX_SET/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_HV_ENABLED/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS1_ENABLED/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS2_ENABLED/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS3_ENABLED/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_ON_OFF/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BW/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP0/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP1/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R0/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R1/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R2/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM_CNT/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SCET/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SYNCHRO_FLAG/attributes/UNITS/values/0' is not empty, as expected.</span>
+        
+        <div class="target">@ variables/.*/attributes/UNITS/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">FormatSpecifier</span>
+        <span class="ref">[ISTP-VA-010]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">MatchesAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I10.0) at path 'variables/ACQUISITION_TIME/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I1.1) at path 'variables/QUALITY_FLAG/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I1.1) at path 'variables/COMMON_BIA_STATUS_FLAG/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I5) at path 'variables/QUALITY_BITMASK/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I1.1) at path 'variables/SURVEY_MODE/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/FREQ/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/BIAS_MODE_MUX_SET/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/BIAS_MODE_HV_ENABLED/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/BIAS_MODE_BIAS1_ENABLED/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/BIAS_MODE_BIAS2_ENABLED/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/BIAS_MODE_BIAS3_ENABLED/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/BIAS_ON_OFF/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/BW/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/SP0/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/SP1/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/R0/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/R1/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/R2/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/ASM_CNT/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (F32.6) at path 'variables/ASM/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (A16) at path 'variables/ACQUISITION_TIME_UNITS/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (A32) at path 'variables/ACQUISITION_TIME_LABEL/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value (I3.3) at path 'variables/SYNCHRO_FLAG/attributes/FORMAT/values/0' matches pattern '^[AIEFDG]\d+(\.\d+)?$'.</span>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DependReferences</span>
+        <span class="ref">[ISTP-VA-011]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ReferencesVariableAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_FLAG/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/COMMON_BIA_STATUS_FLAG/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_BITMASK/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SURVEY_MODE/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/FREQ/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_MUX_SET/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_HV_ENABLED/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS1_ENABLED/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS2_ENABLED/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS3_ENABLED/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_ON_OFF/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BW/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP0/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP1/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R0/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R1/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R2/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM_CNT/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SCET/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SYNCHRO_FLAG/attributes/DEPEND_0/values/0' references existing variable 'Epoch'.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_0/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Path 'variables/.*/attributes/DEPEND_1/values/0' did not match any values, but that's okay.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_1/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Path 'variables/.*/attributes/DEPEND_2/values/0' did not match any values, but that's okay.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_2/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Path 'variables/.*/attributes/DEPEND_3/values/0' did not match any values, but that's okay.</span>
+        
+        <div class="target">@ variables/.*/attributes/DEPEND_3/values/0</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">LablPtrReferences</span>
+        <span class="ref">[ISTP-VA-012]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ReferencesVariableAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME/attributes/LABL_PTR_1/values/0' references existing variable 'ACQUISITION_TIME_LABEL'.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABL_PTR_1/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Path 'variables/.*/attributes/LABL_PTR_2/values/[0-9]*' did not match any values, but that's okay.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABL_PTR_2/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Path 'variables/.*/attributes/LABL_PTR_3/values/[0-9]*' did not match any values, but that's okay.</span>
+        
+        <div class="target">@ variables/.*/attributes/LABL_PTR_3/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ScaleTypValues</span>
+        <span class="ref">[ISTP-VA-013]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ContainsAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/Epoch/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ACQUISITION_TIME/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_FLAG/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/COMMON_BIA_STATUS_FLAG/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/QUALITY_BITMASK/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SURVEY_MODE/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/FREQ/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_MUX_SET/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_HV_ENABLED/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS1_ENABLED/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS2_ENABLED/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_MODE_BIAS3_ENABLED/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BIAS_ON_OFF/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/BW/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP0/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SP1/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R0/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R1/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/R2/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM_CNT/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/ASM/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SCET/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/SYNCHRO_FLAG/attributes/SCALETYP/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/.*/attributes/SCALETYP/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DeltaReferences</span>
+        <span class="ref">[ISTP-VA-014]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Path 'variables/.*/attributes/DELTA_PLUS_VAR/values/[0-9]*' did not match any values, but that's okay.</span>
+        
+        <div class="target">@ variables/.*/attributes/DELTA_PLUS_VAR/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Path 'variables/.*/attributes/DELTA_MINUS_VAR/values/[0-9]*' did not match any values, but that's okay.</span>
+        
+        <div class="target">@ variables/.*/attributes/DELTA_MINUS_VAR/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">EpochVariable</span>
+        <span class="ref">[ISTP-VAR-001]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Path 'variables/Epoch' exists in the file.</span>
+        
+        <div class="target">@ variables/Epoch</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ContainsAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/Epoch/data_type' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/Epoch/data_type</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">EpochAttributes</span>
+        <span class="ref">[ISTP-VAR-002]</span>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ContainsKeysAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/Epoch/attributes' contains all required keys.</span>
+        
+        <div class="target">@ variables/Epoch/attributes</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ComparisonAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/Epoch/attributes/VAR_TYPE/values/0' satisfies condition 'support_data = support_data'.</span>
+        
+        <div class="target">@ variables/Epoch/attributes/VAR_TYPE/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ContainsAssertion</span>
+        
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="reference"></span>: 
+        <span class="message">Value at path 'variables/Epoch/attributes/MONOTON/values/0' is in the expected list of values.</span>
+        
+        <div class="target">@ variables/Epoch/attributes/MONOTON/values/[0-9]*</div>
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        </div>
+        
+        <footer>
+            AstraLint — Space Physics Data Conformance Checker
+        </footer>
+    </div>
+    
+    <script>
+        document.querySelectorAll('.group-header').forEach(header => {
+            header.addEventListener('click', () => {
+                header.parentElement.classList.toggle('collapsed');
+            });
+        });
+    </script>
+</body>
+</html>

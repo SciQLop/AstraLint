@@ -1,0 +1,4509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AstraLint Report</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-bg, #f8fafc);
+            color: var(--color-text, #1e293b);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        .alr { /* scope all report styles */ }
+        .alr {
+            --alr-success: var(--color-success, #22c55e);
+            --alr-error: var(--color-error, #ef4444);
+            --alr-warning: var(--color-warning, #f59e0b);
+            --alr-info: var(--color-info, #3b82f6);
+            --alr-bg: var(--color-bg, #f8fafc);
+            --alr-card: var(--color-card, #ffffff);
+            --alr-border: var(--color-border, #e2e8f0);
+            --alr-text: var(--color-text, #1e293b);
+            --alr-text-muted: var(--color-text-muted, #64748b);
+            --alr-group-header: var(--color-group-header, #f1f5f9);
+            --alr-group-hover: var(--color-group-hover, #e2e8f0);
+            --alr-header-from: var(--color-header-from, #1e293b);
+            --alr-header-to: var(--color-header-to, #334155);
+            --alr-badge-pass-bg: #dcfce7;
+            --alr-badge-pass-fg: #166534;
+            --alr-badge-fail-bg: #fee2e2;
+            --alr-badge-fail-fg: #991b1b;
+            --alr-sev-error-bg: #fee2e2;
+            --alr-sev-error-fg: #991b1b;
+            --alr-sev-warning-bg: #fef3c7;
+            --alr-sev-warning-fg: #92400e;
+            --alr-sev-info-bg: #dbeafe;
+            --alr-sev-info-fg: #1e40af;
+            color: var(--alr-text);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .alr {
+                --alr-badge-pass-bg: #14532d; --alr-badge-pass-fg: #86efac;
+                --alr-badge-fail-bg: #7f1d1d; --alr-badge-fail-fg: #fca5a5;
+                --alr-sev-error-bg: #7f1d1d; --alr-sev-error-fg: #fca5a5;
+                --alr-sev-warning-bg: #78350f; --alr-sev-warning-fg: #fde68a;
+                --alr-sev-info-bg: #1e3a5f; --alr-sev-info-fg: #93c5fd;
+            }
+        }
+
+        [data-theme="dark"] .alr {
+            --alr-badge-pass-bg: #14532d; --alr-badge-pass-fg: #86efac;
+            --alr-badge-fail-bg: #7f1d1d; --alr-badge-fail-fg: #fca5a5;
+            --alr-sev-error-bg: #7f1d1d; --alr-sev-error-fg: #fca5a5;
+            --alr-sev-warning-bg: #78350f; --alr-sev-warning-fg: #fde68a;
+            --alr-sev-info-bg: #1e3a5f; --alr-sev-info-fg: #93c5fd;
+        }
+
+        [data-theme="light"] .alr {
+            --alr-badge-pass-bg: #dcfce7; --alr-badge-pass-fg: #166534;
+            --alr-badge-fail-bg: #fee2e2; --alr-badge-fail-fg: #991b1b;
+            --alr-sev-error-bg: #fee2e2; --alr-sev-error-fg: #991b1b;
+            --alr-sev-warning-bg: #fef3c7; --alr-sev-warning-fg: #92400e;
+            --alr-sev-info-bg: #dbeafe; --alr-sev-info-fg: #1e40af;
+        }
+
+        .alr .alr-header {
+            background: linear-gradient(135deg, var(--alr-header-from) 0%, var(--alr-header-to) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .alr .alr-header h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+        .alr .alr-header .meta { opacity: 0.8; font-size: 0.875rem; }
+
+        .alr .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .alr .stat {
+            background: var(--alr-card);
+            border-radius: 8px;
+            padding: 1.25rem;
+            text-align: center;
+            border: 1px solid var(--alr-border);
+        }
+
+        .alr .stat .count { font-size: 2rem; font-weight: 700; }
+        .alr .stat .label { font-size: 0.75rem; text-transform: uppercase; color: var(--alr-text-muted); }
+        .alr .stat.passed .count { color: var(--alr-success); }
+        .alr .stat.failed .count { color: var(--alr-error); }
+        .alr .stat.warnings .count { color: var(--alr-warning); }
+
+        .alr .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .alr .filter-bar input[type="search"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.6rem 0.9rem;
+            border: 1px solid var(--alr-border);
+            border-radius: 8px;
+            background: var(--alr-card);
+            color: var(--alr-text);
+            font-size: 0.9rem;
+        }
+
+        .alr .filter-bar .failed-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.875rem;
+            color: var(--alr-text-muted);
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .alr .results { background: var(--alr-card); border-radius: 12px; border: 1px solid var(--alr-border); }
+
+        .alr .group { border-bottom: 1px solid var(--alr-border); }
+        .alr .group:last-child { border-bottom: none; }
+
+        .alr .group-header {
+            padding: 1rem 1.5rem;
+            background: var(--alr-group-header);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            user-select: none;
+        }
+
+        .alr .group-header:hover { background: var(--alr-group-hover); }
+
+        .alr .group-header .arrow {
+            transition: transform 0.2s;
+            color: var(--alr-text-muted);
+        }
+
+        .alr .group.collapsed .arrow { transform: rotate(-90deg); }
+        .alr .group.collapsed .group-content { display: none; }
+
+        .alr .group-header .name { font-weight: 600; }
+        .alr .group-header .ref { color: var(--alr-text-muted); font-size: 0.875rem; }
+
+        .alr .group-header .doc-link {
+            font-size: 0.75rem;
+            color: var(--alr-info);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .alr .group-header .doc-link:hover { text-decoration: underline; }
+
+        .alr .group-header .badge {
+            margin-left: auto;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .alr .badge.pass { background: var(--alr-badge-pass-bg); color: var(--alr-badge-pass-fg); }
+        .alr .badge.fail { background: var(--alr-badge-fail-bg); color: var(--alr-badge-fail-fg); }
+
+        .alr .group-content { padding-left: 1.5rem; }
+
+        .alr .result {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--alr-border);
+        }
+
+        .alr .result:last-child { border-bottom: none; }
+
+        .alr .result.sev-ERROR { border-left: 3px solid var(--alr-error); padding-left: calc(1.5rem - 3px); }
+        .alr .result.sev-WARNING { border-left: 3px solid var(--alr-warning); padding-left: calc(1.5rem - 3px); }
+
+        .alr .result .icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+        .alr .result.valid .icon { color: var(--alr-success); }
+        .alr .result.invalid .icon { color: var(--alr-error); }
+        .alr .result.sev-WARNING .icon { color: var(--alr-warning); }
+
+        .alr .result .content { flex: 1; min-width: 0; }
+        .alr .result .message { word-break: break-word; }
+        .alr .result .reference { font-weight: 600; color: var(--alr-text); }
+        .alr .result .target {
+            font-size: 0.8rem; color: var(--alr-text-muted); font-family: monospace;
+            margin-left: 0.5rem; white-space: nowrap;
+        }
+        .alr .result .value { font-size: 0.8rem; color: var(--alr-text-muted); margin-left: 0.5rem; }
+        .alr .result .value code {
+            font-family: monospace; background: var(--alr-code-bg, rgba(127,127,127,0.15));
+            padding: 0.05rem 0.35rem; border-radius: 4px; color: var(--alr-text); word-break: break-all;
+        }
+
+        .alr .severity {
+            font-size: 0.625rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .alr .severity.ERROR { background: var(--alr-sev-error-bg); color: var(--alr-sev-error-fg); }
+        .alr .severity.WARNING { background: var(--alr-sev-warning-bg); color: var(--alr-sev-warning-fg); }
+        .alr .severity.INFO { background: var(--alr-sev-info-bg); color: var(--alr-sev-info-fg); }
+
+        .alr footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--alr-text-muted);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+    <div class="alr">
+        <header class="alr-header">
+            <h1>🔬 AstraLint Conformance Report</h1>
+            <div class="meta">
+                <span>Generated: 2026-06-20 00:31:52</span>
+                 · <span>Suite: AstraLint Results for suite &#39;ISTP&#39; on file &#39;mms1_asp2_srvy_l1b_stat_00000000_v01.cdf&#39;</span>
+            </div>
+        </header>
+
+        <div class="summary">
+            <div class="stat passed">
+                <div class="count">255</div>
+                <div class="label">Passed</div>
+            </div>
+            <div class="stat failed">
+                <div class="count">18</div>
+                <div class="label">Failed</div>
+            </div>
+            <div class="stat warnings">
+                <div class="count">3</div>
+                <div class="label">Warnings</div>
+            </div>
+            <div class="stat">
+                <div class="count">276</div>
+                <div class="label">Total</div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <input type="search" id="alr-filter" placeholder="Filter results by text…" autocomplete="off">
+            <label class="failed-toggle">
+                <input type="checkbox" id="alr-failed-only"> Show only failed
+            </label>
+        </div>
+
+        <div class="results">
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">AstraLint Results for suite &#39;ISTP&#39; on file &#39;mms1_asp2_srvy_l1b_stat_00000000_v01.cdf&#39;</span>
+        
+        
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DOIFormat</span>
+        <span class="ref">[ISTP-GA-014]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#doi" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">DOI did not match any values (not required)</span>
+        
+        <span class="target">@ DOI</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DescriptorFormat</span>
+        <span class="ref">[ISTP-GA-008]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#descriptor" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Descriptor must follow format: ABBREV&gt;Full_description</span>
+        
+        <span class="target">@ Descriptor</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Descriptor cannot be empty</span>
+        
+        <span class="target">@ Descriptor</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DisciplineValues</span>
+        <span class="ref">[ISTP-GA-009]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#discipline" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Discipline should use a standard ISTP value (e.g., &#39;Space Physics&gt;Magnetospheric Science&#39;)</span>
+        
+        <span class="target">@ Discipline</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">MandatoryGlobalAttributes</span>
+        <span class="ref">[ISTP-GA-001]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">all mandatory global attributes present</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ProjectFormat</span>
+        <span class="ref">[ISTP-GA-012]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#project" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Project must follow format: ABBREV&gt;Full_Name (e.g., &#39;ISTP&gt;International Solar-Terrestrial Physics&#39;)</span>
+        
+        <span class="target">@ Project</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Project cannot be empty</span>
+        
+        <span class="target">@ Project</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">RecommendedGlobalAttributes</span>
+        <span class="ref">[ISTP-GA-002]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result invalid sev-WARNING">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">missing recommended global attribute(s): DOI, spase_DatasetResourceID</span>
+        
+        
+    </div>
+    <span class="severity WARNING">WARNING</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">TextNotEmpty</span>
+        <span class="ref">[ISTP-GA-011]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#text" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">TEXT global attribute cannot be empty - must describe the data</span>
+        
+        <span class="target">@ TEXT</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">TEXT global attribute cannot be empty - must describe the data</span>
+        
+        <span class="target">@ TEXT</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">TEXT global attribute cannot be empty - must describe the data</span>
+        
+        <span class="target">@ TEXT</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">TEXT global attribute cannot be empty - must describe the data</span>
+        
+        <span class="target">@ TEXT</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">TEXT global attribute cannot be empty - must describe the data</span>
+        
+        <span class="target">@ TEXT</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">CDAWebRequiredGlobalAttributes</span>
+        <span class="ref">[ISTP-GA-016]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#instrument-type" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">all CDAWeb-required global attributes present</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DataTypeFormat</span>
+        <span class="ref">[ISTP-GA-006]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#data-type" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Data_type must follow format: ABBREV&gt;Full_description (e.g., &#39;L2-Summary&gt;level 2 summary&#39;)</span>
+        
+        <span class="target">@ Data_type</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Data_type cannot be empty</span>
+        
+        <span class="target">@ Data_type</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DataVersionFormat</span>
+        <span class="ref">[ISTP-GA-005]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#data-version" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Data_version must be numeric (e.g., &#39;1&#39;, &#39;1.0&#39;, &#39;01&#39;)</span>
+        
+        <span class="target">@ Data_version</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Data_version cannot be empty</span>
+        
+        <span class="target">@ Data_version</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">GenerationDateFormat</span>
+        <span class="ref">[ISTP-GA-015]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#generation-date" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Generation_date must use yyyymmdd format</span>
+        
+        <span class="target">@ Generation_date</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">InstrumentTypeValues</span>
+        <span class="ref">[ISTP-GA-010]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#instrument-type" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result invalid sev-WARNING">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Instrument_type should use a standard ISTP value</span>
+        
+        <span class="target">@ Instrument_type</span>
+        
+        
+        <span class="value">got <code>Spacecraft Potential Control</code></span>
+        
+    </div>
+    <span class="severity WARNING">WARNING</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">LinkCountConsistency</span>
+        <span class="ref">[ISTP-GA-013]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#link-text-link-title-http-link" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">HTTP_LINK and LINK_TEXT must have the same number of entries</span>
+        
+        <span class="target">@ HTTP_LINK</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">HTTP_LINK and LINK_TITLE must have the same number of entries</span>
+        
+        <span class="target">@ HTTP_LINK</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">LogicalFileIdFormat</span>
+        <span class="ref">[ISTP-GA-004]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#logical-file-id" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result invalid sev-ERROR">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Logical_file_id should follow: logical_source_YYYYMMDD[_vN] format</span>
+        
+        <span class="target">@ Logical_file_id</span>
+        
+        
+        <span class="value">got <code>mms1_asp2_srvy_l1b_stat_20140114_v0.0.0</code></span>
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Logical_file_id cannot be empty</span>
+        
+        <span class="target">@ Logical_file_id</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">LogicalSourceFormat</span>
+        <span class="ref">[ISTP-GA-003]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#logical-source" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Logical_source must follow format: source_descriptor_datatype (lowercase with underscores)</span>
+        
+        <span class="target">@ Logical_source</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Logical_source cannot be empty</span>
+        
+        <span class="target">@ Logical_source</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">SourceNameFormat</span>
+        <span class="ref">[ISTP-GA-007]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/03_metadata-global-attributes.html#source-name" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Source_name must follow format: ABBREV&gt;Full_Name (e.g., &#39;GEOTAIL&gt;Geomagnetic Tail&#39;)</span>
+        
+        <span class="target">@ Source_name</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Source_name cannot be empty</span>
+        
+        <span class="target">@ Source_name</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">CatdescLength</span>
+        <span class="ref">[ISTP-VA-006]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#catdesc" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_epoch (length 53) is within 80 char limit</span>
+        
+        <span class="target">@ mms1_asp_epoch/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_p015v (length 43) is within 80 char limit</span>
+        
+        <span class="target">@ mms1_asp_p015v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_p033v (length 43) is within 80 char limit</span>
+        
+        <span class="target">@ mms1_asp_p033v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_p050v (length 41) is within 80 char limit</span>
+        
+        <span class="target">@ mms1_asp_p050v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_p120v (length 42) is within 80 char limit</span>
+        
+        <span class="target">@ mms1_asp_p120v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_n120v (length 44) is within 80 char limit</span>
+        
+        <span class="target">@ mms1_asp_n120v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_tdpu (length 37) is within 80 char limit</span>
+        
+        <span class="target">@ mms1_asp_tdpu/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_tdcc (length 37) is within 80 char limit</span>
+        
+        <span class="target">@ mms1_asp_tdcc/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_tbox (length 39) is within 80 char limit</span>
+        
+        <span class="target">@ mms1_asp_tbox/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_tmod (length 40) is within 80 char limit</span>
+        
+        <span class="target">@ mms1_asp_tmod/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_stat (length 39) is within 80 char limit</span>
+        
+        <span class="target">@ mms1_asp_stat/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of label_stat (length 19) is within 80 char limit</span>
+        
+        <span class="target">@ label_stat/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_epoch is not empty</span>
+        
+        <span class="target">@ mms1_asp_epoch/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_p015v is not empty</span>
+        
+        <span class="target">@ mms1_asp_p015v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_p033v is not empty</span>
+        
+        <span class="target">@ mms1_asp_p033v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_p050v is not empty</span>
+        
+        <span class="target">@ mms1_asp_p050v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_p120v is not empty</span>
+        
+        <span class="target">@ mms1_asp_p120v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_n120v is not empty</span>
+        
+        <span class="target">@ mms1_asp_n120v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_tdpu is not empty</span>
+        
+        <span class="target">@ mms1_asp_tdpu/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_tdcc is not empty</span>
+        
+        <span class="target">@ mms1_asp_tdcc/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_tbox is not empty</span>
+        
+        <span class="target">@ mms1_asp_tbox/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_tmod is not empty</span>
+        
+        <span class="target">@ mms1_asp_tmod/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_stat is not empty</span>
+        
+        <span class="target">@ mms1_asp_stat/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of label_stat is not empty</span>
+        
+        <span class="target">@ label_stat/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">CatdescMaxLength</span>
+        <span class="ref">[ISTP-VA-020]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#catdesc" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_epoch (length 53) is within 120 char limit</span>
+        
+        <span class="target">@ mms1_asp_epoch/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_p015v (length 43) is within 120 char limit</span>
+        
+        <span class="target">@ mms1_asp_p015v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_p033v (length 43) is within 120 char limit</span>
+        
+        <span class="target">@ mms1_asp_p033v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_p050v (length 41) is within 120 char limit</span>
+        
+        <span class="target">@ mms1_asp_p050v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_p120v (length 42) is within 120 char limit</span>
+        
+        <span class="target">@ mms1_asp_p120v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_n120v (length 44) is within 120 char limit</span>
+        
+        <span class="target">@ mms1_asp_n120v/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_tdpu (length 37) is within 120 char limit</span>
+        
+        <span class="target">@ mms1_asp_tdpu/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_tdcc (length 37) is within 120 char limit</span>
+        
+        <span class="target">@ mms1_asp_tdcc/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_tbox (length 39) is within 120 char limit</span>
+        
+        <span class="target">@ mms1_asp_tbox/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_tmod (length 40) is within 120 char limit</span>
+        
+        <span class="target">@ mms1_asp_tmod/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of mms1_asp_stat (length 39) is within 120 char limit</span>
+        
+        <span class="target">@ mms1_asp_stat/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute CATDESC of label_stat (length 19) is within 120 char limit</span>
+        
+        <span class="target">@ label_stat/CATDESC</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DataVariableAttributes</span>
+        <span class="ref">[ISTP-VA-002]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/04_metadata-variables.html#data-variables" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result invalid sev-ERROR">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">mms1_asp_epoch missing required attribute(s): DEPEND_0</span>
+        
+        <span class="target">@ mms1_asp_epoch</span>
+        
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">All assertions in &#39;all_of&#39; passed successfully.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">All assertions in &#39;all_of&#39; passed successfully.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">All assertions in &#39;all_of&#39; passed successfully.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">All assertions in &#39;all_of&#39; passed successfully.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">All assertions in &#39;all_of&#39; passed successfully.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">All assertions in &#39;all_of&#39; passed successfully.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">All assertions in &#39;all_of&#39; passed successfully.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">All assertions in &#39;all_of&#39; passed successfully.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">All assertions in &#39;all_of&#39; passed successfully.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result invalid sev-ERROR">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Data variable must have UNITS or UNIT_PTR</span>
+        
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">FieldnamLength</span>
+        <span class="ref">[ISTP-VA-007]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#fieldnam" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_epoch (length 9) is within 30 char limit</span>
+        
+        <span class="target">@ mms1_asp_epoch/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_p015v (length 13) is within 30 char limit</span>
+        
+        <span class="target">@ mms1_asp_p015v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_p033v (length 13) is within 30 char limit</span>
+        
+        <span class="target">@ mms1_asp_p033v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_p050v (length 11) is within 30 char limit</span>
+        
+        <span class="target">@ mms1_asp_p050v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_p120v (length 12) is within 30 char limit</span>
+        
+        <span class="target">@ mms1_asp_p120v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_n120v (length 12) is within 30 char limit</span>
+        
+        <span class="target">@ mms1_asp_n120v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_tdpu (length 15) is within 30 char limit</span>
+        
+        <span class="target">@ mms1_asp_tdpu/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_tdcc (length 15) is within 30 char limit</span>
+        
+        <span class="target">@ mms1_asp_tdcc/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_tbox (length 15) is within 30 char limit</span>
+        
+        <span class="target">@ mms1_asp_tbox/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_tmod (length 15) is within 30 char limit</span>
+        
+        <span class="target">@ mms1_asp_tmod/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_stat (length 17) is within 30 char limit</span>
+        
+        <span class="target">@ mms1_asp_stat/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of label_stat (length 13) is within 30 char limit</span>
+        
+        <span class="target">@ label_stat/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_epoch is not empty</span>
+        
+        <span class="target">@ mms1_asp_epoch/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_p015v is not empty</span>
+        
+        <span class="target">@ mms1_asp_p015v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_p033v is not empty</span>
+        
+        <span class="target">@ mms1_asp_p033v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_p050v is not empty</span>
+        
+        <span class="target">@ mms1_asp_p050v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_p120v is not empty</span>
+        
+        <span class="target">@ mms1_asp_p120v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_n120v is not empty</span>
+        
+        <span class="target">@ mms1_asp_n120v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_tdpu is not empty</span>
+        
+        <span class="target">@ mms1_asp_tdpu/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_tdcc is not empty</span>
+        
+        <span class="target">@ mms1_asp_tdcc/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_tbox is not empty</span>
+        
+        <span class="target">@ mms1_asp_tbox/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_tmod is not empty</span>
+        
+        <span class="target">@ mms1_asp_tmod/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_stat is not empty</span>
+        
+        <span class="target">@ mms1_asp_stat/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of label_stat is not empty</span>
+        
+        <span class="target">@ label_stat/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">FieldnamMaxLength</span>
+        <span class="ref">[ISTP-VA-021]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#fieldnam" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_epoch (length 9) is within 50 char limit</span>
+        
+        <span class="target">@ mms1_asp_epoch/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_p015v (length 13) is within 50 char limit</span>
+        
+        <span class="target">@ mms1_asp_p015v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_p033v (length 13) is within 50 char limit</span>
+        
+        <span class="target">@ mms1_asp_p033v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_p050v (length 11) is within 50 char limit</span>
+        
+        <span class="target">@ mms1_asp_p050v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_p120v (length 12) is within 50 char limit</span>
+        
+        <span class="target">@ mms1_asp_p120v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_n120v (length 12) is within 50 char limit</span>
+        
+        <span class="target">@ mms1_asp_n120v/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_tdpu (length 15) is within 50 char limit</span>
+        
+        <span class="target">@ mms1_asp_tdpu/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_tdcc (length 15) is within 50 char limit</span>
+        
+        <span class="target">@ mms1_asp_tdcc/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_tbox (length 15) is within 50 char limit</span>
+        
+        <span class="target">@ mms1_asp_tbox/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_tmod (length 15) is within 50 char limit</span>
+        
+        <span class="target">@ mms1_asp_tmod/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of mms1_asp_stat (length 17) is within 50 char limit</span>
+        
+        <span class="target">@ mms1_asp_stat/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FIELDNAM of label_stat (length 13) is within 50 char limit</span>
+        
+        <span class="target">@ label_stat/FIELDNAM</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">FillvalOutsideRange</span>
+        <span class="ref">[ISTP-VA-019]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#fillval" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FILLVAL of mms1_asp_p015v is outside [VALIDMIN, VALIDMAX] range</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FILLVAL of mms1_asp_p033v is outside [VALIDMIN, VALIDMAX] range</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FILLVAL of mms1_asp_p050v is outside [VALIDMIN, VALIDMAX] range</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FILLVAL of mms1_asp_p120v is outside [VALIDMIN, VALIDMAX] range</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FILLVAL of mms1_asp_n120v is outside [VALIDMIN, VALIDMAX] range</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FILLVAL of mms1_asp_tdpu is outside [VALIDMIN, VALIDMAX] range</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FILLVAL of mms1_asp_tdcc is outside [VALIDMIN, VALIDMAX] range</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FILLVAL of mms1_asp_tbox is outside [VALIDMIN, VALIDMAX] range</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FILLVAL of mms1_asp_tmod is outside [VALIDMIN, VALIDMAX] range</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result invalid sev-ERROR">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Attribute FILLVAL of mms1_asp_stat must be outside [VALIDMIN, VALIDMAX] range (or NaN)</span>
+        
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Condition not met, assertion skipped.</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">FormatSpecifier</span>
+        <span class="ref">[ISTP-VA-010]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#format" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FORMAT of mms1_asp_p015v has value &#39;F5.3&#39;</span>
+        
+        <span class="target">@ mms1_asp_p015v/FORMAT</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FORMAT of mms1_asp_p033v has value &#39;F5.3&#39;</span>
+        
+        <span class="target">@ mms1_asp_p033v/FORMAT</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FORMAT of mms1_asp_p050v has value &#39;F5.3&#39;</span>
+        
+        <span class="target">@ mms1_asp_p050v/FORMAT</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FORMAT of mms1_asp_p120v has value &#39;F5.2&#39;</span>
+        
+        <span class="target">@ mms1_asp_p120v/FORMAT</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FORMAT of mms1_asp_n120v has value &#39;F6.2&#39;</span>
+        
+        <span class="target">@ mms1_asp_n120v/FORMAT</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FORMAT of mms1_asp_tdpu has value &#39;F6.1&#39;</span>
+        
+        <span class="target">@ mms1_asp_tdpu/FORMAT</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FORMAT of mms1_asp_tdcc has value &#39;F6.1&#39;</span>
+        
+        <span class="target">@ mms1_asp_tdcc/FORMAT</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FORMAT of mms1_asp_tbox has value &#39;F6.1&#39;</span>
+        
+        <span class="target">@ mms1_asp_tbox/FORMAT</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FORMAT of mms1_asp_tmod has value &#39;F6.1&#39;</span>
+        
+        <span class="target">@ mms1_asp_tmod/FORMAT</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FORMAT of mms1_asp_stat has value &#39;I3&#39;</span>
+        
+        <span class="target">@ mms1_asp_stat/FORMAT</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute FORMAT of label_stat has value &#39;A21&#39;</span>
+        
+        <span class="target">@ label_stat/FORMAT</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">LablaxisLength</span>
+        <span class="ref">[ISTP-VA-008]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#lablaxis" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_epoch (length 5) is within 10 char limit</span>
+        
+        <span class="target">@ mms1_asp_epoch/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_p015v (length 8) is within 10 char limit</span>
+        
+        <span class="target">@ mms1_asp_p015v/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_p033v (length 8) is within 10 char limit</span>
+        
+        <span class="target">@ mms1_asp_p033v/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_p050v (length 6) is within 10 char limit</span>
+        
+        <span class="target">@ mms1_asp_p050v/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_p120v (length 7) is within 10 char limit</span>
+        
+        <span class="target">@ mms1_asp_p120v/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_n120v (length 7) is within 10 char limit</span>
+        
+        <span class="target">@ mms1_asp_n120v/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_tdpu (length 5) is within 10 char limit</span>
+        
+        <span class="target">@ mms1_asp_tdpu/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_tdcc (length 5) is within 10 char limit</span>
+        
+        <span class="target">@ mms1_asp_tdcc/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_tbox (length 5) is within 10 char limit</span>
+        
+        <span class="target">@ mms1_asp_tbox/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_tmod (length 5) is within 10 char limit</span>
+        
+        <span class="target">@ mms1_asp_tmod/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_stat (length 6) is within 10 char limit</span>
+        
+        <span class="target">@ mms1_asp_stat/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result invalid sev-WARNING">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of label_stat (length 12) should be 10 characters or less</span>
+        
+        <span class="target">@ label_stat/LABLAXIS</span>
+        
+        
+        <span class="value">got <code>label_status</code></span>
+        
+    </div>
+    <span class="severity WARNING">WARNING</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">LablaxisMaxLength</span>
+        <span class="ref">[ISTP-VA-022]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#lablaxis" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_epoch (length 5) is within 20 char limit</span>
+        
+        <span class="target">@ mms1_asp_epoch/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_p015v (length 8) is within 20 char limit</span>
+        
+        <span class="target">@ mms1_asp_p015v/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_p033v (length 8) is within 20 char limit</span>
+        
+        <span class="target">@ mms1_asp_p033v/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_p050v (length 6) is within 20 char limit</span>
+        
+        <span class="target">@ mms1_asp_p050v/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_p120v (length 7) is within 20 char limit</span>
+        
+        <span class="target">@ mms1_asp_p120v/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_n120v (length 7) is within 20 char limit</span>
+        
+        <span class="target">@ mms1_asp_n120v/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_tdpu (length 5) is within 20 char limit</span>
+        
+        <span class="target">@ mms1_asp_tdpu/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_tdcc (length 5) is within 20 char limit</span>
+        
+        <span class="target">@ mms1_asp_tdcc/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_tbox (length 5) is within 20 char limit</span>
+        
+        <span class="target">@ mms1_asp_tbox/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_tmod (length 5) is within 20 char limit</span>
+        
+        <span class="target">@ mms1_asp_tmod/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of mms1_asp_stat (length 6) is within 20 char limit</span>
+        
+        <span class="target">@ mms1_asp_stat/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABLAXIS of label_stat (length 12) is within 20 char limit</span>
+        
+        <span class="target">@ label_stat/LABLAXIS</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">MandatoryVariableAttributes</span>
+        <span class="ref">[ISTP-VA-001]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_epoch has all mandatory attributes</span>
+        
+        <span class="target">@ mms1_asp_epoch</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_p015v has all mandatory attributes</span>
+        
+        <span class="target">@ mms1_asp_p015v</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_p033v has all mandatory attributes</span>
+        
+        <span class="target">@ mms1_asp_p033v</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_p050v has all mandatory attributes</span>
+        
+        <span class="target">@ mms1_asp_p050v</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_p120v has all mandatory attributes</span>
+        
+        <span class="target">@ mms1_asp_p120v</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_n120v has all mandatory attributes</span>
+        
+        <span class="target">@ mms1_asp_n120v</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_tdpu has all mandatory attributes</span>
+        
+        <span class="target">@ mms1_asp_tdpu</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_tdcc has all mandatory attributes</span>
+        
+        <span class="target">@ mms1_asp_tdcc</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_tbox has all mandatory attributes</span>
+        
+        <span class="target">@ mms1_asp_tbox</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_tmod has all mandatory attributes</span>
+        
+        <span class="target">@ mms1_asp_tmod</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_stat has all mandatory attributes</span>
+        
+        <span class="target">@ mms1_asp_stat</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">label_stat has all mandatory attributes</span>
+        
+        <span class="target">@ label_stat</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Exactly one assertion passed in &#39;one_of&#39;.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Exactly one assertion passed in &#39;one_of&#39;.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Exactly one assertion passed in &#39;one_of&#39;.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Exactly one assertion passed in &#39;one_of&#39;.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Exactly one assertion passed in &#39;one_of&#39;.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Exactly one assertion passed in &#39;one_of&#39;.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Exactly one assertion passed in &#39;one_of&#39;.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Exactly one assertion passed in &#39;one_of&#39;.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Exactly one assertion passed in &#39;one_of&#39;.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Exactly one assertion passed in &#39;one_of&#39;.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Exactly one assertion passed in &#39;one_of&#39;.</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_epoch has FILLVAL attribute</span>
+        
+        <span class="target">@ mms1_asp_epoch</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_p015v has FILLVAL attribute</span>
+        
+        <span class="target">@ mms1_asp_p015v</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_p033v has FILLVAL attribute</span>
+        
+        <span class="target">@ mms1_asp_p033v</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_p050v has FILLVAL attribute</span>
+        
+        <span class="target">@ mms1_asp_p050v</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_p120v has FILLVAL attribute</span>
+        
+        <span class="target">@ mms1_asp_p120v</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_n120v has FILLVAL attribute</span>
+        
+        <span class="target">@ mms1_asp_n120v</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_tdpu has FILLVAL attribute</span>
+        
+        <span class="target">@ mms1_asp_tdpu</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_tdcc has FILLVAL attribute</span>
+        
+        <span class="target">@ mms1_asp_tdcc</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_tbox has FILLVAL attribute</span>
+        
+        <span class="target">@ mms1_asp_tbox</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_tmod has FILLVAL attribute</span>
+        
+        <span class="target">@ mms1_asp_tmod</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">mms1_asp_stat has FILLVAL attribute</span>
+        
+        <span class="target">@ mms1_asp_stat</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">MetadataVariableAttributes</span>
+        <span class="ref">[ISTP-VA-015]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/04_metadata-variables.html#metadata-variables" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">All assertions in &#39;all_of&#39; passed successfully.</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ScaleTypValues</span>
+        <span class="ref">[ISTP-VA-013]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#scaletyp" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute SCALETYP of mms1_asp_epoch has value &#39;linear&#39;</span>
+        
+        <span class="target">@ mms1_asp_epoch/SCALETYP</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute SCALETYP of mms1_asp_p015v has value &#39;linear&#39;</span>
+        
+        <span class="target">@ mms1_asp_p015v/SCALETYP</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute SCALETYP of mms1_asp_p033v has value &#39;linear&#39;</span>
+        
+        <span class="target">@ mms1_asp_p033v/SCALETYP</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute SCALETYP of mms1_asp_p050v has value &#39;linear&#39;</span>
+        
+        <span class="target">@ mms1_asp_p050v/SCALETYP</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute SCALETYP of mms1_asp_p120v has value &#39;linear&#39;</span>
+        
+        <span class="target">@ mms1_asp_p120v/SCALETYP</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute SCALETYP of mms1_asp_n120v has value &#39;linear&#39;</span>
+        
+        <span class="target">@ mms1_asp_n120v/SCALETYP</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute SCALETYP of mms1_asp_tdpu has value &#39;linear&#39;</span>
+        
+        <span class="target">@ mms1_asp_tdpu/SCALETYP</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute SCALETYP of mms1_asp_tdcc has value &#39;linear&#39;</span>
+        
+        <span class="target">@ mms1_asp_tdcc/SCALETYP</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute SCALETYP of mms1_asp_tbox has value &#39;linear&#39;</span>
+        
+        <span class="target">@ mms1_asp_tbox/SCALETYP</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute SCALETYP of mms1_asp_tmod has value &#39;linear&#39;</span>
+        
+        <span class="target">@ mms1_asp_tmod/SCALETYP</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute SCALETYP of mms1_asp_stat has value &#39;linear&#39;</span>
+        
+        <span class="target">@ mms1_asp_stat/SCALETYP</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">UnitsNotEmpty</span>
+        <span class="ref">[ISTP-VA-009]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#units" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute UNITS of mms1_asp_epoch is not empty</span>
+        
+        <span class="target">@ mms1_asp_epoch/UNITS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute UNITS of mms1_asp_p015v is not empty</span>
+        
+        <span class="target">@ mms1_asp_p015v/UNITS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute UNITS of mms1_asp_p033v is not empty</span>
+        
+        <span class="target">@ mms1_asp_p033v/UNITS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute UNITS of mms1_asp_p050v is not empty</span>
+        
+        <span class="target">@ mms1_asp_p050v/UNITS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute UNITS of mms1_asp_p120v is not empty</span>
+        
+        <span class="target">@ mms1_asp_p120v/UNITS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute UNITS of mms1_asp_n120v is not empty</span>
+        
+        <span class="target">@ mms1_asp_n120v/UNITS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute UNITS of mms1_asp_tdpu is not empty</span>
+        
+        <span class="target">@ mms1_asp_tdpu/UNITS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute UNITS of mms1_asp_tdcc is not empty</span>
+        
+        <span class="target">@ mms1_asp_tdcc/UNITS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute UNITS of mms1_asp_tbox is not empty</span>
+        
+        <span class="target">@ mms1_asp_tbox/UNITS</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute UNITS of mms1_asp_tmod is not empty</span>
+        
+        <span class="target">@ mms1_asp_tmod/UNITS</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DeltaReferences</span>
+        <span class="ref">[ISTP-VA-014]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#delta-plus-var-delta-minus-var" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">DELTA_PLUS_VAR did not match any values (not required)</span>
+        
+        <span class="target">@ DELTA_PLUS_VAR</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">DELTA_MINUS_VAR did not match any values (not required)</span>
+        
+        <span class="target">@ DELTA_MINUS_VAR</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DependReferences</span>
+        <span class="ref">[ISTP-VA-011]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#depend-0" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DEPEND_0 of mms1_asp_p015v references existing variable &#39;mms1_asp_epoch&#39;</span>
+        
+        <span class="target">@ mms1_asp_p015v/DEPEND_0</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DEPEND_0 of mms1_asp_p033v references existing variable &#39;mms1_asp_epoch&#39;</span>
+        
+        <span class="target">@ mms1_asp_p033v/DEPEND_0</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DEPEND_0 of mms1_asp_p050v references existing variable &#39;mms1_asp_epoch&#39;</span>
+        
+        <span class="target">@ mms1_asp_p050v/DEPEND_0</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DEPEND_0 of mms1_asp_p120v references existing variable &#39;mms1_asp_epoch&#39;</span>
+        
+        <span class="target">@ mms1_asp_p120v/DEPEND_0</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DEPEND_0 of mms1_asp_n120v references existing variable &#39;mms1_asp_epoch&#39;</span>
+        
+        <span class="target">@ mms1_asp_n120v/DEPEND_0</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DEPEND_0 of mms1_asp_tdpu references existing variable &#39;mms1_asp_epoch&#39;</span>
+        
+        <span class="target">@ mms1_asp_tdpu/DEPEND_0</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DEPEND_0 of mms1_asp_tdcc references existing variable &#39;mms1_asp_epoch&#39;</span>
+        
+        <span class="target">@ mms1_asp_tdcc/DEPEND_0</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DEPEND_0 of mms1_asp_tbox references existing variable &#39;mms1_asp_epoch&#39;</span>
+        
+        <span class="target">@ mms1_asp_tbox/DEPEND_0</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DEPEND_0 of mms1_asp_tmod references existing variable &#39;mms1_asp_epoch&#39;</span>
+        
+        <span class="target">@ mms1_asp_tmod/DEPEND_0</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DEPEND_0 of mms1_asp_stat references existing variable &#39;mms1_asp_epoch&#39;</span>
+        
+        <span class="target">@ mms1_asp_stat/DEPEND_0</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">DEPEND_1 did not match any values (not required)</span>
+        
+        <span class="target">@ DEPEND_1</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">DEPEND_2 did not match any values (not required)</span>
+        
+        <span class="target">@ DEPEND_2</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">DEPEND_3 did not match any values (not required)</span>
+        
+        <span class="target">@ DEPEND_3</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">DisplayTypeValues</span>
+        <span class="ref">[ISTP-VA-005]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#display-type" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DISPLAY_TYPE of mms1_asp_epoch has value &#39;time_series&#39;</span>
+        
+        <span class="target">@ mms1_asp_epoch/DISPLAY_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DISPLAY_TYPE of mms1_asp_p015v has value &#39;time_series&#39;</span>
+        
+        <span class="target">@ mms1_asp_p015v/DISPLAY_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DISPLAY_TYPE of mms1_asp_p033v has value &#39;time_series&#39;</span>
+        
+        <span class="target">@ mms1_asp_p033v/DISPLAY_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DISPLAY_TYPE of mms1_asp_p050v has value &#39;time_series&#39;</span>
+        
+        <span class="target">@ mms1_asp_p050v/DISPLAY_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DISPLAY_TYPE of mms1_asp_p120v has value &#39;time_series&#39;</span>
+        
+        <span class="target">@ mms1_asp_p120v/DISPLAY_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DISPLAY_TYPE of mms1_asp_n120v has value &#39;time_series&#39;</span>
+        
+        <span class="target">@ mms1_asp_n120v/DISPLAY_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DISPLAY_TYPE of mms1_asp_tdpu has value &#39;time_series&#39;</span>
+        
+        <span class="target">@ mms1_asp_tdpu/DISPLAY_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DISPLAY_TYPE of mms1_asp_tdcc has value &#39;time_series&#39;</span>
+        
+        <span class="target">@ mms1_asp_tdcc/DISPLAY_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DISPLAY_TYPE of mms1_asp_tbox has value &#39;time_series&#39;</span>
+        
+        <span class="target">@ mms1_asp_tbox/DISPLAY_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DISPLAY_TYPE of mms1_asp_tmod has value &#39;time_series&#39;</span>
+        
+        <span class="target">@ mms1_asp_tmod/DISPLAY_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute DISPLAY_TYPE of mms1_asp_stat has value &#39;time_series&#39;</span>
+        
+        <span class="target">@ mms1_asp_stat/DISPLAY_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">FormPtrReferences</span>
+        <span class="ref">[ISTP-VA-017]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#form-ptr" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">FORM_PTR did not match any values (not required)</span>
+        
+        <span class="target">@ FORM_PTR</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">LablPtrReferences</span>
+        <span class="ref">[ISTP-VA-012]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#labl-ptr-i" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute LABL_PTR_1 of mms1_asp_stat references existing variable &#39;label_stat&#39;</span>
+        
+        <span class="target">@ mms1_asp_stat/LABL_PTR_1</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">LABL_PTR_2 did not match any values (not required)</span>
+        
+        <span class="target">@ LABL_PTR_2</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">LABL_PTR_3 did not match any values (not required)</span>
+        
+        <span class="target">@ LABL_PTR_3</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ProposalAttributes</span>
+        <span class="ref">[ISTP-INFO-001]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#coordinate-system" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Attribute COORDINATE_SYSTEM of mms1_asp_epoch is available for vectors/tensors (proposal)</span>
+        
+        <span class="target">@ mms1_asp_epoch</span>
+        
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Attribute COORDINATE_SYSTEM of mms1_asp_p015v is available for vectors/tensors (proposal)</span>
+        
+        <span class="target">@ mms1_asp_p015v</span>
+        
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Attribute COORDINATE_SYSTEM of mms1_asp_p033v is available for vectors/tensors (proposal)</span>
+        
+        <span class="target">@ mms1_asp_p033v</span>
+        
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Attribute COORDINATE_SYSTEM of mms1_asp_p050v is available for vectors/tensors (proposal)</span>
+        
+        <span class="target">@ mms1_asp_p050v</span>
+        
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Attribute COORDINATE_SYSTEM of mms1_asp_p120v is available for vectors/tensors (proposal)</span>
+        
+        <span class="target">@ mms1_asp_p120v</span>
+        
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Attribute COORDINATE_SYSTEM of mms1_asp_n120v is available for vectors/tensors (proposal)</span>
+        
+        <span class="target">@ mms1_asp_n120v</span>
+        
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Attribute COORDINATE_SYSTEM of mms1_asp_tdpu is available for vectors/tensors (proposal)</span>
+        
+        <span class="target">@ mms1_asp_tdpu</span>
+        
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Attribute COORDINATE_SYSTEM of mms1_asp_tdcc is available for vectors/tensors (proposal)</span>
+        
+        <span class="target">@ mms1_asp_tdcc</span>
+        
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Attribute COORDINATE_SYSTEM of mms1_asp_tbox is available for vectors/tensors (proposal)</span>
+        
+        <span class="target">@ mms1_asp_tbox</span>
+        
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Attribute COORDINATE_SYSTEM of mms1_asp_tmod is available for vectors/tensors (proposal)</span>
+        
+        <span class="target">@ mms1_asp_tmod</span>
+        
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Attribute COORDINATE_SYSTEM of mms1_asp_stat is available for vectors/tensors (proposal)</span>
+        
+        <span class="target">@ mms1_asp_stat</span>
+        
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">Attribute COORDINATE_SYSTEM of label_stat is available for vectors/tensors (proposal)</span>
+        
+        <span class="target">@ label_stat</span>
+        
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+            
+<div class="result invalid">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">PROPOSAL: Data_processing_level attribute is available</span>
+        
+        
+    </div>
+    <span class="severity INFO">INFO</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">ScalPtrReferences</span>
+        <span class="ref">[ISTP-VA-018]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#scal-ptr" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">SCAL_PTR did not match any values (not required)</span>
+        
+        <span class="target">@ SCAL_PTR</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">SupportDataVariableAttributes</span>
+        <span class="ref">[ISTP-VA-003]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/04_metadata-variables.html#support-data-variables" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Condition not met for any binding, assertion skipped.</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">UnitPtrReferences</span>
+        <span class="ref">[ISTP-VA-016]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#unit-ptr" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">UNIT_PTR did not match any values (not required)</span>
+        
+        <span class="target">@ UNIT_PTR</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">VarTypeValues</span>
+        <span class="ref">[ISTP-VA-004]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/05_metadata-variable-attributes.html#var-type" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute VAR_TYPE of mms1_asp_epoch has value &#39;data&#39;</span>
+        
+        <span class="target">@ mms1_asp_epoch/VAR_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute VAR_TYPE of mms1_asp_p015v has value &#39;data&#39;</span>
+        
+        <span class="target">@ mms1_asp_p015v/VAR_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute VAR_TYPE of mms1_asp_p033v has value &#39;data&#39;</span>
+        
+        <span class="target">@ mms1_asp_p033v/VAR_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute VAR_TYPE of mms1_asp_p050v has value &#39;data&#39;</span>
+        
+        <span class="target">@ mms1_asp_p050v/VAR_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute VAR_TYPE of mms1_asp_p120v has value &#39;data&#39;</span>
+        
+        <span class="target">@ mms1_asp_p120v/VAR_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute VAR_TYPE of mms1_asp_n120v has value &#39;data&#39;</span>
+        
+        <span class="target">@ mms1_asp_n120v/VAR_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute VAR_TYPE of mms1_asp_tdpu has value &#39;data&#39;</span>
+        
+        <span class="target">@ mms1_asp_tdpu/VAR_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute VAR_TYPE of mms1_asp_tdcc has value &#39;data&#39;</span>
+        
+        <span class="target">@ mms1_asp_tdcc/VAR_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute VAR_TYPE of mms1_asp_tbox has value &#39;data&#39;</span>
+        
+        <span class="target">@ mms1_asp_tbox/VAR_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute VAR_TYPE of mms1_asp_tmod has value &#39;data&#39;</span>
+        
+        <span class="target">@ mms1_asp_tmod/VAR_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute VAR_TYPE of mms1_asp_stat has value &#39;data&#39;</span>
+        
+        <span class="target">@ mms1_asp_stat/VAR_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute VAR_TYPE of label_stat has value &#39;metadata&#39;</span>
+        
+        <span class="target">@ label_stat/VAR_TYPE</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">EpochAttributes</span>
+        <span class="ref">[ISTP-VAR-002]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/04_metadata-variables.html#epoch" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge fail">
+            FAIL
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result invalid sev-ERROR">
+    <span class="icon">✗</span>
+    <div class="content">
+        <span class="message">time variable mms1_asp_epoch should have VAR_TYPE=&#39;support_data&#39; (got &#39;data&#39;)</span>
+        
+        <span class="target">@ mms1_asp_epoch/VAR_TYPE</span>
+        
+        
+    </div>
+    <span class="severity ERROR">ERROR</span>
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">EpochRecommendedAttributes</span>
+        <span class="ref">[ISTP-VAR-003]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/04_metadata-variables.html#epoch" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">time variable mms1_asp_epoch has MONOTON</span>
+        
+        <span class="target">@ mms1_asp_epoch</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Attribute MONOTON of mms1_asp_epoch has value &#39;INCREASE&#39;</span>
+        
+        <span class="target">@ mms1_asp_epoch/MONOTON</span>
+        
+        
+    </div>
+    
+</div>
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">Condition not met for any binding, assertion skipped.</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+            
+<div class="group">
+    <div class="group-header">
+        <span class="arrow">▼</span>
+        <span class="name">EpochVariable</span>
+        <span class="ref">[ISTP-VAR-001]</span>
+        <a class="doc-link" href="https://istp-metadata.readthedocs.io/en/latest/source/04_metadata-variables.html#epoch" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open documentation">📖 docs</a>
+        <span class="badge pass">
+            PASS
+        </span>
+    </div>
+    <div class="group-content">
+        
+            
+<div class="result valid">
+    <span class="icon">✓</span>
+    <div class="content">
+        <span class="message">dataset contains a CDF time (epoch) variable</span>
+        
+        
+    </div>
+    
+</div>
+        
+    </div>
+</div>
+        
+    </div>
+</div>
+        </div>
+
+        <footer>
+            AstraLint — Space Physics Data Conformance Checker
+        </footer>
+    </div>
+
+    <script>
+        document.querySelectorAll('.group-header').forEach(header => {
+            header.addEventListener('click', () => {
+                header.parentElement.classList.toggle('collapsed');
+            });
+        });
+
+        function applyFilter() {
+            const q = document.getElementById('alr-filter').value.toLowerCase();
+            const failedOnly = document.getElementById('alr-failed-only').checked;
+            document.querySelectorAll('.alr .result').forEach(r => {
+                const matchesText = !q || r.textContent.toLowerCase().includes(q);
+                const matchesState = !failedOnly || r.classList.contains('invalid');
+                r.style.display = (matchesText && matchesState) ? '' : 'none';
+            });
+            document.querySelectorAll('.alr .group').forEach(g => {
+                const visible = [...g.querySelectorAll('.result')]
+                    .some(r => r.style.display !== 'none');
+                g.style.display = visible ? '' : 'none';
+                if (visible && (q || failedOnly)) g.classList.remove('collapsed');
+            });
+        }
+
+        document.getElementById('alr-filter').addEventListener('input', applyFilter);
+        document.getElementById('alr-failed-only').addEventListener('change', applyFilter);
+    </script>
+    </div>
+</body>
+</html>
