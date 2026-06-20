@@ -56,3 +56,17 @@ def test_apply_set_overwrites_existing():
     out = apply_fixes(_bytes(), [_fix(var, "SCALETYP", "log", "set")])
     reloaded = pycdfpp.load(out)
     assert [x for x in reloaded[var].attributes["SCALETYP"]] == ["log"]
+
+
+def test_numeric_value_and_type_epoch16_tuple():
+    # CDFEPOCH16 fill comes from the resolver as a (real, imaginary) tuple and
+    # must be written as a complex128 / CDF_EPOCH16 (previously a KeyError crash).
+    import numpy as np
+
+    from astralint.base.file import DataType
+    from astralint.resolver.apply import _numeric_value_and_type
+
+    arr, cdf_type = _numeric_value_and_type(DataType.CDFEPOCH16, (-1e31, -1e31))
+    assert cdf_type == pycdfpp.DataType.CDF_EPOCH16
+    assert arr.dtype == np.complex128
+    assert arr[0] == complex(-1e31, -1e31)

@@ -18,3 +18,10 @@ def test_fix_auto_writes_corrected_cdf(tmp_path):
     fix_command(Path(_CDF), suite="ISTP", apply="auto", output=out)
     assert out.exists()
     assert out.stat().st_size > 0
+
+
+def test_fix_rejects_invalid_apply(tmp_path):
+    import pytest
+
+    with pytest.raises(SystemExit):
+        fix_command(Path(_CDF), suite="ISTP", apply="bogus", output=tmp_path / "x.cdf")

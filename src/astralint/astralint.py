@@ -267,6 +267,9 @@ def fix(
         Hard cap on convergence iterations. Default 10.
     """
     console = Console()
+    if apply not in ("auto", "none"):
+        console.print(f"[red]✗[/] Invalid --apply '{apply}'; expected 'auto' or 'none'")
+        raise SystemExit(1)
     checker = get_suite(suite)
     if checker is None:
         console.print(f"[red]✗[/] Unknown suite '{suite}'")
