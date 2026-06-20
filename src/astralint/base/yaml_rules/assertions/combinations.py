@@ -139,6 +139,7 @@ class AnyOf(BaseAssertionGroup):
     check: Literal["any_of"] = "any_of"  # type: ignore[assignment]
 
     def evaluate(self, file: File, severity: Severity) -> ValidationResult:
+        results: list[ValidationResult | ValidationResultGroup] = []
         for assertion in self.assertions:
             result = assertion.evaluate(file, severity)
             if result.valid:
@@ -151,12 +152,22 @@ class AnyOf(BaseAssertionGroup):
                     ),
                     target="",
                 )
+            results.append(result)
+        # All failed: surface the target only when every failing alternative points
+        # at the SAME concrete attribute (e.g. FillvalOutsideRange's checks all
+        # target var/FILLVAL) — then the result stays routable for the resolver and
+        # the report can name the attribute. If the alternatives diverge ("LABLAXIS
+        # or LABL_PTR_1") or any of them has no concrete target (e.g. a wildcard
+        # path), no single target applies, so leave it empty to avoid a misleading
+        # report or a mis-routed fix. The message stays the rule's own (or generic).
+        targets = {(_first_failure(r) or ("", ""))[1] for r in results}
+        target = next(iter(targets)) if len(targets) == 1 and "" not in targets else ""
         return ValidationResult(
             valid=False,
             reference="",
             severity=severity,
             message=self._result_message(False, "All assertions in 'any_of' failed."),
-            target="",
+            target=target,
         )
 
 

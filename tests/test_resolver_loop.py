@@ -129,3 +129,32 @@ def test_converge_fixes_malformed_logical_file_id_from_filename():
     assert [x for x in fixed.attributes["Logical_file_id"]][
         0
     ] == "mms1_asp2_srvy_l1b_stat_00000000_v01"
+
+
+def test_converge_fixes_fillval_inside_range():
+    # ISTP-VA-019: a FILLVAL inside [VALIDMIN, VALIDMAX] is invalid. The resolver
+    # sets the type-standard fill (-1e31) when it is outside this variable's range.
+    import numpy as np
+
+    cdf = pycdfpp.load(_CDF)
+    tv = "mms1_asp_p015v"
+    vmin = float(np.ravel([x for x in cdf[tv].attributes["VALIDMIN"]])[0])
+    vmax = float(np.ravel([x for x in cdf[tv].attributes["VALIDMAX"]])[0])
+    cdf[tv].attributes["FILLVAL"].set_value(
+        np.array([(vmin + vmax) / 2], dtype=np.float32), pycdfpp.DataType.CDF_FLOAT
+    )
+    broken = bytes(pycdfpp.save(cdf))
+
+    suite = get_suite("ISTP")
+    assert suite is not None
+    loaded = CdfCodec.load(broken)
+    assert loaded is not None
+    baseline = suite.run(loaded).count_by_severity()["ERROR"]
+
+    report, out = converge(broken, suite, max_iter=5, filename=os.path.basename(_CDF))
+
+    assert report.remaining_errors < baseline
+    assert any(f.attribute == "FILLVAL" and f.variable == tv for f in report.applied)
+    fixed = pycdfpp.load(out)
+    fill = np.ravel([x for x in fixed[tv].attributes["FILLVAL"]])[0]
+    assert fill < vmin or fill > vmax  # VA-019 only requires outside the range

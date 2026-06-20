@@ -34,6 +34,45 @@ def fillval_by_type(
     )
 
 
+def _scalar(attr: Any) -> Any:
+    """Unwrap a (possibly nested, e.g. [[0.0]]) attribute value to its scalar."""
+    if attr is None or not attr.values:
+        return None
+    value = attr.values[0]
+    while isinstance(value, (list, tuple)) and value:
+        value = value[0]
+    return value
+
+
+def fillval_outside_range(
+    file: File, variable: str | None, attribute: str, failure: ValidationResult | None
+) -> ResolverOutput | None:
+    """ISTP-VA-019: FILLVAL must be outside [VALIDMIN, VALIDMAX]. Propose the
+    type-standard fill ONLY when it is actually outside the variable's range — the
+    default is not outside for every range (e.g. one spanning +/-1e32), and an
+    in-range fill would not clear the error. Returns None otherwise."""
+    if variable is None or variable not in file.variables:
+        return None
+    var = file.variables[variable]
+    default = _FILLVAL_BY_TYPE.get(var.data_type)
+    if default is None:
+        return None
+    vmin = _scalar(var.attributes.get("VALIDMIN"))
+    vmax = _scalar(var.attributes.get("VALIDMAX"))
+    if vmin is None or vmax is None:
+        return None
+    try:
+        outside = default < vmin or default > vmax
+    except TypeError:
+        return None  # non-order-comparable (e.g. an epoch16 tuple fill)
+    if not outside:
+        return None
+    return ResolverOutput(
+        value=default,
+        provenance_note=f"ISTP default fill for {var.data_type.value}, outside [VALIDMIN, VALIDMAX]",
+    )
+
+
 def scaletyp_default(
     file: File, variable: str | None, attribute: str, failure: ValidationResult | None
 ) -> ResolverOutput | None:

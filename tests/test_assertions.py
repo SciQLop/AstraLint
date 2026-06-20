@@ -8,7 +8,11 @@ from astralint.base.yaml_rules.assertions.base import (
     parse_captures,
     resolve_path_with_captures,
 )
-from astralint.base.yaml_rules.yaml_rule import ValidationResultGroup, YamlRule
+from astralint.base.yaml_rules.yaml_rule import (
+    ValidationResult,
+    ValidationResultGroup,
+    YamlRule,
+)
 
 from . import *  # isort:skip # noqa: F403
 
@@ -201,6 +205,93 @@ assertions:
     rule = YamlRule(**safe_load(yaml_rule_txt))
     result = rule.check(mock_file)
     assert not result.valid
+
+
+def test_any_of_failure_carries_subassertion_target(mock_file):
+    """A failing any_of surfaces the failing sub-assertion's target (routable),
+    mirroring all_of, instead of an empty target."""
+    yaml_rule_txt = """
+name: TEST-ANYOF-TARGET
+description: "any_of target propagation"
+url: "https://..."
+reference: "TEST-ANYOF-TARGET"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: any_of
+      assertions:
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: FLOAT64
+        - path: attributes/global_attr/data_type/0
+          check: is_type
+          type: CHAR
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    assert isinstance(result, ValidationResultGroup)
+    leaf = result.results[0]
+    assert isinstance(leaf, ValidationResult)
+    assert not leaf.valid
+    assert leaf.target == "global_attr"
+
+
+def test_any_of_failure_with_divergent_targets_has_no_target(mock_file):
+    """When any_of alternatives point at different attributes (e.g. LABLAXIS or
+    LABL_PTR_1), no single target applies — the failure must carry an empty
+    target so it isn't misattributed or mis-routed to one arbitrary attribute."""
+    yaml_rule_txt = """
+name: TEST-ANYOF-DIVERGE
+description: "any_of divergent targets"
+url: "https://..."
+reference: "TEST-ANYOF-DIVERGE"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: any_of
+      assertions:
+        - path: attributes/MISSING_A
+          check: exists
+        - path: attributes/MISSING_B
+          check: exists
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    assert isinstance(result, ValidationResultGroup)
+    leaf = result.results[0]
+    assert isinstance(leaf, ValidationResult)
+    assert not leaf.valid
+    assert leaf.target == ""
+
+
+def test_any_of_failure_with_one_empty_target_has_no_target(mock_file):
+    """If one failing alternative has no concrete target (a file-level/wildcard
+    check) and another has a concrete one, no single target applies — the concrete
+    one must NOT be surfaced (it would mis-route a resolver)."""
+    yaml_rule_txt = """
+name: TEST-ANYOF-MIXED
+description: "any_of mixed empty/concrete target"
+url: "https://..."
+reference: "TEST-ANYOF-MIXED"
+severity: ERROR
+suite: TEST
+assertions:
+    - check: any_of
+      assertions:
+        - path: compression
+          check: comparison
+          operator: "="
+          value: "GZIP"
+        - path: attributes/MISSING
+          check: exists
+    """
+    rule = YamlRule(**safe_load(yaml_rule_txt))
+    result = rule.check(mock_file)
+    assert isinstance(result, ValidationResultGroup)
+    leaf = result.results[0]
+    assert isinstance(leaf, ValidationResult)
+    assert not leaf.valid
+    assert leaf.target == ""
 
 
 def test_not_negates_passing_assertion(mock_file):
