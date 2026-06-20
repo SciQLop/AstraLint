@@ -1,0 +1,61 @@
+from collections.abc import Callable
+from enum import Enum
+from typing import Any, Literal
+
+from pydantic import BaseModel, ConfigDict
+
+
+class Scope(str, Enum):
+    VARIABLE = "variable"
+    GLOBAL = "global"
+
+
+class ReferenceSource(str, Enum):
+    TYPE_RULE = "type_rule"
+    GRAPH_RULE = "graph_rule"
+    USER = "user"
+
+
+class ApplyPolicy(str, Enum):
+    ALWAYS = "always"
+    IF_UNIQUE = "if_unique"
+    NEVER = "never"
+
+
+class ResolverOutput(BaseModel):
+    """What a resolver function returns (or None when it cannot resolve)."""
+
+    value: Any
+    confidence: float | None = None  # overrides entry.confidence_default when set
+    provenance_note: str
+    ambiguous: bool = False  # for if_unique: stage instead of auto-apply when True
+    alternatives: list[Any] = []  # candidate values when ambiguous
+
+
+class ResolverEntry(BaseModel):
+    """One declarative registry row. `resolver` is a direct function reference."""
+
+    model_config = ConfigDict(frozen=True, arbitrary_types_allowed=True)
+
+    attribute: str
+    scope: Scope
+    sources: list[ReferenceSource]
+    resolver: Callable
+    auto_apply: ApplyPolicy
+    confidence_default: float
+    triggers: list[str] = []  # rule references this entry handles; empty = any
+
+
+class Fix(BaseModel):
+    """The auditable unit applied to a CDF."""
+
+    target_path: str  # e.g. "variables/Epoch/attributes/FILLVAL"
+    variable: str | None
+    attribute: str
+    scope: Scope
+    action: Literal["add", "set"]  # add = missing attr; set = present-but-wrong
+    value: Any
+    source: ReferenceSource
+    confidence: float
+    provenance_note: str
+    auto: bool  # decided by the engine: always | (if_unique & not ambiguous)
