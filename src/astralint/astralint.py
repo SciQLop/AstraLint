@@ -299,7 +299,7 @@ def fix(
     with open(path, "rb") as f:
         cdf_bytes = f.read()
 
-    convergence, fixed = converge(cdf_bytes, checker, max_iter=max_iter)
+    convergence, fixed = converge(cdf_bytes, checker, max_iter=max_iter, filename=path.name)
 
     if convergence.applied:
         console.print(f"[bold]Proposed/applied fixes ({len(convergence.applied)}):[/]")
