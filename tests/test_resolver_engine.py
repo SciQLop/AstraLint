@@ -93,3 +93,29 @@ def test_resolve_dedups_same_target():
     failures = _group([_failure("ISTP-VA-001", "flux"), _failure("ISTP-VA-001", "flux")])
     fixes = resolve(_file(), failures)
     assert len([f for f in fixes if f.attribute == "FILLVAL"]) == 1
+
+
+def test_resolve_reads_reference_from_enclosing_rule_group():
+    # Real validation output puts the rule reference on the enclosing rule
+    # group's `rule_reference`, NOT on the leaf (the leaf's own `reference` is
+    # empty). The engine must use the enclosing rule reference for trigger
+    # matching — otherwise it resolves nothing on real files.
+    leaf = ValidationResult(
+        valid=False,
+        reference="",  # empty, as real leaves are
+        severity=Severity.ERROR,
+        message="missing mandatory attributes",
+        target="flux",
+        value="",
+    )
+    rule_group = ValidationResultGroup(
+        name="MandatoryVariableAttributes",
+        rule_reference="ISTP-VA-001",  # the reference lives here
+        severity=Severity.ERROR,
+        results=[leaf],
+    )
+    top = ValidationResultGroup(
+        name="results", rule_reference="", severity=Severity.ERROR, results=[rule_group]
+    )
+    fixes = resolve(_file(), top)
+    assert any(f.attribute == "FILLVAL" and f.auto for f in fixes)
