@@ -30,8 +30,11 @@ def _broken_bytes() -> tuple[bytes, str]:
 
 def test_converge_applies_autofix_and_reduces_errors():
     suite = get_suite("ISTP")
+    assert suite is not None
     broken, target = _broken_bytes()
-    baseline = suite.run(CdfCodec.load(broken)).count_by_severity()["ERROR"]
+    loaded = CdfCodec.load(broken)
+    assert loaded is not None
+    baseline = suite.run(loaded).count_by_severity()["ERROR"]
 
     report, out = converge(broken, suite, max_iter=5)
 
@@ -46,6 +49,7 @@ def test_converge_applies_autofix_and_reduces_errors():
 
 def test_converge_caps_iterations():
     suite = get_suite("ISTP")
+    assert suite is not None
     broken, _ = _broken_bytes()
     report, _ = converge(broken, suite, max_iter=1)
     assert report.iterations <= 1
@@ -56,6 +60,7 @@ def test_converge_unmodified_file_reports():
     with open(_CDF, "rb") as f:
         data = f.read()
     suite = get_suite("ISTP")
+    assert suite is not None
     report, out = converge(data, suite, max_iter=5)
     assert isinstance(report, ConvergenceReport)
     assert isinstance(out, bytes)

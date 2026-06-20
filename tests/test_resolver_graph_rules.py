@@ -16,7 +16,7 @@ def _file(variables):
     )
 
 
-def _time_var(name="Epoch", records=10, var_type="support_data"):
+def _time_var(name="Epoch", records=10, var_type: str | None = "support_data"):
     attrs = {}
     if var_type is not None:
         attrs["VAR_TYPE"] = _attr("VAR_TYPE", var_type)
@@ -57,6 +57,7 @@ def test_depend0_ambiguous_two_time_vars():
         }
     )
     out = depend0_finder(f, "flux", "DEPEND_0", None)
+    assert out is not None
     assert out.ambiguous is True
     assert set(out.alternatives) == {"Epoch", "Epoch2"}
 
@@ -74,6 +75,7 @@ def test_var_type_support_data_when_pointed_by_depend():
         }
     )
     out = var_type_infer(f, "Epoch", "VAR_TYPE", None)
+    assert out is not None
     assert out.value == "support_data"
 
 
@@ -85,12 +87,14 @@ def test_var_type_data_when_numeric_with_own_depend0():
         }
     )
     out = var_type_infer(f, "flux", "VAR_TYPE", None)
+    assert out is not None
     assert out.value == "data"
 
 
 def test_display_type_time_series_for_1d():
     f = _file({"Epoch": _time_var(), "flux": _data_var(ndim=1)})
     out = display_type_infer(f, "flux", "DISPLAY_TYPE", None)
+    assert out is not None
     assert out.value == "time_series"
 
 
@@ -103,4 +107,5 @@ def test_display_type_spectrogram_for_2d_with_depend1():
         }
     )
     out = display_type_infer(f, "flux", "DISPLAY_TYPE", None)
+    assert out is not None
     assert out.value == "spectrogram"
