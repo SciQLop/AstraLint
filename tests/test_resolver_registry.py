@@ -3,11 +3,13 @@ from astralint.resolver.registry import REGISTRY
 
 
 def test_registry_has_fillval_entry():
+    # FILLVAL has two entries: the by-type default (missing FILLVAL, VA-001) and
+    # the range-aware one (FILLVAL inside [VALIDMIN,VALIDMAX], VA-019).
     fillval = [e for e in REGISTRY if e.attribute == "FILLVAL"]
-    assert len(fillval) == 1
-    assert fillval[0].auto_apply == ApplyPolicy.ALWAYS
-    assert fillval[0].sources == [ReferenceSource.TYPE_RULE]
-    assert "ISTP-VA-001" in fillval[0].triggers
+    by_type = [e for e in fillval if "ISTP-VA-001" in e.triggers]
+    assert len(by_type) == 1
+    assert by_type[0].auto_apply == ApplyPolicy.ALWAYS
+    assert by_type[0].sources == [ReferenceSource.TYPE_RULE]
 
 
 def test_pointer_entries_are_never_auto():
@@ -42,3 +44,9 @@ def test_var_type_entry_triggers_on_epoch_rule():
     var_type = [e for e in REGISTRY if e.attribute == "VAR_TYPE"]
     triggers = {t for e in var_type for t in e.triggers}
     assert "ISTP-VAR-002" in triggers  # epoch VAR_TYPE=support_data graph win
+
+
+def test_fillval_entry_triggers_on_fillval_range():
+    fillval = [e for e in REGISTRY if e.attribute == "FILLVAL"]
+    triggers = {t for e in fillval for t in e.triggers}
+    assert "ISTP-VA-019" in triggers  # FillvalOutsideRange -> set type-standard fill

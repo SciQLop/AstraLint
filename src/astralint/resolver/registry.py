@@ -6,7 +6,7 @@ from .sources.filename import (
 )
 from .sources.graph_rules import depend0_finder, display_type_infer, var_type_infer
 from .sources.pointers import dangling_pointer_suggestion
-from .sources.type_rules import fillval_by_type, scaletyp_default
+from .sources.type_rules import fillval_by_type, fillval_outside_range, scaletyp_default
 
 # Rule references that flag a dangling pointer for each pointer family.
 _POINTER_TRIGGERS = {
@@ -45,7 +45,20 @@ REGISTRY: list[ResolverEntry] = [
         resolver=fillval_by_type,
         auto_apply=ApplyPolicy.ALWAYS,
         confidence_default=1.0,
-        triggers=["ISTP-VA-001"],
+        triggers=["ISTP-VA-001"],  # missing FILLVAL
+    ),
+    ResolverEntry(
+        # VA-019: FILLVAL inside [VALIDMIN,VALIDMAX]. A dedicated resolver proposes
+        # the type-standard fill only when it is genuinely outside the range
+        # (otherwise it wouldn't clear the error), so this can't write a still-
+        # invalid value or stall the loop.
+        attribute="FILLVAL",
+        scope=Scope.VARIABLE,
+        sources=[ReferenceSource.TYPE_RULE],
+        resolver=fillval_outside_range,
+        auto_apply=ApplyPolicy.ALWAYS,
+        confidence_default=1.0,
+        triggers=["ISTP-VA-019"],
     ),
     ResolverEntry(
         attribute="SCALETYP",
