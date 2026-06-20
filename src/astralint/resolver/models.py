@@ -5,18 +5,18 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict
 
 
-class Scope(str, Enum):
+class Scope(str, Enum):  # noqa: UP042
     VARIABLE = "variable"
     GLOBAL = "global"
 
 
-class ReferenceSource(str, Enum):
+class ReferenceSource(str, Enum):  # noqa: UP042
     TYPE_RULE = "type_rule"
     GRAPH_RULE = "graph_rule"
     USER = "user"
 
 
-class ApplyPolicy(str, Enum):
+class ApplyPolicy(str, Enum):  # noqa: UP042
     ALWAYS = "always"
     IF_UNIQUE = "if_unique"
     NEVER = "never"
