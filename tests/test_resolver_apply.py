@@ -14,12 +14,26 @@ def _bytes() -> bytes:
         return f.read()
 
 
+_FLOAT_TYPES = (
+    pycdfpp.DataType.CDF_FLOAT,
+    pycdfpp.DataType.CDF_REAL4,
+    pycdfpp.DataType.CDF_DOUBLE,
+    pycdfpp.DataType.CDF_REAL8,
+)
+
+
 def _target_variable() -> str:
+    # A float-typed variable: FILLVAL is now written with the variable's native
+    # CDF type, so -1e31 must go to a float variable (not the tt2000 epoch var).
     cdf = pycdfpp.load(_CDF)
     for name, var in cdf.items():
-        if "NEW_SCALETYP" not in var.attributes and "NEW_FILLVAL" not in var.attributes:
+        if (
+            var.type in _FLOAT_TYPES
+            and "NEW_SCALETYP" not in var.attributes
+            and "NEW_FILLVAL" not in var.attributes
+        ):
             return name
-    raise AssertionError("no suitable variable")
+    raise AssertionError("no suitable float variable")
 
 
 def _fix(variable, attribute, value, action, scope=Scope.VARIABLE):
@@ -46,7 +60,11 @@ def test_apply_add_char_and_numeric_in_one_pass():
     out = apply_fixes(_bytes(), fixes)
     cdf = pycdfpp.load(out)
     assert [x for x in cdf[var].attributes["NEW_SCALETYP"]] == ["linear"]
-    assert [x for x in cdf[var].attributes["NEW_FILLVAL"]] == [[-1e31]]
+    # written with the variable's native (float32) type -> compare approximately
+    import numpy as np
+
+    fillval = np.ravel([x for x in cdf[var].attributes["NEW_FILLVAL"]])[0]
+    assert np.isclose(fillval, -1e31, rtol=1e-4)
 
 
 def test_apply_set_overwrites_existing():
@@ -70,3 +88,15 @@ def test_numeric_value_and_type_epoch16_tuple():
     assert cdf_type == pycdfpp.DataType.CDF_EPOCH16
     assert arr.dtype == np.complex128
     assert arr[0] == complex(-1e31, -1e31)
+
+
+def test_numeric_value_and_type_uses_native_cdf_type():
+    # FILLVAL is written with the variable's native CDF type (not always DOUBLE):
+    # a FLOAT32 var -> CDF_FLOAT, a CDFEPOCH var -> CDF_EPOCH.
+    from astralint.base.file import DataType
+    from astralint.resolver.apply import _numeric_value_and_type
+
+    _, float32_type = _numeric_value_and_type(DataType.FLOAT32, -1e31)
+    assert float32_type == pycdfpp.DataType.CDF_FLOAT
+    _, epoch_type = _numeric_value_and_type(DataType.CDFEPOCH, -1e31)
+    assert epoch_type == pycdfpp.DataType.CDF_EPOCH

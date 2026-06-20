@@ -10,22 +10,24 @@ _CDF_WRITE = {
     DataType.INT16: (np.int16, pycdfpp.DataType.CDF_INT2),
     DataType.INT32: (np.int32, pycdfpp.DataType.CDF_INT4),
     DataType.INT64: (np.int64, pycdfpp.DataType.CDF_INT8),
+    DataType.UINT8: (np.uint8, pycdfpp.DataType.CDF_UINT1),
+    DataType.UINT16: (np.uint16, pycdfpp.DataType.CDF_UINT2),
+    DataType.UINT32: (np.uint32, pycdfpp.DataType.CDF_UINT4),
     DataType.FLOAT32: (np.float32, pycdfpp.DataType.CDF_FLOAT),
     DataType.FLOAT64: (np.float64, pycdfpp.DataType.CDF_DOUBLE),
     DataType.TT2000: (np.int64, pycdfpp.DataType.CDF_TIME_TT2000),
+    DataType.CDFEPOCH: (np.float64, pycdfpp.DataType.CDF_EPOCH),
 }
 
 
 def _numeric_value_and_type(variable_abstract_type: DataType, value: object):
-    # CDF_EPOCH16 fill is a 2-component (real, imaginary) time, written as a
-    # complex128. fillval_by_type returns it as a (real, imaginary) tuple.
+    # Write each value with the variable's native CDF type so FILLVAL matches
+    # the variable (a FLOAT32 var gets CDF_FLOAT, CDFEPOCH gets CDF_EPOCH, ...).
+    # CDF_EPOCH16 fill is a 2-component (real, imaginary) time written as a
+    # complex128; fillval_by_type returns it as a (real, imaginary) tuple.
     if isinstance(value, tuple):
         real, imag = value
         return np.array([complex(real, imag)], dtype=np.complex128), pycdfpp.DataType.CDF_EPOCH16
-    # Python float -> always write as FLOAT64 (e.g. standard -1e31 fill value);
-    # Python int -> use the variable's native CDF type.
-    if isinstance(value, float):
-        return np.array([value], dtype=np.float64), pycdfpp.DataType.CDF_DOUBLE
     np_dtype, cdf_type = _CDF_WRITE[variable_abstract_type]
     return np.array([value], dtype=np_dtype), cdf_type
 

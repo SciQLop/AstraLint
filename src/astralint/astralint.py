@@ -289,11 +289,11 @@ def fix(
     """
     console = Console()
     if apply not in ("auto", "none"):
-        console.print(f"[red]✗[/] Invalid --apply '{apply}'; expected 'auto' or 'none'")
+        console.print(f"[red]✗[/] Invalid --apply '{escape(apply)}'; expected 'auto' or 'none'")
         raise SystemExit(1)
     checker = get_suite(suite)
     if checker is None:
-        console.print(f"[red]✗[/] Unknown suite '{suite}'")
+        console.print(f"[red]✗[/] Unknown suite '{escape(suite)}'")
         raise SystemExit(1)
 
     with open(path, "rb") as f:
@@ -321,7 +321,7 @@ def fix(
     if apply == "auto":
         dest = output or path.with_suffix(".fixed.cdf")
         dest.write_bytes(fixed)
-        console.print(f"[green]✓[/] Wrote corrected CDF to [bold]{dest}[/]")
+        console.print(f"[green]✓[/] Wrote corrected CDF to [bold]{escape(str(dest))}[/]")
 
 
 @app.command()
