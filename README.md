@@ -59,6 +59,12 @@ astralint list-suites
 
 # Strict mode: exit with error on warnings too
 astralint lint myfile.cdf --strict
+
+# Auto-fix deterministic ISTP issues and write a corrected copy (<stem>.fixed.cdf)
+astralint fix myfile.cdf
+
+# Dry run: list the proposed fixes without writing anything
+astralint fix myfile.cdf --apply none
 ```
 
 By default the console output is **quiet**, like a typical linter: it lists only
@@ -68,6 +74,51 @@ findings`). Use `--show-passed` to see the full nested tree of every check, and
 `--output html` for an interactive, filterable report.
 
 AstraLint returns exit code `1` on validation errors (or warnings with `--strict`), making it suitable for CI/CD pipelines.
+
+## Auto-fixing
+
+AstraLint can propose and apply **deterministic** fixes for many ISTP issues. When
+you lint a CDF, the verdict is followed by a hint pointing at the `fix` command:
+
+```
+✗ Found 8 problems (5 errors, 3 warnings)
+
+→ 5 auto-fixable, 3 need review — run: astralint fix myfile.cdf
+```
+
+`astralint fix` runs a convergence loop — validate → propose fixes → apply the safe
+ones → re-validate — until the file is clean or no further progress is made, then
+writes a corrected copy:
+
+```bash
+# Apply the safe (auto) fixes; writes <stem>.fixed.cdf
+astralint fix myfile.cdf
+
+# Dry run: list every proposed fix (auto + staged) without writing
+astralint fix myfile.cdf --apply none
+
+# Choose the output path
+astralint fix myfile.cdf --output corrected.cdf
+```
+
+Every proposed fix carries its **source**, **confidence**, and a one-line
+**provenance note**, and falls into one of three dispositions:
+
+- **auto** — deterministic and safe, applied automatically. Examples: a missing
+  `FILLVAL` set to the ISTP default for the variable's type; `VAR_TYPE`/`DEPEND_0`
+  inferred from the variable reference graph; `Logical_file_id`/`Logical_source`
+  derived from an ISTP-conventional filename; an out-of-range `FILLVAL` reset to
+  the standard fill; `Generation_date` reformatted to `yyyymmdd`.
+- **staged** — computed but lossy or ambiguous, so it is *suggested* for review and
+  never applied automatically. Examples: truncating an over-long
+  `CATDESC`/`FIELDNAM`/`LABLAXIS`; a closest-name suggestion for a dangling
+  `DEPEND_i`/`LABL_PTR_i` pointer.
+- **needs your input** — irreducibly human and never fabricated (e.g. `UNITS`,
+  `PI_name`, `DOI`).
+
+Physical/numeric values (`UNITS`, `VALIDMIN`/`VALIDMAX`, …) and identity/provenance
+attributes (`PI_name`, `DOI`, …) are **never** invented — they are only ever
+reported, not auto-filled.
 
 ## Configuration
 
