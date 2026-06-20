@@ -14,6 +14,7 @@ class ReferenceSource(str, Enum):  # noqa: UP042
     TYPE_RULE = "type_rule"
     GRAPH_RULE = "graph_rule"
     FILENAME = "filename_convention"
+    FORMAT_RULE = "format_rule"  # deterministic reshaping of an existing value (length/format)
     USER = "user"
 
 

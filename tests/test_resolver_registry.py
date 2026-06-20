@@ -50,3 +50,13 @@ def test_fillval_entry_triggers_on_fillval_range():
     fillval = [e for e in REGISTRY if e.attribute == "FILLVAL"]
     triggers = {t for e in fillval for t in e.triggers}
     assert "ISTP-VA-019" in triggers  # FillvalOutsideRange -> set type-standard fill
+
+
+def test_truncation_entries_are_staged():
+    from astralint.resolver.models import ApplyPolicy
+
+    truncate = {
+        e.attribute: e for e in REGISTRY if e.attribute in {"CATDESC", "FIELDNAM", "LABLAXIS"}
+    }
+    assert {"CATDESC", "FIELDNAM", "LABLAXIS"} <= set(truncate)
+    assert all(e.auto_apply == ApplyPolicy.NEVER for e in truncate.values())
