@@ -6,7 +6,28 @@ from .sources.filename import (
 )
 from .sources.graph_rules import depend0_finder, display_type_infer, var_type_infer
 from .sources.pointers import dangling_pointer_suggestion
+from .sources.text import truncate_to_limit
 from .sources.type_rules import fillval_by_type, fillval_outside_range, scaletyp_default
+
+# Over-length descriptive attributes (ISTP hard limits) -> staged truncation.
+_TRUNCATE_TRIGGERS = {
+    "CATDESC": "ISTP-VA-020",
+    "FIELDNAM": "ISTP-VA-021",
+    "LABLAXIS": "ISTP-VA-022",
+}
+
+
+def _truncate_entry(attribute: str, trigger: str) -> "ResolverEntry":
+    return ResolverEntry(
+        attribute=attribute,
+        scope=Scope.VARIABLE,
+        sources=[ReferenceSource.FORMAT_RULE],
+        resolver=truncate_to_limit,
+        auto_apply=ApplyPolicy.NEVER,  # lossy -> always staged for review
+        confidence_default=0.5,
+        triggers=[trigger],
+    )
+
 
 # Rule references that flag a dangling pointer for each pointer family.
 _POINTER_TRIGGERS = {
@@ -128,4 +149,5 @@ REGISTRY: list[ResolverEntry] = [
         triggers=["ISTP-GA-005", "ISTP-GA-001"],
     ),
     *[_pointer_entry(attr, triggers) for attr, triggers in _POINTER_TRIGGERS.items()],
+    *[_truncate_entry(attr, trigger) for attr, trigger in _TRUNCATE_TRIGGERS.items()],
 ]

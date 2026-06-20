@@ -133,3 +133,16 @@ def test_resolve_reads_reference_from_enclosing_rule_group():
     )
     fixes = resolve(_file(), top)
     assert any(f.attribute == "FILLVAL" and f.auto for f in fixes)
+
+
+def test_resolve_over_long_lablaxis_is_staged_truncation():
+    f = _file()
+    f.variables["flux"].attributes["LABLAXIS"] = _attr(
+        "LABLAXIS", "this_label_is_way_too_long_over_twenty"
+    )
+    failures = _group([_failure("ISTP-VA-022", "flux/LABLAXIS")])
+    fixes = resolve(f, failures)
+    lab = [x for x in fixes if x.attribute == "LABLAXIS"]
+    assert len(lab) == 1
+    assert lab[0].auto is False  # staged, never auto-applied
+    assert lab[0].value == "this_label_is_way_too_long_over_twenty"[:20]
