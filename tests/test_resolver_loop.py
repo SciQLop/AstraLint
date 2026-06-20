@@ -72,7 +72,10 @@ def test_converge_reduces_errors_on_real_file():
 
     assert isinstance(report, ConvergenceReport)
     assert report.remaining_errors < baseline
-    assert any(f.attribute == "VAR_TYPE" and f.value == "support_data" for f in report.applied)
+    assert any(
+        f.variable == "mms1_asp_epoch" and f.attribute == "VAR_TYPE" and f.value == "support_data"
+        for f in report.applied
+    )
     fixed = pycdfpp.load(out)
     assert [x for x in fixed["mms1_asp_epoch"].attributes["VAR_TYPE"]] == ["support_data"]
 
