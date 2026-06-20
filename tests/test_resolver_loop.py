@@ -99,3 +99,23 @@ def test_failure_signature_distinguishes_rules_on_same_target():
     assert ("ISTP-VA-001", "v") in sig
     assert ("ISTP-VA-004", "v") in sig
     assert len(sig) == 2
+
+
+def test_converge_fixes_malformed_logical_file_id_from_filename():
+    fname = "mms1_asp2_srvy_l1b_stat_00000000_v01.cdf"
+    cdf = pycdfpp.load(_CDF)
+    if "Logical_file_id" in cdf.attributes:
+        cdf.attributes["Logical_file_id"].set_values(["BADID"], [pycdfpp.DataType.CDF_CHAR])
+    else:
+        cdf.add_attribute("Logical_file_id", [["BADID"]], [pycdfpp.DataType.CDF_CHAR])
+    broken = bytes(pycdfpp.save(cdf))
+
+    suite = get_suite("ISTP")
+    assert suite is not None
+    report, out = converge(broken, suite, max_iter=5, filename=fname)
+
+    assert any(f.attribute == "Logical_file_id" for f in report.applied)
+    fixed = pycdfpp.load(out)
+    assert [x for x in fixed.attributes["Logical_file_id"]][
+        0
+    ] == "mms1_asp2_srvy_l1b_stat_00000000_v01"

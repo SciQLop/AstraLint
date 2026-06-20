@@ -27,3 +27,12 @@ def test_depend0_has_both_a_finder_and_a_dangling_entry():
     triggers = {t for e in depend0 for t in e.triggers}
     assert "ISTP-VA-002" in triggers  # missing -> finder
     assert "ISTP-VA-011" in triggers  # dangling -> suggestion
+
+
+def test_registry_has_filename_global_entries():
+    from astralint.resolver.models import ReferenceSource, Scope
+
+    filename_entries = [e for e in REGISTRY if ReferenceSource.FILENAME in e.sources]
+    attrs = {e.attribute for e in filename_entries}
+    assert {"Logical_file_id", "Logical_source", "Data_version"} <= attrs
+    assert all(e.scope == Scope.GLOBAL for e in filename_entries)

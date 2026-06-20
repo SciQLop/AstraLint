@@ -27,15 +27,22 @@ def _failure_signature(results: ValidationResultGroup) -> frozenset[tuple[str, s
     return frozenset((reference, leaf.target) for reference, leaf in _iter_failures(results))
 
 
-def _load(cdf_bytes: bytes) -> File:
+def _load(cdf_bytes: bytes, filename: str | None = None) -> File:
     result = CdfCodec.load(cdf_bytes)
     if result is None:
         raise ValueError("Failed to parse CDF bytes")
+    # The byte round-trip drops the original filename (the codec uses a
+    # placeholder); restore it so filename-derived resolvers can run.
+    if filename is not None:
+        result.filename = filename
     return result
 
 
 def converge(
-    cdf_bytes: bytes, suite: ConformanceSuite, max_iter: int = 10
+    cdf_bytes: bytes,
+    suite: ConformanceSuite,
+    max_iter: int = 10,
+    filename: str | None = None,
 ) -> tuple[ConvergenceReport, bytes]:
     applied: list[Fix] = []
     iterations = 0
@@ -43,7 +50,7 @@ def converge(
     prev_signature: frozenset[tuple[str, str]] | None = None
 
     while iterations < max_iter:
-        file = _load(cdf_bytes)
+        file = _load(cdf_bytes, filename)
         results = suite.run(file)
         if not results.has_errors():
             stopped = "converged"
@@ -66,7 +73,7 @@ def converge(
 
     # Recompute staged suggestions against the FINAL file state so they reflect
     # what still needs review after all auto-fixes (not a stale pre-mutation set).
-    final_file = _load(cdf_bytes)
+    final_file = _load(cdf_bytes, filename)
     final = suite.run(final_file)
     staged = [f for f in resolve(final_file, final.failures_only()) if not f.auto]
     report = ConvergenceReport(

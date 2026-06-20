@@ -41,9 +41,11 @@ def _abstract_type(var) -> DataType:
 
 def _apply_one(cdf, fix: Fix) -> None:
     if fix.scope == Scope.GLOBAL:
-        # Phase 1 emits no global fixes, but keep the path honest.
+        # One CHAR entry: entries_values is a flat list of per-entry values.
         if fix.action == "add":
-            cdf.add_attribute(fix.attribute, [[fix.value]], [pycdfpp.DataType.CDF_CHAR])
+            cdf.add_attribute(fix.attribute, [fix.value], [pycdfpp.DataType.CDF_CHAR])
+        else:  # set: overwrite the existing global attribute's entries
+            cdf.attributes[fix.attribute].set_values([fix.value], [pycdfpp.DataType.CDF_CHAR])
         return
 
     # Re-fetch the variable handle every time: pycdfpp wrappers hold references

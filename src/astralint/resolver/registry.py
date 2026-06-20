@@ -1,4 +1,9 @@
 from .models import ApplyPolicy, ReferenceSource, ResolverEntry, Scope
+from .sources.filename import (
+    data_version_from_filename,
+    logical_file_id_from_filename,
+    logical_source_from_filename,
+)
 from .sources.graph_rules import depend0_finder, display_type_infer, var_type_infer
 from .sources.pointers import dangling_pointer_suggestion
 from .sources.type_rules import fillval_by_type, scaletyp_default
@@ -77,6 +82,36 @@ REGISTRY: list[ResolverEntry] = [
         auto_apply=ApplyPolicy.IF_UNIQUE,
         confidence_default=0.8,
         triggers=["ISTP-VA-002", "ISTP-VA-005"],
+    ),
+    # Filename-derived global attributes (AUTO when the filename matches the
+    # ISTP convention; the resolver returns None otherwise). Triggers cover both
+    # the malformed-value rule and the missing-attribute rule (ISTP-GA-001).
+    ResolverEntry(
+        attribute="Logical_file_id",
+        scope=Scope.GLOBAL,
+        sources=[ReferenceSource.FILENAME],
+        resolver=logical_file_id_from_filename,
+        auto_apply=ApplyPolicy.ALWAYS,
+        confidence_default=0.9,
+        triggers=["ISTP-GA-004", "ISTP-GA-001"],
+    ),
+    ResolverEntry(
+        attribute="Logical_source",
+        scope=Scope.GLOBAL,
+        sources=[ReferenceSource.FILENAME],
+        resolver=logical_source_from_filename,
+        auto_apply=ApplyPolicy.ALWAYS,
+        confidence_default=0.9,
+        triggers=["ISTP-GA-003", "ISTP-GA-001"],
+    ),
+    ResolverEntry(
+        attribute="Data_version",
+        scope=Scope.GLOBAL,
+        sources=[ReferenceSource.FILENAME],
+        resolver=data_version_from_filename,
+        auto_apply=ApplyPolicy.ALWAYS,
+        confidence_default=0.9,
+        triggers=["ISTP-GA-005", "ISTP-GA-001"],
     ),
     *[_pointer_entry(attr, triggers) for attr, triggers in _POINTER_TRIGGERS.items()],
 ]

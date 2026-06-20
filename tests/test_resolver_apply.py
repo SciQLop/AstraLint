@@ -100,3 +100,34 @@ def test_numeric_value_and_type_uses_native_cdf_type():
     assert float32_type == pycdfpp.DataType.CDF_FLOAT
     _, epoch_type = _numeric_value_and_type(DataType.CDFEPOCH, -1e31)
     assert epoch_type == pycdfpp.DataType.CDF_EPOCH
+
+
+def _global_fix(attribute, value, action):
+    return Fix(
+        target_path=f"attributes/{attribute}",
+        variable=None,
+        attribute=attribute,
+        scope=Scope.GLOBAL,
+        action=action,
+        value=value,
+        source=ReferenceSource.FILENAME,
+        confidence=1.0,
+        provenance_note="test",
+        auto=True,
+    )
+
+
+def test_apply_global_add():
+    out = apply_fixes(_bytes(), [_global_fix("NEW_GLOBAL_ATTR", "hello", "add")])
+    # Bind the CDF to a local: pycdfpp attribute views read into the CDF's C++
+    # memory, so the loaded CDF must outlive the iteration.
+    cdf = pycdfpp.load(out)
+    assert [x for x in cdf.attributes["NEW_GLOBAL_ATTR"]] == ["hello"]
+
+
+def test_apply_global_set_overwrites():
+    cdf = pycdfpp.load(_CDF)
+    gname = next(iter(cdf.attributes))  # an existing global attribute
+    out = apply_fixes(_bytes(), [_global_fix(gname, "OVERWRITTEN", "set")])
+    reloaded = pycdfpp.load(out)
+    assert [x for x in reloaded.attributes[gname]] == ["OVERWRITTEN"]
