@@ -31,10 +31,10 @@ def _numeric_value_and_type(variable_abstract_type: DataType, value: object):
 
 
 def _abstract_type(var) -> DataType:
-    # reuse the codec mapping so apply and load agree on types
-    from ..codecs.cdf import _to_data_type
+    # reuse the codec's public mapping so apply and load agree on types
+    from ..codecs.cdf import type_mapping
 
-    return _to_data_type(var.type)
+    return type_mapping.get(var.type, DataType.NONE)
 
 
 def _apply_one(cdf, fix: Fix) -> None:

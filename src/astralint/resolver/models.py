@@ -2,7 +2,7 @@ from collections.abc import Callable
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Scope(str, Enum):  # noqa: UP042
@@ -29,7 +29,7 @@ class ResolverOutput(BaseModel):
     confidence: float | None = None  # overrides entry.confidence_default when set
     provenance_note: str
     ambiguous: bool = False  # for if_unique: stage instead of auto-apply when True
-    alternatives: list[Any] = []  # candidate values when ambiguous
+    alternatives: list[Any] = Field(default_factory=list)  # candidate values when ambiguous
 
 
 class ResolverEntry(BaseModel):
@@ -43,7 +43,9 @@ class ResolverEntry(BaseModel):
     resolver: Callable
     auto_apply: ApplyPolicy
     confidence_default: float
-    triggers: list[str] = []  # rule references this entry handles; empty = any
+    triggers: list[str] = Field(
+        default_factory=list
+    )  # rule references this entry handles; empty = any
 
 
 class Fix(BaseModel):
