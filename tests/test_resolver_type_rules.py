@@ -29,11 +29,13 @@ def test_fillval_int32():
 
 def test_fillval_float64():
     out = fillval_by_type(_var(DataType.FLOAT64), "v", "FILLVAL", None)
+    assert out is not None
     assert out.value == -1e31
 
 
 def test_fillval_char_is_blank():
     out = fillval_by_type(_var(DataType.CHAR), "v", "FILLVAL", None)
+    assert out is not None
     assert out.value == " "
 
 
@@ -48,4 +50,5 @@ def test_fillval_unknown_variable_returns_none():
 
 def test_scaletyp_default_is_linear():
     out = scaletyp_default(_var(DataType.FLOAT64), "v", "SCALETYP", None)
+    assert out is not None
     assert out.value == "linear"
