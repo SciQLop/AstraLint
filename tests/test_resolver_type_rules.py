@@ -39,9 +39,20 @@ def test_fillval_char_is_blank():
     assert out.value == " "
 
 
+def test_fillval_unsigned_is_max_value():
+    # CDAWeb convention: unsigned fill is the maximum value (all bits set).
+    for data_type, expected in (
+        (DataType.UINT8, 255),
+        (DataType.UINT16, 65535),
+        (DataType.UINT32, 4294967295),
+    ):
+        out = fillval_by_type(_var(data_type), "v", "FILLVAL", None)
+        assert out is not None
+        assert out.value == expected
+
+
 def test_fillval_unmapped_type_returns_none():
-    # Unsigned types are intentionally unmapped in Phase 1.
-    assert fillval_by_type(_var(DataType.UINT32), "v", "FILLVAL", None) is None
+    assert fillval_by_type(_var(DataType.NONE), "v", "FILLVAL", None) is None
 
 
 def test_fillval_unknown_variable_returns_none():
@@ -116,3 +127,25 @@ def test_fillval_outside_range_none_without_validminmax():
         },
     )
     assert fillval_outside_range(f, "v", "FILLVAL", None) is None
+
+
+def test_fillval_outside_range_unsigned_proposes_max():
+    from astralint.resolver.sources.type_rules import fillval_outside_range
+
+    # UINT8 var with range [0, 100] and an in-range FILLVAL: 255 (max) is outside.
+    out = fillval_outside_range(
+        _var_with_range(0, 100, 50, dt=DataType.UINT8), "v", "FILLVAL", None
+    )
+    assert out is not None
+    assert out.value == 255
+
+
+def test_fillval_outside_range_unsigned_none_when_full_range():
+    from astralint.resolver.sources.type_rules import fillval_outside_range
+
+    # A UINT8 var whose valid range spans the whole type [0, 255] has no possible
+    # out-of-range fill — the resolver must not propose one.
+    assert (
+        fillval_outside_range(_var_with_range(0, 255, 255, dt=DataType.UINT8), "v", "FILLVAL", None)
+        is None
+    )

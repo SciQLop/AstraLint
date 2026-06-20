@@ -4,13 +4,16 @@ from ...base.file import DataType, File
 from ...base.validation_result import ValidationResult
 from ..models import ResolverOutput
 
-# ISTP default fill values keyed on the abstract CDF data type. Unsigned types
-# are intentionally omitted in Phase 1 (no agreed ISTP default here yet).
+# ISTP/CDAWeb default fill values keyed on the abstract CDF data type. Unsigned
+# integers use the maximum value (all bits set), the conventional unsigned fill.
 _FILLVAL_BY_TYPE: dict[DataType, Any] = {
     DataType.INT8: -128,
     DataType.INT16: -32768,
     DataType.INT32: -(2**31),
     DataType.INT64: -(2**63),
+    DataType.UINT8: 2**8 - 1,
+    DataType.UINT16: 2**16 - 1,
+    DataType.UINT32: 2**32 - 1,
     DataType.TT2000: -(2**63),
     DataType.FLOAT32: -1e31,
     DataType.FLOAT64: -1e31,
