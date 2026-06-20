@@ -23,6 +23,7 @@ from .config import (
 from .config.loader import generate_starter_config
 from .config.paths import expand_lint_paths
 from .reports import report
+from .resolver import converge
 
 app = App()
 config_app = App(name="config", help="Manage AstraLint configuration.")
@@ -239,6 +240,70 @@ def lint(
             f"Unknown conformance suite '{cfg.suite}'. "
             f"Available suites: {', '.join(list_all_suites())}"
         )
+
+
+@app.command()
+def fix(
+    path: Path,
+    suite: str = "ISTP",
+    apply: str = "auto",
+    output: Path | None = None,
+    max_iter: int = 10,
+):
+    """Propose and (optionally) apply deterministic ISTP fixes to a CDF.
+
+    Parameters
+    ----------
+    path : Path
+        The CDF file to repair.
+    suite : str
+        Conformance suite to validate against. Default "ISTP".
+    apply : str
+        "auto" runs the convergence loop and writes a corrected CDF;
+        "none" is a dry run that lists proposed fixes without writing.
+    output : Path, optional
+        Destination for the corrected CDF. Defaults to "<stem>.fixed.cdf".
+    max_iter : int
+        Hard cap on convergence iterations. Default 10.
+    """
+    console = Console()
+    checker = get_suite(suite)
+    if checker is None:
+        console.print(f"[red]✗[/] Unknown suite '{suite}'")
+        raise SystemExit(1)
+
+    with open(path, "rb") as f:
+        cdf_bytes = f.read()
+
+    convergence, fixed = converge(cdf_bytes, checker, max_iter=max_iter)
+
+    if convergence.applied:
+        console.print(f"[bold]Proposed/applied fixes ({len(convergence.applied)}):[/]")
+        for fx in convergence.applied:
+            console.print(
+                f"  [green]{fx.attribute}[/] {fx.target_path} = {fx.value!r} "
+                f"[dim]({fx.source.value}, conf {fx.confidence:.2f}) — {fx.provenance_note}[/]"
+            )
+    else:
+        console.print("No auto-applicable fixes found.")
+
+    if convergence.staged:
+        console.print(f"\n[bold]Staged suggestions ({len(convergence.staged)}) — need review:[/]")
+        for fx in convergence.staged:
+            console.print(
+                f"  [yellow]{fx.attribute}[/] {fx.target_path} ~ {fx.value!r} "
+                f"[dim]— {fx.provenance_note}[/]"
+            )
+
+    console.print(
+        f"\n[dim]iterations={convergence.iterations} stopped={convergence.stopped_reason} "
+        f"remaining_errors={convergence.remaining_errors}[/]"
+    )
+
+    if apply == "auto":
+        dest = output or path.with_suffix(".fixed.cdf")
+        dest.write_bytes(fixed)
+        console.print(f"[green]✓[/] Wrote corrected CDF to [bold]{dest}[/]")
 
 
 @app.command()
