@@ -4,10 +4,10 @@ from pydantic import BaseModel
 
 from ..base.conformance_suite import ConformanceSuite
 from ..base.file import File
-from ..base.validation_result import Severity, ValidationResultGroup
+from ..base.validation_result import ValidationResultGroup
 from ..codecs.cdf import CdfCodec
 from .apply import apply_fixes
-from .engine import resolve
+from .engine import _iter_failures, resolve
 from .models import Fix
 
 
@@ -21,17 +21,10 @@ class ConvergenceReport(BaseModel):
 
 
 def _failure_signature(results: ValidationResultGroup) -> frozenset[tuple[str, str]]:
-    sig: set[tuple[str, str]] = set()
-
-    def walk(group: ValidationResultGroup) -> None:
-        for r in group.results:
-            if isinstance(r, ValidationResultGroup):
-                walk(r)
-            elif not r.valid and r.severity != Severity.SKIPPED:
-                sig.add((r.reference, r.target))
-
-    walk(results)
-    return frozenset(sig)
+    # Key on the enclosing rule reference (carried by _iter_failures), not the
+    # leaf's own reference which is empty — otherwise distinct rules failing on
+    # the same target collapse to one signature and trigger a false no-progress.
+    return frozenset((reference, leaf.target) for reference, leaf in _iter_failures(results))
 
 
 def _load(cdf_bytes: bytes) -> File:

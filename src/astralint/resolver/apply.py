@@ -17,6 +17,11 @@ _CDF_WRITE = {
 
 
 def _numeric_value_and_type(variable_abstract_type: DataType, value: object):
+    # CDF_EPOCH16 fill is a 2-component (real, imaginary) time, written as a
+    # complex128. fillval_by_type returns it as a (real, imaginary) tuple.
+    if isinstance(value, tuple):
+        real, imag = value
+        return np.array([complex(real, imag)], dtype=np.complex128), pycdfpp.DataType.CDF_EPOCH16
     # Python float -> always write as FLOAT64 (e.g. standard -1e31 fill value);
     # Python int -> use the variable's native CDF type.
     if isinstance(value, float):

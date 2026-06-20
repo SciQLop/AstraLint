@@ -68,3 +68,34 @@ def test_converge_unmodified_file_reports():
     # Never auto-overwrite an attribute on a file we were not asked to change:
     # every auto-applied fix must add a genuinely-missing attribute, not set one.
     assert all(f.action == "add" for f in report.applied)
+
+
+def test_failure_signature_distinguishes_rules_on_same_target():
+    # The rule id lives on the enclosing group; leaves carry an empty reference.
+    # Distinct rules failing on the same target must stay distinct in the
+    # signature, otherwise the loop reports a false no-progress.
+    from astralint.base.validation_result import (
+        Severity,
+        ValidationResult,
+        ValidationResultGroup,
+    )
+    from astralint.resolver.loop import _failure_signature
+
+    def _leaf():
+        return ValidationResult(
+            valid=False, reference="", severity=Severity.ERROR, message="", target="v", value=""
+        )
+
+    group_a = ValidationResultGroup(
+        name="A", rule_reference="ISTP-VA-001", severity=Severity.ERROR, results=[_leaf()]
+    )
+    group_b = ValidationResultGroup(
+        name="B", rule_reference="ISTP-VA-004", severity=Severity.ERROR, results=[_leaf()]
+    )
+    top = ValidationResultGroup(
+        name="t", rule_reference="", severity=Severity.ERROR, results=[group_a, group_b]
+    )
+    sig = _failure_signature(top)
+    assert ("ISTP-VA-001", "v") in sig
+    assert ("ISTP-VA-004", "v") in sig
+    assert len(sig) == 2

@@ -1,6 +1,6 @@
 # Resolver Engine — Design (Phase 1)
 
-**Status:** approved design, implementation not started
+**Status:** implemented in PR #25 (Phase 1)
 **Owner:** Alexis Jeandet (LPP)
 **Scope:** AstraLint deterministic correction/authoring engine, Phase 1 (no ML)
 **Source:** `~/Downloads/HANDOVER_resolver_engine.md` (design intent), grounded by Phase-0 recon of the current codebase.
