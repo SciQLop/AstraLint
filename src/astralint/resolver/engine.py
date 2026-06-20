@@ -50,6 +50,12 @@ def _entry_matches(
     return True
 
 
+def _attribute_present(file: File, entry: ResolverEntry, variable: str | None) -> bool:
+    if entry.scope == Scope.VARIABLE and variable is not None:
+        return entry.attribute in file.variables[variable].attributes
+    return entry.attribute in file.attributes
+
+
 def _build_fix(
     file: File, entry: ResolverEntry, variable: str | None, output: ResolverOutput
 ) -> Fix:
@@ -83,6 +89,12 @@ def resolve(file: File, failures: ValidationResultGroup) -> list[Fix]:
         variable, attribute, scope = _split_target(file, leaf.target)
         for entry in REGISTRY:
             if not _entry_matches(entry, reference, attribute, scope):
+                continue
+            # When the failure does not name a specific attribute (its target is
+            # just the variable, e.g. a "missing required attribute(s)" failure),
+            # only fill genuinely-absent attributes — never overwrite an existing
+            # attribute the failure never flagged.
+            if attribute is None and _attribute_present(file, entry, variable):
                 continue
             output = entry.resolver(file, variable, entry.attribute, leaf)
             if output is None:
