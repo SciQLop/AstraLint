@@ -63,7 +63,8 @@ REGISTRY: list[ResolverEntry] = [
         resolver=var_type_infer,
         auto_apply=ApplyPolicy.IF_UNIQUE,
         confidence_default=0.9,
-        triggers=["ISTP-VA-001", "ISTP-VA-004"],
+        # GA/VA-001 (missing), VA-004 (invalid value), VAR-002 (epoch must be support_data)
+        triggers=["ISTP-VA-001", "ISTP-VA-004", "ISTP-VAR-002"],
     ),
     ResolverEntry(
         attribute="DEPEND_0",

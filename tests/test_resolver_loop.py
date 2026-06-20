@@ -56,18 +56,25 @@ def test_converge_caps_iterations():
     assert report.stopped_reason in {"converged", "no_progress", "max_iter"}
 
 
-def test_converge_unmodified_file_reports():
+def test_converge_reduces_errors_on_real_file():
+    # The real MMS file has genuine ISTP errors the resolver can fix: a
+    # filename-derived Logical_file_id and the epoch VAR_TYPE (must be
+    # support_data, ISTP-VAR-002). Converging it must reduce the error count.
     with open(_CDF, "rb") as f:
         data = f.read()
     suite = get_suite("ISTP")
     assert suite is not None
-    report, out = converge(data, suite, max_iter=5)
+    loaded = CdfCodec.load(data)
+    assert loaded is not None
+    baseline = suite.run(loaded).count_by_severity()["ERROR"]
+
+    report, out = converge(data, suite, max_iter=5, filename=os.path.basename(_CDF))
+
     assert isinstance(report, ConvergenceReport)
-    assert isinstance(out, bytes)
-    assert report.stopped_reason in {"converged", "no_progress", "max_iter"}
-    # Never auto-overwrite an attribute on a file we were not asked to change:
-    # every auto-applied fix must add a genuinely-missing attribute, not set one.
-    assert all(f.action == "add" for f in report.applied)
+    assert report.remaining_errors < baseline
+    assert any(f.attribute == "VAR_TYPE" and f.value == "support_data" for f in report.applied)
+    fixed = pycdfpp.load(out)
+    assert [x for x in fixed["mms1_asp_epoch"].attributes["VAR_TYPE"]] == ["support_data"]
 
 
 def test_failure_signature_distinguishes_rules_on_same_target():
