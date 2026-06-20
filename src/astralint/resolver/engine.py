@@ -4,12 +4,20 @@ from .models import ApplyPolicy, Fix, ResolverEntry, ResolverOutput, Scope
 from .registry import REGISTRY
 
 
-def _iter_failures(group: ValidationResultGroup):
+def _iter_failures(group: ValidationResultGroup, inherited_reference: str = ""):
+    """Yield (rule_reference, failing_leaf) pairs.
+
+    The rule reference (e.g. "ISTP-VA-004") lives on the enclosing rule's
+    ``ValidationResultGroup.rule_reference``, not on the leaf — a leaf's own
+    ``reference`` is usually empty. Carry the nearest non-empty rule reference
+    down to each leaf so the registry can match it against entry triggers.
+    """
+    reference = group.rule_reference or inherited_reference
     for result in group.results:
         if isinstance(result, ValidationResultGroup):
-            yield from _iter_failures(result)
+            yield from _iter_failures(result, reference)
         elif not result.valid and result.severity != Severity.SKIPPED:
-            yield result
+            yield result.reference or reference, result
 
 
 def _split_target(file: File, target: str) -> tuple[str | None, str | None, Scope]:
@@ -71,10 +79,10 @@ def _build_fix(
 
 def resolve(file: File, failures: ValidationResultGroup) -> list[Fix]:
     fixes: dict[str, Fix] = {}  # keyed on target_path for dedup
-    for leaf in _iter_failures(failures):
+    for reference, leaf in _iter_failures(failures):
         variable, attribute, scope = _split_target(file, leaf.target)
         for entry in REGISTRY:
-            if not _entry_matches(entry, leaf.reference, attribute, scope):
+            if not _entry_matches(entry, reference, attribute, scope):
                 continue
             output = entry.resolver(file, variable, entry.attribute, leaf)
             if output is None:
