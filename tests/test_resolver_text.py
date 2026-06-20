@@ -45,3 +45,52 @@ def test_truncate_none_when_within_limit():
 
 def test_truncate_none_for_unmanaged_attribute():
     assert truncate_to_limit(_file("CATDESC", "x" * 200), "v", "UNITS", None) is None
+
+
+def _file_with_gen_date(value: str) -> File:
+    return File(
+        extension="cdf",
+        filename="t.cdf",
+        compression="NONE",
+        variables={},
+        attributes={
+            "Generation_date": Attribute(
+                name="Generation_date", data_type=[DataType.CHAR], shape=[1], values=[value]
+            )
+        },
+    )
+
+
+def test_generation_date_reformats_iso():
+    from astralint.resolver.sources.text import generation_date_format
+
+    out = generation_date_format(_file_with_gen_date("2022-02-21"), None, "Generation_date", None)
+    assert out is not None
+    assert out.value == "20220221"
+
+
+def test_generation_date_reformats_with_time():
+    from astralint.resolver.sources.text import generation_date_format
+
+    out = generation_date_format(
+        _file_with_gen_date("2022-02-21T13:45:00"), None, "Generation_date", None
+    )
+    assert out is not None and out.value == "20220221"
+
+
+def test_generation_date_none_when_unparseable():
+    from astralint.resolver.sources.text import generation_date_format
+
+    assert (
+        generation_date_format(
+            _file_with_gen_date("sometime in Feb"), None, "Generation_date", None
+        )
+        is None
+    )
+
+
+def test_generation_date_none_when_absent():
+    from astralint.resolver.sources.text import generation_date_format
+
+    f = File(extension="cdf", filename="t.cdf", compression="NONE", variables={}, attributes={})
+    assert generation_date_format(f, None, "Generation_date", None) is None

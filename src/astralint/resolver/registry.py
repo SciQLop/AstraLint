@@ -6,7 +6,7 @@ from .sources.filename import (
 )
 from .sources.graph_rules import depend0_finder, display_type_infer, var_type_infer
 from .sources.pointers import dangling_pointer_suggestion
-from .sources.text import truncate_to_limit
+from .sources.text import generation_date_format, truncate_to_limit
 from .sources.type_rules import fillval_by_type, fillval_outside_range, scaletyp_default
 
 # Over-length descriptive attributes (ISTP hard limits) -> staged truncation.
@@ -147,6 +147,17 @@ REGISTRY: list[ResolverEntry] = [
         auto_apply=ApplyPolicy.ALWAYS,
         confidence_default=0.9,
         triggers=["ISTP-GA-005", "ISTP-GA-001"],
+    ),
+    ResolverEntry(
+        # GA-015: Generation_date not yyyymmdd. Lossless reformat of an existing
+        # parseable date (no fabrication of a missing one).
+        attribute="Generation_date",
+        scope=Scope.GLOBAL,
+        sources=[ReferenceSource.FORMAT_RULE],
+        resolver=generation_date_format,
+        auto_apply=ApplyPolicy.ALWAYS,
+        confidence_default=0.9,
+        triggers=["ISTP-GA-015"],
     ),
     *[_pointer_entry(attr, triggers) for attr, triggers in _POINTER_TRIGGERS.items()],
     *[_truncate_entry(attr, trigger) for attr, trigger in _TRUNCATE_TRIGGERS.items()],
