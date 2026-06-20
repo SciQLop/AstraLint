@@ -36,3 +36,9 @@ def test_registry_has_filename_global_entries():
     attrs = {e.attribute for e in filename_entries}
     assert {"Logical_file_id", "Logical_source", "Data_version"} <= attrs
     assert all(e.scope == Scope.GLOBAL for e in filename_entries)
+
+
+def test_var_type_entry_triggers_on_epoch_rule():
+    var_type = [e for e in REGISTRY if e.attribute == "VAR_TYPE"]
+    triggers = {t for e in var_type for t in e.triggers}
+    assert "ISTP-VAR-002" in triggers  # epoch VAR_TYPE=support_data graph win
