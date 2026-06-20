@@ -65,3 +65,6 @@ def test_converge_unmodified_file_reports():
     assert isinstance(report, ConvergenceReport)
     assert isinstance(out, bytes)
     assert report.stopped_reason in {"converged", "no_progress", "max_iter"}
+    # Never auto-overwrite an attribute on a file we were not asked to change:
+    # every auto-applied fix must add a genuinely-missing attribute, not set one.
+    assert all(f.action == "add" for f in report.applied)

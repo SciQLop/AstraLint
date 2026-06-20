@@ -95,6 +95,20 @@ def test_resolve_dedups_same_target():
     assert len([f for f in fixes if f.attribute == "FILLVAL"]) == 1
 
 
+def test_resolve_does_not_overwrite_unflagged_present_attribute():
+    # A bare-variable failure (target is just the variable, no attribute named)
+    # must not auto-overwrite an attribute that already exists and was never
+    # flagged. Here "flux" already has a valid DISPLAY_TYPE while the failure is
+    # about a *different* missing attribute (ISTP-VA-002 also triggers the
+    # DISPLAY_TYPE entry). The genuinely-missing DEPEND_0 is still proposed.
+    f = _file()
+    f.variables["flux"].attributes["DISPLAY_TYPE"] = _attr("DISPLAY_TYPE", "spectrogram")
+    failures = _group([_failure("ISTP-VA-002", "flux")])
+    fixes = resolve(f, failures)
+    assert not any(x.attribute == "DISPLAY_TYPE" for x in fixes)
+    assert any(x.attribute == "DEPEND_0" and x.action == "add" for x in fixes)
+
+
 def test_resolve_reads_reference_from_enclosing_rule_group():
     # Real validation output puts the rule reference on the enclosing rule
     # group's `rule_reference`, NOT on the leaf (the leaf's own `reference` is
