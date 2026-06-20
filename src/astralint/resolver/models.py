@@ -63,3 +63,13 @@ class Fix(BaseModel):
     confidence: float
     provenance_note: str
     auto: bool  # decided by the engine: always | (if_unique & not ambiguous)
+
+    @property
+    def disposition(self) -> str:
+        """How the fix is offered: applied automatically, suggested for review,
+        or flagged as requiring human input (a value-less USER fix)."""
+        if self.auto:
+            return "auto"
+        if self.source == ReferenceSource.USER:
+            return "user"
+        return "staged"
