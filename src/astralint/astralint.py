@@ -8,6 +8,7 @@ from rich.pretty import Pretty
 
 from .base import (
     ConformanceSuite,
+    File,
     Severity,
     ValidationResultGroup,
     get_suite,
@@ -24,7 +25,7 @@ from .config import (
 from .config.loader import generate_starter_config
 from .config.paths import expand_lint_paths
 from .reports import report
-from .resolver import Fix, converge
+from .resolver import Fix, converge, resolve
 
 app = App()
 config_app = App(name="config", help="Manage AstraLint configuration.")
@@ -119,6 +120,33 @@ def init(force: bool = False):
     console.print("\nEdit this file to customize AstraLint behavior.")
 
 
+def _fix_hint(loaded: list[tuple[Path, File, ValidationResultGroup]]) -> str | None:
+    """Summarise how many findings `astralint fix` can address, across CDF files.
+
+    Counts the resolver's proposed fixes (auto vs staged) without applying
+    anything. Returns None when there is nothing to offer.
+    """
+    auto = staged = 0
+    for _path, file, result in loaded:
+        if file.extension != "cdf":  # the fix command operates on CDF only
+            continue
+        for fix in resolve(file, result.failures_only()):
+            if fix.auto:
+                auto += 1
+            else:
+                staged += 1
+    if not (auto or staged):
+        return None
+    cdf_paths = [p for p, file, _ in loaded if file.extension == "cdf"]
+    target = str(cdf_paths[0]) if len(cdf_paths) == 1 else "<file>"
+    parts = []
+    if auto:
+        parts.append(f"{auto} auto-fixable")
+    if staged:
+        parts.append(f"{staged} need review")
+    return f"{', '.join(parts)} — run: astralint fix {target}"
+
+
 @app.command()
 def lint(
     path: list[Path],
@@ -208,17 +236,18 @@ def lint(
     # Run linting
     checker: ConformanceSuite | None = get_suite(cfg.suite)
     if checker:
+        loaded: list[tuple[Path, File, ValidationResultGroup]] = []
         results = []
         for p in files_to_lint:
             if file := load_file(str(p)):
-                results.append(
-                    checker.run(
-                        file,
-                        select=cfg.select or None,
-                        ignore=cfg.ignore or None,
-                        severity_overrides=cfg.severity_overrides or None,
-                    )
+                file_result = checker.run(
+                    file,
+                    select=cfg.select or None,
+                    ignore=cfg.ignore or None,
+                    severity_overrides=cfg.severity_overrides or None,
                 )
+                loaded.append((p, file, file_result))
+                results.append(file_result)
 
         results = ValidationResultGroup(
             name="AstraLint Results", rule_reference="", results=results, severity=Severity.INFO
@@ -230,6 +259,12 @@ def lint(
             show_passed=cfg.output.show_passed,
             failed_only=failed_only,
         )
+
+        # Point the user at `astralint fix` when it can help (console output only).
+        if cfg.output.format == "console" and not cfg.output.dest:
+            hint = _fix_hint(loaded)
+            if hint:
+                console.print(f"\n[cyan]→[/] {escape(hint)}")
 
         # Exit with error code if validation failed
         if results.has_errors():
