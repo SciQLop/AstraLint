@@ -2,6 +2,7 @@ from pathlib import Path
 
 from cyclopts import App
 from rich.console import Console, Group
+from rich.markup import escape
 from rich.panel import Panel
 from rich.pretty import Pretty
 
@@ -23,7 +24,7 @@ from .config import (
 from .config.loader import generate_starter_config
 from .config.paths import expand_lint_paths
 from .reports import report
-from .resolver import converge
+from .resolver import Fix, converge
 
 app = App()
 config_app = App(name="config", help="Manage AstraLint configuration.")
@@ -242,6 +243,26 @@ def lint(
         )
 
 
+def _fix_line(fx: Fix, *, staged: bool) -> str:
+    """Render one fix as a Rich-markup line, escaping file-derived content.
+
+    ``target_path``/``value``/``provenance_note`` come from CDF metadata and may
+    contain ``[``/``]``, which Rich would otherwise interpret as markup.
+    """
+    colour = "yellow" if staged else "green"
+    sep = "~" if staged else "="
+    line = (
+        f"  [{colour}]{escape(fx.attribute)}[/] {escape(fx.target_path)} "
+        f"{sep} {escape(repr(fx.value))}"
+    )
+    if staged:
+        return f"{line} [dim]— {escape(fx.provenance_note)}[/]"
+    return (
+        f"{line} [dim]({fx.source.value}, conf {fx.confidence:.2f}) "
+        f"— {escape(fx.provenance_note)}[/]"
+    )
+
+
 @app.command()
 def fix(
     path: Path,
@@ -283,20 +304,14 @@ def fix(
     if convergence.applied:
         console.print(f"[bold]Proposed/applied fixes ({len(convergence.applied)}):[/]")
         for fx in convergence.applied:
-            console.print(
-                f"  [green]{fx.attribute}[/] {fx.target_path} = {fx.value!r} "
-                f"[dim]({fx.source.value}, conf {fx.confidence:.2f}) — {fx.provenance_note}[/]"
-            )
+            console.print(_fix_line(fx, staged=False))
     else:
         console.print("No auto-applicable fixes found.")
 
     if convergence.staged:
         console.print(f"\n[bold]Staged suggestions ({len(convergence.staged)}) — need review:[/]")
         for fx in convergence.staged:
-            console.print(
-                f"  [yellow]{fx.attribute}[/] {fx.target_path} ~ {fx.value!r} "
-                f"[dim]— {fx.provenance_note}[/]"
-            )
+            console.print(_fix_line(fx, staged=True))
 
     console.print(
         f"\n[dim]iterations={convergence.iterations} stopped={convergence.stopped_reason} "
