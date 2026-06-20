@@ -38,7 +38,6 @@ def converge(
     cdf_bytes: bytes, suite: ConformanceSuite, max_iter: int = 10
 ) -> tuple[ConvergenceReport, bytes]:
     applied: list[Fix] = []
-    staged: list[Fix] = []
     iterations = 0
     stopped: Literal["converged", "no_progress", "max_iter"] = "max_iter"
     prev_signature: frozenset[tuple[str, str]] | None = None
@@ -56,9 +55,7 @@ def converge(
             break
         prev_signature = signature
 
-        fixes = resolve(file, results.failures_only())
-        auto = [f for f in fixes if f.auto]
-        staged = [f for f in fixes if not f.auto]
+        auto = [f for f in resolve(file, results.failures_only()) if f.auto]
         if not auto:
             stopped = "no_progress"
             break
@@ -67,7 +64,11 @@ def converge(
         applied.extend(auto)
         iterations += 1
 
-    final = suite.run(_load(cdf_bytes))
+    # Recompute staged suggestions against the FINAL file state so they reflect
+    # what still needs review after all auto-fixes (not a stale pre-mutation set).
+    final_file = _load(cdf_bytes)
+    final = suite.run(final_file)
+    staged = [f for f in resolve(final_file, final.failures_only()) if not f.auto]
     report = ConvergenceReport(
         iterations=iterations,
         applied=applied,
