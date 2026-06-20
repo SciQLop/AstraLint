@@ -8,6 +8,43 @@ from .sources.graph_rules import depend0_finder, display_type_infer, var_type_in
 from .sources.pointers import dangling_pointer_suggestion
 from .sources.text import generation_date_format, truncate_to_limit
 from .sources.type_rules import fillval_by_type, fillval_outside_range, scaletyp_default
+from .sources.user import needs_user_input
+
+# Irreducible attributes — physical, provenance/identity, prose, external IDs —
+# flagged as "needs your input" (never fabricated). attribute -> rule triggers.
+_USER_GLOBAL = {
+    # Mandatory (GA-001) provenance / prose / description.
+    "PI_name": ["ISTP-GA-001"],
+    "PI_affiliation": ["ISTP-GA-001"],
+    "TEXT": ["ISTP-GA-001", "ISTP-GA-011"],
+    "Logical_source_description": ["ISTP-GA-001"],
+    "Descriptor": ["ISTP-GA-001", "ISTP-GA-008"],
+    "Data_type": ["ISTP-GA-001", "ISTP-GA-006"],
+    "Source_name": ["ISTP-GA-001", "ISTP-GA-007"],
+    # Recommended (GA-002) provenance / prose / external identifiers, plus their
+    # own value/format rules. (Time_resolution is excluded — it is data-derived.)
+    "DOI": ["ISTP-GA-002", "ISTP-GA-014"],
+    "spase_DatasetResourceID": ["ISTP-GA-002"],
+    "Acknowledgement": ["ISTP-GA-002"],
+    "Rules_of_use": ["ISTP-GA-002"],
+    "Generated_by": ["ISTP-GA-002"],
+    "Project": ["ISTP-GA-002", "ISTP-GA-012"],
+    "Discipline": ["ISTP-GA-002", "ISTP-GA-009"],
+}
+_USER_VARIABLE = {"UNITS": ["ISTP-VA-009"]}
+
+
+def _user_entry(attribute: str, scope: Scope, triggers: list[str]) -> "ResolverEntry":
+    return ResolverEntry(
+        attribute=attribute,
+        scope=scope,
+        sources=[ReferenceSource.USER],
+        resolver=needs_user_input,
+        auto_apply=ApplyPolicy.NEVER,  # value-less: always surfaced, never applied
+        confidence_default=0.0,
+        triggers=triggers,
+    )
+
 
 # Over-length descriptive attributes (ISTP hard limits) -> staged truncation.
 _TRUNCATE_TRIGGERS = {
@@ -161,4 +198,6 @@ REGISTRY: list[ResolverEntry] = [
     ),
     *[_pointer_entry(attr, triggers) for attr, triggers in _POINTER_TRIGGERS.items()],
     *[_truncate_entry(attr, trigger) for attr, trigger in _TRUNCATE_TRIGGERS.items()],
+    *[_user_entry(attr, Scope.GLOBAL, triggers) for attr, triggers in _USER_GLOBAL.items()],
+    *[_user_entry(attr, Scope.VARIABLE, triggers) for attr, triggers in _USER_VARIABLE.items()],
 ]

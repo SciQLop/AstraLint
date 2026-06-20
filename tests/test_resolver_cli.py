@@ -93,3 +93,17 @@ def test_lint_prints_fix_hint(capsys):
     with pytest.raises(SystemExit):  # the resource file has errors -> exit 1
         lint([Path(_CDF)], suite="ISTP")
     assert "astralint fix" in capsys.readouterr().out
+
+
+def test_fix_hint_counts_user_disposition():
+    from astralint.astralint import _fix_hint
+    from astralint.base import get_suite, load_file
+
+    p = Path(_CDF)
+    file = load_file(str(p))
+    suite = get_suite("ISTP")
+    assert file is not None and suite is not None
+    # construct a file missing a recommended provenance global so a USER fix fires
+    file.attributes.pop("DOI", None)
+    hint = _fix_hint([(p, file, suite.run(file))])
+    assert hint is not None

@@ -60,3 +60,12 @@ def test_truncation_entries_are_staged():
     }
     assert {"CATDESC", "FIELDNAM", "LABLAXIS"} <= set(truncate)
     assert all(e.auto_apply == ApplyPolicy.NEVER for e in truncate.values())
+
+
+def test_user_entries_are_flagging_only():
+    from astralint.resolver.models import ApplyPolicy, ReferenceSource
+
+    user = [e for e in REGISTRY if ReferenceSource.USER in e.sources]
+    attrs = {e.attribute for e in user}
+    assert {"UNITS", "DOI", "PI_name", "TEXT"} <= attrs
+    assert all(e.auto_apply == ApplyPolicy.NEVER for e in user)

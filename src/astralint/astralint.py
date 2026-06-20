@@ -121,29 +121,23 @@ def init(force: bool = False):
 
 
 def _fix_hint(loaded: list[tuple[Path, File, ValidationResultGroup]]) -> str | None:
-    """Summarise how many findings `astralint fix` can address, across CDF files.
+    """Summarise how the resolver can address findings, across CDF files.
 
-    Counts the resolver's proposed fixes (auto vs staged) without applying
+    Counts proposed fixes by disposition (auto / staged / user) without applying
     anything. Returns None when there is nothing to offer.
     """
-    auto = staged = 0
+    counts = {"auto": 0, "staged": 0, "user": 0}
     for _path, file, result in loaded:
         if file.extension != "cdf":  # the fix command operates on CDF only
             continue
         for fix in resolve(file, result.failures_only()):
-            if fix.auto:
-                auto += 1
-            else:
-                staged += 1
-    if not (auto or staged):
+            counts[fix.disposition] += 1
+    if not any(counts.values()):
         return None
     cdf_paths = [p for p, file, _ in loaded if file.extension == "cdf"]
     target = str(cdf_paths[0]) if len(cdf_paths) == 1 else "<file>"
-    parts = []
-    if auto:
-        parts.append(f"{auto} auto-fixable")
-    if staged:
-        parts.append(f"{staged} need review")
+    labels = (("auto", "auto-fixable"), ("staged", "need review"), ("user", "need your input"))
+    parts = [f"{counts[key]} {label}" for key, label in labels if counts[key]]
     return f"{', '.join(parts)} — run: astralint fix {target}"
 
 
@@ -298,6 +292,12 @@ def _fix_line(fx: Fix, *, staged: bool) -> str:
     )
 
 
+def _user_line(fx: Fix) -> str:
+    """Render a value-less 'needs your input' fix (no value to show)."""
+    target = escape(fx.target_path)
+    return f"  [magenta]{escape(fx.attribute)}[/] {target} [dim]— {escape(fx.provenance_note)}[/]"
+
+
 @app.command()
 def fix(
     path: Path,
@@ -343,10 +343,16 @@ def fix(
     else:
         console.print("No auto-applicable fixes found.")
 
-    if convergence.staged:
-        console.print(f"\n[bold]Staged suggestions ({len(convergence.staged)}) — need review:[/]")
-        for fx in convergence.staged:
+    review = [fx for fx in convergence.staged if fx.disposition == "staged"]
+    needs_input = [fx for fx in convergence.staged if fx.disposition == "user"]
+    if review:
+        console.print(f"\n[bold]Staged suggestions ({len(review)}) — need review:[/]")
+        for fx in review:
             console.print(_fix_line(fx, staged=True))
+    if needs_input:
+        console.print(f"\n[bold]Need your input ({len(needs_input)}) — cannot be auto-filled:[/]")
+        for fx in needs_input:
+            console.print(_user_line(fx))
 
     console.print(
         f"\n[dim]iterations={convergence.iterations} stopped={convergence.stopped_reason} "
