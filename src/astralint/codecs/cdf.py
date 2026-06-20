@@ -41,6 +41,19 @@ def _to_data_type(cdf_dtype: CDFDataType) -> DataType:
     return type_mapping.get(cdf_dtype, DataType.NONE)
 
 
+def _compression_name(item) -> str:
+    """The compression type name, tolerating an unknown CompressionType code.
+
+    pycdfpp raises ``ValueError`` when ``.compression`` carries a code its enum
+    doesn't know (malformed or newer-than-our-pycdfpp file); a single bad field
+    shouldn't abort the whole load — fall back to a placeholder.
+    """
+    try:
+        return item.compression.name
+    except ValueError:
+        return "UNKNOWN"
+
+
 @singledispatch
 def _parse_attribute(attr) -> Attribute:
     raise NotImplementedError(f"Unsupported attribute type: {type(attr)}")
@@ -73,7 +86,7 @@ def _parse_variable(var: CDFVariable) -> Variable:
         name=var.name,
         shape=list(var.shape),
         attributes={name: _parse_attribute(attr) for name, attr in var.attributes.items()},
-        compression=var.compression.name,
+        compression=_compression_name(var),
         record_variance=not var.is_nrv,
         data_type=_to_data_type(var.type),
     )
@@ -99,7 +112,7 @@ class CdfCodec(Codec):
             return File(
                 extension="cdf",
                 filename=fname,
-                compression=cdf.compression.name,
+                compression=_compression_name(cdf),
                 attributes={name: _parse_attribute(attr) for name, attr in cdf.attributes.items()},
                 variables={name: _parse_variable(var) for name, var in cdf.items()},
             )
