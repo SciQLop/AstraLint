@@ -21,15 +21,17 @@ try:
 
         assert len(list_all_suites()) > 0
 
-    @pytest.mark.driver_timeout(60 * 2)
-    @copy_files_to_pyodide(
-        file_list=[(_FILE_PATH, _DEST_PATH)], install_wheels=True, recurse_directories=True
-    )
+    @pytest.mark.driver_timeout(60 * 4)
     @run_in_pyodide(packages=["micropip"])
     async def test_resolver_mutation_under_pyodide(selenium):
-        # Validates that the resolver's mutation surface works in the browser:
-        # pycdfpp.save / add_attribute / set_value (used by apply_fixes/converge)
-        # must be available in the emscripten build for an in-browser auto-fixer.
+        # Validates the in-browser auto-fixer: that the resolver runs AND that
+        # pycdfpp's mutation surface (CDF/save/add_attribute, used by
+        # apply_fixes/converge) works under emscripten. Installs astralint from
+        # PyPI — the same path the online demo uses — rather than the local wheel.
+        import micropip
+
+        await micropip.install("astralint")
+
         import numpy as np
         import pycdfpp
 
