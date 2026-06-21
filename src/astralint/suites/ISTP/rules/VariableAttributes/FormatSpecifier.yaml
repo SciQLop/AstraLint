@@ -6,10 +6,14 @@ severity: WARNING
 suite: ISTP
 
 assertions:
-  # Common Fortran formats: F, E, I, A, G followed by width and optional decimal places
+  # Fortran edit descriptor: optional scale factor (nP) and/or repeat count, then a
+  # descriptor letter — A/I/E/F/D/G plus Z (hex) — width, and optional decimals.
+  # Fortran is case-insensitive, so lowercase ("f12.8", "a5") and forms like
+  # "1PE9.2" or "Z10.8" are valid. Width is still required (widthless "I"/"F"/"B"
+  # remain non-conformant per the doc's "F10.3"-style examples).
   - path: "variables/.*/attributes/FORMAT/values/[0-9]*"
     check: matches
     error_if_no_match: false
-    pattern: "^[AIEFDG]\\d+(\\.\\d+)?$"
+    pattern: "(?i)^\\s*(\\d+p)?\\d*[aiefdgz]\\d+(\\.\\d+)?\\s*$"
     message: "{% if valid %}Attribute FORMAT of {{ variable }} has value '{{ value }}'{% else %}Attribute FORMAT of {{ variable }} has value '{{ value }}', expected a valid Fortran format specifier (e.g., F10.2, E12.4, I5, A20, G13.6){% endif %}"
 

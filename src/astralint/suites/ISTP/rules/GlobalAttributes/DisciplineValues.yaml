@@ -6,14 +6,15 @@ severity: WARNING
 suite: ISTP
 
 assertions:
+  # The ISTP doc only enumerates the *space-physics* subset ("The list for space
+  # physics is: …"), so real values like "Planetary Physics>…", "Solar Physics>…"
+  # or "Heliospheric Physics>…" are valid disciplines it doesn't list. Validate the
+  # SPASE "Discipline>Subdiscipline" structure (one or more ">"-separated capitalised
+  # terms) rather than an inevitably-incomplete allow-list; the full controlled
+  # vocabulary lives in the SPASE base model.
   - path: "attributes/Discipline/values/[0-9]*"
-    check: in
+    check: matches
     error_if_no_match: false
-    values:
-      - "Solar Physics>Heliospheric Physics"
-      - "Space Physics>Interplanetary Studies"
-      - "Space Physics>Magnetospheric Science"
-      - "Space Physics>Ionospheric Science"
-      - "Space Physics>Astrophysics Science"
-    message: "Discipline should use a standard ISTP value (e.g., 'Space Physics>Magnetospheric Science')"
+    pattern: "^[A-Z][A-Za-z ]*(>[A-Z][A-Za-z ]*)+$"
+    message: "{% if valid %}Attribute Discipline has value '{{ value }}'{% else %}Discipline should follow the SPASE 'Discipline>Subdiscipline' form, e.g. 'Space Physics>Magnetospheric Science' (the ISTP doc lists only the space-physics subset; see the SPASE controlled vocabulary for the full list){% endif %}"
 
