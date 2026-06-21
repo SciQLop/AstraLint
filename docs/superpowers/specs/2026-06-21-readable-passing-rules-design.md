@@ -72,10 +72,10 @@ In `base/yaml_rules/assertions/combinations.py`, on the **success path only**:
 - **`AllOf`** → return a `ValidationResultGroup` of its sub-results instead of one generic
   summary leaf (mirrors what `IfThen` already does today). This lets
   "Bx_gse has all required data attributes" survive to the report.
-- **`AnyOf`** → return the **passing** sub-result (the member that actually satisfied it),
-  not a generic "at least one passed" leaf. (Implementation note: `AnyOf` already returns
-  early on the first passing `result`; return that `result` itself instead of a synthesized
-  summary leaf.)
+- **`AnyOf`** → keep its single leaf (it already renders the rule's own `message`, e.g.
+  "Data variable must have LABLAXIS or LABL_PTR_1"), but stamp on it the **target/value of
+  the alternative that actually passed** (e.g. `Bx_gse/LABLAXIS`), so the reader sees which
+  branch satisfied it. This stays one leaf — no count change.
 - **`OneOf` / `AtLeast` / `AtMost` / `Exactly`** → unchanged: keep their single summary
   leaf, because their meaning *is* the count ("exactly 1 passed"). They get a reference
   stamped at render time like every other leaf.
@@ -103,9 +103,12 @@ it yields the flat list of *display leaves* by:
   as `✔ :` — it renders as `✔ ISTP-VA-002`. (Console's `_collect_findings` already carries
   the nearest reference down; this generalizes it and applies it to the tree renderers, not
   just the quiet view.)
-- **Dropping pure-noise leaves on the pass path**: `SKIPPED` "Condition not met" leaves and
-  the `INFO` "… did not match any values (not required)" leaves. These mean "nothing to
-  check here", not "a valid member".
+- **Dropping pure-noise leaves on the pass path**: `SKIPPED` "Condition not met" leaves (by
+  severity) and the "… did not match any values (not required)" leaves (by the no-match
+  message marker — **not** by INFO severity, since `ProposalAttributes` is a genuine
+  `severity: INFO` rule whose real passing members must survive). These mean "nothing to
+  check here", not "a valid member". This is a **display-time** drop: it does not change the
+  stat-card counts (the leaves remain counted but unlisted).
 - Preserving the `target` and `value` the real assertion leaves already carry.
 
 Rendered result, per passing rule:
@@ -137,11 +140,12 @@ shared.
   resolver convergence tests are a second guard.
 - **Resolver and `failures_only()`** walk only failing leaves, so they are untouched once
   the above holds.
-- **Counts shift on the pass path, by design.** `_count_stats` (HTML stat cards) and
-  `count_by_severity` (console verdict's INFO count) count leaves; an `all_of` that was 1
-  "passed" leaf becomes N. This is more accurate but is a visible number change; tests that
-  assert old counts are updated as intended changes, not silently. The verdict's
-  error/warning counts do not move (no failures on the pass path).
+- **Counts shift only from the `AllOf` expansion, by design.** `_count_stats` (HTML stat
+  cards) and `count_by_severity` count leaves; an `all_of` that was 1 "passed" leaf becomes
+  N. This is more accurate but is a visible number change; tests that assert old counts are
+  updated as intended changes, not silently. `AnyOf` stays 1 leaf (no change), and the
+  display-time noise drop does not touch counts. The verdict's error/warning counts do not
+  move (no failures on the pass path).
 - **Tests asserting the old generic strings** ("All assertions in 'all_of' passed
   successfully", etc.) are updated, since removing that text is the point.
 
@@ -167,6 +171,7 @@ visual judgement, including the "(not required)" drop.
 
 ## Open sub-decision (defer to visual output)
 
-Dropping the "(not required)" `INFO` leaves also removes them from the console verdict's
-INFO count. The user will judge on the rendered output whether to drop them entirely or
-keep them counted-but-unlisted.
+The "(not required)" leaves are dropped at **display time** only, so they stay in the
+stat-card "passed"/"total" counts but no longer render as green lines. The user will judge
+on the rendered output whether that is right, or whether they'd rather these be removed from
+the tree entirely (which would lower the counts to match).
