@@ -82,3 +82,44 @@ def test_any_of_pass_reports_the_passing_alternative_target():
     assert result.valid
     assert result.message == "must have LABLAXIS or LABL_PTR_1"
     assert "LABLAXIS" in result.target
+
+
+from astralint.reports._findings import display_children, is_internal_wrapper
+
+
+def test_display_children_flattens_stamps_reference_and_drops_noise():
+    skipped = ValidationResult(
+        valid=True, reference="", severity=Severity.SKIPPED,
+        message="Condition not met, assertion skipped.", target="",
+    )
+    not_required = ValidationResult(
+        valid=True, reference="", severity=Severity.INFO,
+        message="DOI did not match any values (not required)", target="DOI",
+    )
+    real = ValidationResult(
+        valid=True, reference="", severity=Severity.ERROR,
+        message="Data_type is valid", target="Data_type", value="L2>level 2",
+    )
+    wrapper = ValidationResultGroup(
+        name="Matches", rule_reference="", severity=Severity.ERROR,
+        results=[real, skipped, not_required],
+    )
+    rule = ValidationResultGroup(
+        name="DataTypeFormat", rule_reference="ISTP-GA-006", severity=Severity.ERROR,
+        results=[wrapper], url="http://example/doc",
+    )
+    children = display_children(rule)
+    assert all(isinstance(c, ValidationResult) for c in children)
+    assert [c.message for c in children] == ["Data_type is valid"]
+    assert children[0].reference == "ISTP-GA-006"  # stamped from the rule group
+
+
+def test_is_internal_wrapper():
+    assert is_internal_wrapper(
+        ValidationResultGroup(name="all_of", rule_reference="", severity=Severity.ERROR, results=[])
+    )
+    assert not is_internal_wrapper(
+        ValidationResultGroup(
+            name="r", rule_reference="ISTP-GA-006", severity=Severity.ERROR, results=[]
+        )
+    )
