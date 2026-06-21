@@ -28,7 +28,7 @@ try:
         # pycdfpp's mutation surface (CDF/save/add_attribute, used by
         # apply_fixes/converge) works under emscripten. Installs astralint from
         # PyPI — the same path the online demo uses — rather than the local wheel.
-        import micropip
+        import micropip  # type: ignore
 
         await micropip.install("astralint")
 
