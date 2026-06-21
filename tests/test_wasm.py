@@ -24,13 +24,24 @@ try:
     @pytest.mark.driver_timeout(60 * 4)
     @run_in_pyodide(packages=["micropip"])
     async def test_resolver_mutation_under_pyodide(selenium):
-        # Validates the in-browser auto-fixer: that the resolver runs AND that
-        # pycdfpp's mutation surface (CDF/save/add_attribute, used by
-        # apply_fixes/converge) works under emscripten. Installs astralint from
-        # PyPI — the same path the online demo uses — rather than the local wheel.
+        # Validates the in-browser auto-fixer the same way the online demo runs:
+        # install astralint + pycdfpp from PyPI, exercise resolve (read-only) and
+        # converge (mutation -> pycdfpp save/add_attribute under emscripten). The
+        # assertion message carries a diagnostic (which astralint is active) if
+        # the resolver subpackage is somehow absent.
+        import os
+
         import micropip  # type: ignore
 
-        await micropip.install("astralint")
+        await micropip.install(["astralint", "pycdfpp"])
+
+        import astralint
+
+        pkg_dir = os.path.dirname(astralint.__file__)
+        version = getattr(astralint, "__version__", "?")
+        assert "resolver" in os.listdir(pkg_dir), (
+            f"astralint {version} at {pkg_dir} has no resolver: {sorted(os.listdir(pkg_dir))}"
+        )
 
         import numpy as np
         import pycdfpp
@@ -50,10 +61,8 @@ try:
         assert suite is not None
         file = CdfCodec.load(data)
         assert file is not None
-        # read-only proposal path (metadata only)
-        assert isinstance(resolve(file, suite.run(file).failures_only()), list)
-        # mutation path: add/set attributes + save back to bytes
-        report, out = converge(data, suite, max_iter=3, filename="x.cdf")
+        assert isinstance(resolve(file, suite.run(file).failures_only()), list)  # read-only path
+        report, out = converge(data, suite, max_iter=3, filename="x.cdf")  # mutation path
         assert isinstance(out, bytes)
 
 
