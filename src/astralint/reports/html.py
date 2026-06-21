@@ -5,6 +5,7 @@ from jinja2 import Template
 from markupsafe import Markup
 
 from ..base import Severity, ValidationResult, ValidationResultGroup
+from ._findings import display_children
 
 _REPORT_CSS = """
         .alr { /* scope all report styles */ }
@@ -401,37 +402,12 @@ def _render_item(item: ValidationResult | ValidationResultGroup) -> Markup:
     return Markup(
         template.render(
             group=item,
-            children=_display_children(item),
+            children=display_children(item),
             all_valid=_is_all_valid(item),
             render_item=_render_item,
             doc_url=_safe_doc_url(item.url),
         )
     )
-
-
-def _is_internal_wrapper(group: ValidationResultGroup) -> bool:
-    """An internal per-assertion ``…Assertion``/``IfThen`` wrapper, as opposed to a
-    rule group (has a ``rule_reference``) or a per-file/suite group (carries a
-    ``message`` and/or ``url``). Only these are flattened away."""
-    return not group.rule_reference and not group.message and not group.url
-
-
-def _display_children(
-    group: ValidationResultGroup,
-) -> list[ValidationResult | ValidationResultGroup]:
-    """Children to render directly under ``group``.
-
-    Internal wrapper groups are flattened away so a rule's findings render directly
-    beneath it instead of under a noisy extra layer, while real groupings (rule
-    groups and per-file suite groups) are preserved.
-    """
-    items: list[ValidationResult | ValidationResultGroup] = []
-    for child in group.results:
-        if isinstance(child, ValidationResultGroup) and _is_internal_wrapper(child):
-            items.extend(_display_children(child))
-        else:
-            items.append(child)
-    return items
 
 
 def _render_report(template_str: str, results: ValidationResultGroup) -> str:

@@ -79,10 +79,13 @@ def test_internal_assertion_wrapper_is_flattened():
     assert "ISTP-GA-006" in html
 
 
-def test_no_stray_colon_prefix_for_empty_reference():
+def test_leaf_gets_rule_reference_stamped():
     html = generate_html_fragment(_rule_with_wrapper())
-    # The leaf has no reference, so its message must not be prefixed with ": ".
-    assert "</span>: <span" not in html.replace("\n", "")
+    # The leaf has no reference of its own, but display_children stamps the enclosing
+    # rule reference (ISTP-GA-006) onto it. The template then renders
+    # <span class="reference">ISTP-GA-006</span>: <span class="message">…
+    # so the colon separator is correct (not stray) and the message follows.
+    assert '<span class="reference">ISTP-GA-006</span>' in html.replace("\n", "")
     assert "Data_type must follow format" in html
 
 
