@@ -1746,10 +1746,12 @@ def test_all_of_custom_message(mock_file):
 
 
 def test_all_of_custom_message_on_success(mock_file):
-    """AllOf with custom message should use it when all assertions pass."""
+    """AllOf on the success path now returns a group preserving each member's result.
+    The all_of-level message template is not rendered (pass path is a group, not a leaf);
+    the individual member results are preserved instead."""
     from pydantic import TypeAdapter
 
-    from astralint.base.validation_result import Severity
+    from astralint.base.validation_result import Severity, ValidationResultGroup
     from astralint.base.yaml_rules.assertions.base import get_assertion_union
 
     rule_yaml = {
@@ -1768,4 +1770,6 @@ def test_all_of_custom_message_on_success(mock_file):
     assertion = adapter.validate_python(rule_yaml)
     result = assertion.evaluate(mock_file, Severity.ERROR)
     assert result.valid
-    assert result.message == "All checks passed"
+    assert isinstance(result, ValidationResultGroup)
+    assert result.name == "all_of"
+    assert len(result.results) == 1

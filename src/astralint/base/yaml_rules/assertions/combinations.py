@@ -128,7 +128,8 @@ class AllOf(BaseAssertionGroup):
     model_config = ConfigDict(frozen=True)
     check: Literal["all_of"] = "all_of"  # type: ignore[assignment]
 
-    def evaluate(self, file: File, severity: Severity) -> ValidationResult:
+    def evaluate(self, file: File, severity: Severity) -> ValidationResult | ValidationResultGroup:
+        results: list[ValidationResult | ValidationResultGroup] = []
         for assertion in self.assertions:
             result = assertion.evaluate(file, severity)
             if not result.valid:
@@ -141,12 +142,11 @@ class AllOf(BaseAssertionGroup):
                     message=self._result_message(False, message),
                     target=target,
                 )
-        return ValidationResult(
-            valid=True,
-            reference="",
-            severity=severity,
-            message=self._result_message(True, "All assertions in 'all_of' passed successfully."),
-            target="",
+            results.append(result)
+        # Pass path: preserve each member's result so the report can show which
+        # value/member was validated (an internal wrapper group the reporter flattens).
+        return ValidationResultGroup(
+            name="all_of", rule_reference="", results=results, severity=severity
         )
 
 
