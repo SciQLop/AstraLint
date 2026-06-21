@@ -625,7 +625,19 @@ def astralint_version() -> str:
     except PackageNotFoundError:
         return "unknown"
 
-def _converge_to_json(data: bytes, filename: str, suite_name: str) -> str:
+def list_rules(suite_name: str = "ISTP") -> str:
+    """JSON list of the suite's rules, for the advanced rule-selection panel."""
+    import json
+    suite = get_suite(suite_name)
+    if suite is None:
+        return json.dumps({"error": f'Suite "{suite_name}" not found'})
+    return json.dumps([
+        {"reference": r.reference, "name": r.name,
+         "description": r.description, "severity": r.severity.value}
+        for r in suite.rules
+    ])
+
+def _converge_to_json(data: bytes, filename: str, suite_name: str, ignore_json: str = "[]") -> str:
     """Run the auto-fixer (auto fixes only) and return base64 bytes + counts."""
     import base64
     import json
@@ -636,7 +648,8 @@ def _converge_to_json(data: bytes, filename: str, suite_name: str) -> str:
     if suite is None:
         return json.dumps({"error": f'Suite "{suite_name}" not found'})
     try:
-        report, fixed = converge(bytes(data), suite, filename=filename)
+        ignore = json.loads(ignore_json) or None
+        report, fixed = converge(bytes(data), suite, filename=filename, ignore=ignore)
     except Exception as e:
         import traceback
         return json.dumps({"error": str(e), "trace": traceback.format_exc()})
@@ -646,15 +659,15 @@ def _converge_to_json(data: bytes, filename: str, suite_name: str) -> str:
         "remaining_errors": report.remaining_errors,
     })
 
-def fix_file_bytes(data: bytes, filename: str, suite_name: str = "ISTP") -> str:
-    return _converge_to_json(data, filename, suite_name)
+def fix_file_bytes(data: bytes, filename: str, suite_name: str = "ISTP", ignore_json: str = "[]") -> str:
+    return _converge_to_json(data, filename, suite_name, ignore_json)
 
-def fix_file_url(url: str, suite_name: str = "ISTP") -> str:
+def fix_file_url(url: str, suite_name: str = "ISTP", ignore_json: str = "[]") -> str:
     from astralint.base.codec import get_remote_file
     filename = url.rstrip("/").split("/")[-1] or "file.cdf"
-    return _converge_to_json(get_remote_file(url), filename, suite_name)
+    return _converge_to_json(get_remote_file(url), filename, suite_name, ignore_json)
 
-def validate_file_bytes(data: bytes, filename: str, suite_name: str = "ISTP") -> str:
+def validate_file_bytes(data: bytes, filename: str, suite_name: str = "ISTP", ignore_json: str = "[]") -> str:
     """Validate file from bytes (for local file uploads)."""
     try:
         # Get the appropriate codec based on file extension
@@ -669,7 +682,8 @@ def validate_file_bytes(data: bytes, filename: str, suite_name: str = "ISTP") ->
         if suite is None:
             return f'<div class="status error">Suite "{suite_name}" not found. Available: {list_all_suites()}</div>'
 
-        results = suite.run(file)
+        import json
+        results = suite.run(file, ignore=json.loads(ignore_json) or None)
         return _fix_preview(file, results) + generate_html_fragment(results)
 
     except Exception as e:
@@ -677,7 +691,7 @@ def validate_file_bytes(data: bytes, filename: str, suite_name: str = "ISTP") ->
         tb = traceback.format_exc()
         return f'<div class="status error">Error processing {filename}: {str(e)}<pre style="font-size:0.75rem;margin-top:1rem;text-align:left;overflow-x:auto;">{tb}</pre></div>'
 
-def validate_file_url(url: str, suite_name: str = "ISTP") -> str:
+def validate_file_url(url: str, suite_name: str = "ISTP", ignore_json: str = "[]") -> str:
     """Validate file directly from URL using codec's native URL loading."""
     try:
         # Load file directly from URL using the generic codec interface
@@ -690,7 +704,8 @@ def validate_file_url(url: str, suite_name: str = "ISTP") -> str:
         if suite is None:
             return f'<div class="status error">Suite "{suite_name}" not found. Available: {list_all_suites()}</div>'
 
-        results = suite.run(file)
+        import json
+        results = suite.run(file, ignore=json.loads(ignore_json) or None)
         return _fix_preview(file, results) + generate_html_fragment(results)
 
     except Exception as e:
