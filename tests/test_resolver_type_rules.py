@@ -129,6 +129,21 @@ def test_fillval_outside_range_none_without_validminmax():
     assert fillval_outside_range(f, "v", "FILLVAL", None) is None
 
 
+def test_fillval_outside_range_none_when_float32_default_quantizes_onto_validmin():
+    from astralint.resolver.sources.type_rules import fillval_outside_range
+
+    # Real MMS master case: VALIDMIN is float32(-1e31) (-9.999999848243207e+30).
+    # The -1e31 default looks below VALIDMIN in double precision, but once written
+    # as FLOAT32 it rounds right back onto VALIDMIN, so the "fix" would not clear
+    # VA-019. The resolver must recognise this and propose nothing.
+    import numpy as np
+
+    vmin = float(np.float32(-1e31))
+    assert (
+        fillval_outside_range(_var_with_range(vmin, 1e5, vmin), "v", "FILLVAL", None) is None
+    )
+
+
 def test_fillval_outside_range_unsigned_proposes_max():
     from astralint.resolver.sources.type_rules import fillval_outside_range
 

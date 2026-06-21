@@ -47,6 +47,18 @@ def _scalar(attr: Any) -> Any:
     return value
 
 
+def _as_stored(value: Any, data_type: DataType) -> Any:
+    """The value as it will actually be written to the variable, so the range
+    check matches the stored bits. FLOAT32 quantization can move the -1e31 default
+    onto a VALIDMIN that is itself float32(-1e31) — looking outside in double
+    precision while landing exactly on the boundary once stored."""
+    if data_type == DataType.FLOAT32:
+        import numpy as np
+
+        return float(np.float32(value))
+    return value
+
+
 def fillval_outside_range(
     file: File, variable: str | None, attribute: str, failure: ValidationResult | None
 ) -> ResolverOutput | None:
@@ -64,8 +76,9 @@ def fillval_outside_range(
     vmax = _scalar(var.attributes.get("VALIDMAX"))
     if vmin is None or vmax is None:
         return None
+    stored = _as_stored(default, var.data_type)
     try:
-        outside = default < vmin or default > vmax
+        outside = stored < vmin or stored > vmax
     except TypeError:
         return None  # non-order-comparable (e.g. an epoch16 tuple fill)
     if not outside:
