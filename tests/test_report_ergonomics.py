@@ -218,10 +218,17 @@ class TestHtmlFilterBox:
         html = generate_html(self._group())
         assert 'id="alr-filter"' in html
 
-    def test_html_has_failed_only_toggle(self):
+    def test_html_has_show_passed_toggle(self):
         html = generate_html(self._group())
-        assert 'id="alr-failed-only"' in html
+        assert 'id="alr-show-passed"' in html
+        assert "Show passed" in html
 
     def test_html_filter_script_present(self):
         html = generate_html(self._group())
         assert "applyFilter" in html
+
+    def test_html_defaults_to_failures_only(self):
+        # The filter runs on load so the report opens showing failures only;
+        # ticking "Show passed" reveals the rest.
+        html = generate_html(self._group())
+        assert "applyFilter();" in html
