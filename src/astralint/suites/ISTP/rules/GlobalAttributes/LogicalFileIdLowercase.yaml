@@ -1,0 +1,17 @@
+name: LogicalFileIdLowercase
+description: "Logical_file_id should preferably be all-lowercase"
+url: "https://istp-metadata.readthedocs.io/en/latest/source/filenaming-dataset-naming-recommendations.html"
+reference: "ISTP-GA-017"
+severity: WARNING
+suite: ISTP
+
+assertions:
+  # The ISTP file-naming recommendation: "Use all lower case filenames unless
+  # absolutely necessary, to avoid confusion with files that differ only by case."
+  # This is a preference, not a format requirement (the format check ISTP-GA-004 is
+  # case-insensitive), so an uppercase id is flagged softly here, not as an error.
+  - path: "attributes/Logical_file_id/values/[0-9]*"
+    check: matches
+    error_if_no_match: false
+    pattern: "^[^A-Z]*$"
+    message: "{% if valid %}Logical_file_id '{{ value }}' is lowercase{% else %}Logical_file_id '{{ value }}' should preferably be all-lowercase (ISTP recommends lowercase filenames unless absolutely necessary){% endif %}"

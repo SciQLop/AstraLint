@@ -8,12 +8,16 @@ suite: ISTP
 assertions:
   # logical_source + Date[time] + v + Data_version, per the ISTP File_naming_convention:
   # the date is yyyyMMdd, optionally followed by a time (HH/HHmm/HHmmss) with an
-  # optional "t" separator (sub-daily/burst files), and Data_version may be dotted
+  # optional "t"/"T" separator (sub-daily/burst files), and Data_version may be dotted
   # (matching ISTP-GA-005), e.g. "psp_isois_l2-summary_20180928_v07" or
   # "mms1_fpi_brst_l1b_des-moms-part_20170709104703_v3.3.0".
+  # Case-insensitive: the naming doc only *recommends* lowercase ("unless absolutely
+  # necessary"), so canonical uppercase ids like "AC_H2_SIS_20101105_V06" (ACE) or
+  # "GE_K0_CPI_19921231_V02" (Geotail) are well-formed, not malformed. The lowercase
+  # preference is a separate WARNING (ISTP-GA-017).
   - path: "attributes/Logical_file_id/values/[0-9]*"
     check: matches
-    pattern: "^[a-z0-9_-]+_\\d{8}(t?\\d{2,6})?(_v\\d+(\\.\\d+)*)?$"
+    pattern: "(?i)^[a-z0-9_-]+_\\d{8}([t]?\\d{2,6})?(_v\\d+(\\.\\d+)*)?$"
     message: "Logical_file_id should follow: logical_source_Date[time][_vData_version] format"
 
   - path: "attributes/Logical_file_id/values/[0-9]*"

@@ -6,17 +6,12 @@ severity: WARNING
 suite: ISTP
 
 assertions:
+  # The base display type may carry plotting parameters after ">" — the ISTP doc's
+  # own example uses "spectrogram>y=energy,z=Flux_H(*,1)". Match the base type
+  # (before any ">"), case-insensitively, tolerating surrounding whitespace.
   - path: "variables/.*/attributes/DISPLAY_TYPE/values/[0-9]*"
-    check: in
+    check: matches
     error_if_no_match: false
-    values:
-      - time_series
-      - spectrogram
-      - stack_plot
-      - image
-      - no_plot
-      - orbit
-      - plasmagram
-      - movie
-    message: "{% if valid %}Attribute DISPLAY_TYPE of {{ variable }} has value '{{ value }}'{% else %}Attribute DISPLAY_TYPE of {{ variable }} has value '{{ value }}', expected time_series, spectrogram, stack_plot, image, no_plot, orbit, plasmagram, or movie{% endif %}"
+    pattern: "(?i)^\\s*(time_series|spectrogram|stack_plot|image|no_plot|orbit|plasmagram|movie)\\s*(>.*)?$"
+    message: "{% if valid %}Attribute DISPLAY_TYPE of {{ variable }} has value '{{ value }}'{% else %}Attribute DISPLAY_TYPE of {{ variable }} has value '{{ value }}', expected time_series, spectrogram, stack_plot, image, no_plot, orbit, plasmagram, or movie (optionally followed by '>' plot parameters){% endif %}"
 
