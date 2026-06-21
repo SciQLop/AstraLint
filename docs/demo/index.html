@@ -765,6 +765,8 @@ def validate_file_url(url: str, suite_name: str = "ISTP", ignore_json: str = "[]
                 const badge = document.getElementById('version-badge');
                 if (badge) { badge.textContent = 'v' + version; badge.hidden = false; }
 
+                await populateRuleList(document.querySelector('input[name="suite"]:checked').value);
+
                 autoRunFromQuery();
 
                 // Tell an opener (e.g. the CDFpp WASM demo) we're ready to receive
@@ -841,15 +843,16 @@ def validate_file_url(url: str, suite_name: str = "ISTP", ignore_json: str = "[]
             try {
                 const suite = document.querySelector('input[name="suite"]:checked').value;
                 let resultJson;
+                pyodide.globals.set('fix_ignore', JSON.stringify(currentIgnore()));
                 if (lastBytes) {
                     pyodide.globals.set('fix_bytes', lastBytes);
                     pyodide.globals.set('fix_name', lastName || 'file.cdf');
                     pyodide.globals.set('fix_suite', suite);
-                    resultJson = await pyodide.runPythonAsync('fix_file_bytes(fix_bytes.to_py(), fix_name, fix_suite)');
+                    resultJson = await pyodide.runPythonAsync('fix_file_bytes(fix_bytes.to_py(), fix_name, fix_suite, fix_ignore)');
                 } else if (lastUrl) {
                     pyodide.globals.set('fix_url', lastUrl);
                     pyodide.globals.set('fix_suite', suite);
-                    resultJson = await pyodide.runPythonAsync('fix_file_url(fix_url, fix_suite)');
+                    resultJson = await pyodide.runPythonAsync('fix_file_url(fix_url, fix_suite, fix_ignore)');
                 } else {
                     return;
                 }
@@ -914,9 +917,10 @@ def validate_file_url(url: str, suite_name: str = "ISTP", ignore_json: str = "[]
                 pyodide.globals.set('file_bytes', uint8Array);
                 pyodide.globals.set('file_name', name);
                 pyodide.globals.set('selected_suite', suiteName || document.querySelector('input[name="suite"]:checked').value);
+                pyodide.globals.set('selected_ignore', JSON.stringify(currentIgnore()));
 
                 const html = await pyodide.runPythonAsync(`
-validate_file_bytes(file_bytes.to_py(), file_name, selected_suite)
+validate_file_bytes(file_bytes.to_py(), file_name, selected_suite, selected_ignore)
                 `);
 
                 results.innerHTML = html;
@@ -953,9 +957,10 @@ validate_file_bytes(file_bytes.to_py(), file_name, selected_suite)
                 // Pass URL directly to Python - codec handles the download
                 pyodide.globals.set('file_url', url);
                 pyodide.globals.set('selected_suite', document.querySelector('input[name="suite"]:checked').value);
+                pyodide.globals.set('selected_ignore', JSON.stringify(currentIgnore()));
 
                 const html = await pyodide.runPythonAsync(`
-validate_file_url(file_url, selected_suite)
+validate_file_url(file_url, selected_suite, selected_ignore)
                 `);
 
                 results.innerHTML = html;
@@ -1112,10 +1117,29 @@ validate_file_url(file_url, selected_suite)
                 }
             });
 
-            // Changing the suite re-runs the analysis on the loaded file automatically.
+            // Changing the suite repopulates the rule list (all enabled) and re-runs.
             document.querySelectorAll('input[name="suite"]').forEach((radio) => {
-                radio.addEventListener('change', revalidateCurrent);
+                radio.addEventListener('change', async () => {
+                    const suite = document.querySelector('input[name="suite"]:checked').value;
+                    await populateRuleList(suite);
+                    revalidateCurrent();
+                });
             });
+
+            // Toggling a rule (delegated) re-runs; Enable/Disable all set every box.
+            document.getElementById('rule-list').addEventListener('change', (e) => {
+                if (e.target.matches('input[type="checkbox"]')) {
+                    updateRuleCount();
+                    revalidateCurrent();
+                }
+            });
+            function setAllRules(on) {
+                document.querySelectorAll('#rule-list input[type="checkbox"]').forEach(cb => { cb.checked = on; });
+                updateRuleCount();
+                revalidateCurrent();
+            }
+            document.getElementById('rules-enable-all').addEventListener('click', () => setAllRules(true));
+            document.getElementById('rules-disable-all').addEventListener('click', () => setAllRules(false));
 
             // Accept a CDF handed off via postMessage (e.g. from the CDFpp WASM demo
             // for local files that can't be passed by ?url=). We replied 'astralint-ready'
