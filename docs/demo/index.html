@@ -731,27 +731,28 @@ def validate_file_url(url: str, suite_name: str = "ISTP") -> str:
             });
 
             const filterInput = document.getElementById('alr-filter');
-            const failedOnly = document.getElementById('alr-failed-only');
-            if (!filterInput || !failedOnly) return;
+            const showPassed = document.getElementById('alr-show-passed');
+            if (!filterInput || !showPassed) return;
 
             function applyFilter() {
                 const q = filterInput.value.toLowerCase();
-                const onlyFailed = failedOnly.checked;
+                const show = showPassed.checked;
                 document.querySelectorAll('.alr .result').forEach(r => {
                     const matchesText = !q || r.textContent.toLowerCase().includes(q);
-                    const matchesState = !onlyFailed || r.classList.contains('invalid');
+                    const matchesState = show || r.classList.contains('invalid');
                     r.style.display = (matchesText && matchesState) ? '' : 'none';
                 });
                 document.querySelectorAll('.alr .group').forEach(g => {
                     const visible = [...g.querySelectorAll('.result')]
                         .some(r => r.style.display !== 'none');
                     g.style.display = visible ? '' : 'none';
-                    if (visible && (q || onlyFailed)) g.classList.remove('collapsed');
+                    if (visible && (q || !show)) g.classList.remove('collapsed');
                 });
             }
 
             filterInput.addEventListener('input', applyFilter);
-            failedOnly.addEventListener('change', applyFilter);
+            showPassed.addEventListener('change', applyFilter);
+            applyFilter();  // default view: failures only (tick "Show passed" to reveal the rest)
         }
 
         // Trigger a browser download of base64-encoded bytes.

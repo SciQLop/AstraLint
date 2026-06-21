@@ -256,7 +256,7 @@ _REPORT_BODY = """
         <div class="filter-bar">
             <input type="search" id="alr-filter" placeholder="Filter results by text…" autocomplete="off">
             <label class="failed-toggle">
-                <input type="checkbox" id="alr-failed-only"> Show only failed
+                <input type="checkbox" id="alr-show-passed"> Show passed
             </label>
         </div>
 
@@ -278,22 +278,23 @@ _REPORT_BODY = """
 
         function applyFilter() {
             const q = document.getElementById('alr-filter').value.toLowerCase();
-            const failedOnly = document.getElementById('alr-failed-only').checked;
+            const showPassed = document.getElementById('alr-show-passed').checked;
             document.querySelectorAll('.alr .result').forEach(r => {
                 const matchesText = !q || r.textContent.toLowerCase().includes(q);
-                const matchesState = !failedOnly || r.classList.contains('invalid');
+                const matchesState = showPassed || r.classList.contains('invalid');
                 r.style.display = (matchesText && matchesState) ? '' : 'none';
             });
             document.querySelectorAll('.alr .group').forEach(g => {
                 const visible = [...g.querySelectorAll('.result')]
                     .some(r => r.style.display !== 'none');
                 g.style.display = visible ? '' : 'none';
-                if (visible && (q || failedOnly)) g.classList.remove('collapsed');
+                if (visible && (q || !showPassed)) g.classList.remove('collapsed');
             });
         }
 
         document.getElementById('alr-filter').addEventListener('input', applyFilter);
-        document.getElementById('alr-failed-only').addEventListener('change', applyFilter);
+        document.getElementById('alr-show-passed').addEventListener('change', applyFilter);
+        applyFilter();  // default view: failures only (tick "Show passed" to reveal the rest)
     </script>
 """
 
