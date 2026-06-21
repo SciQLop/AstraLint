@@ -6,10 +6,13 @@ severity: ERROR
 suite: ISTP
 
 assertions:
-  # Format: ABBREV>Full_Name (e.g., "GEOTAIL>Geomagnetic Tail")
+  # Format: ABBREV>Full_Name (e.g., "GEOTAIL>Geomagnetic Tail"). The doc requires
+  # "short and long names, separated by >", but does not mandate an UPPERCASE short
+  # name — real values are mixed-case (e.g. "Lanl-01A>..."). Mirror Descriptor/
+  # DataType formats which allow [A-Za-z].
   - path: "attributes/Source_name/values/[0-9]*"
     check: matches
-    pattern: "^[A-Z0-9_-]+>.+$"
+    pattern: "^[A-Za-z0-9_-]+>.+$"
     message: "Source_name must follow format: ABBREV>Full_Name (e.g., 'GEOTAIL>Geomagnetic Tail')"
 
   - path: "attributes/Source_name/values/[0-9]*"
