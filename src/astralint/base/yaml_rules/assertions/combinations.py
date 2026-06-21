@@ -108,6 +108,22 @@ def _first_failure(
     return None
 
 
+def _first_pass(
+    result: ValidationResult | ValidationResultGroup,
+) -> tuple[str, str] | None:
+    """The (target, value) of the first genuinely-passing leaf under ``result``.
+    Lets ``any_of`` name which alternative satisfied it."""
+    if isinstance(result, ValidationResultGroup):
+        for child in result.results:
+            found = _first_pass(child)
+            if found is not None:
+                return found
+        return None
+    if result.valid and result.severity != Severity.SKIPPED:
+        return result.target, result.value
+    return None
+
+
 class AllOf(BaseAssertionGroup):
     model_config = ConfigDict(frozen=True)
     check: Literal["all_of"] = "all_of"  # type: ignore[assignment]
@@ -143,6 +159,7 @@ class AnyOf(BaseAssertionGroup):
         for assertion in self.assertions:
             result = assertion.evaluate(file, severity)
             if result.valid:
+                target, value = _first_pass(result) or ("", "")
                 return ValidationResult(
                     valid=True,
                     reference="",
@@ -150,7 +167,8 @@ class AnyOf(BaseAssertionGroup):
                     message=self._result_message(
                         True, "At least one assertion in 'any_of' passed successfully."
                     ),
-                    target="",
+                    target=target,
+                    value=value,
                 )
             results.append(result)
         # All failed: surface the target only when every failing alternative points
