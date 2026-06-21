@@ -10,9 +10,9 @@ assertions:
   - path: "attributes/Logical_source/values/[0-9]*"
     check: matches
     pattern: "^[a-zA-Z0-9-]+_[a-zA-Z0-9_-]+_[a-zA-Z0-9_-]+$"
-    message: "Logical_source must follow format: source_descriptor_datatype (lowercase with underscores)"
+    message: "{% if valid %}Logical_source follows the source_descriptor_datatype format{% else %}Logical_source must follow format: source_descriptor_datatype (lowercase with underscores){% endif %}"
 
   - path: "attributes/Logical_source/values/[0-9]*"
     check: not_empty
-    message: "Logical_source cannot be empty"
+    message: "{% if valid %}Logical_source is present{% else %}Logical_source cannot be empty{% endif %}"
 

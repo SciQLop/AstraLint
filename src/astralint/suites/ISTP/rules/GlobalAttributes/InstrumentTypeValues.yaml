@@ -28,5 +28,5 @@ assertions:
       - "Particles (space)"
       - "Plasma and Solar Wind"
       - "Radio and Plasma Waves (space)"
-    message: "Instrument_type should use a standard ISTP value"
+    message: "{% if valid %}Instrument_type uses a standard ISTP value{% else %}Instrument_type should use a standard ISTP value{% endif %}"
 

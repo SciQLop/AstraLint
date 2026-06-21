@@ -10,9 +10,9 @@ assertions:
   - path: "attributes/Descriptor/values/[0-9]*"
     check: matches
     pattern: "^[A-Za-z0-9_-]+>.+$"
-    message: "Descriptor must follow format: ABBREV>Full_description"
+    message: "{% if valid %}Descriptor follows the ABBREV>Full_description format{% else %}Descriptor must follow format: ABBREV>Full_description{% endif %}"
 
   - path: "attributes/Descriptor/values/[0-9]*"
     check: not_empty
-    message: "Descriptor cannot be empty"
+    message: "{% if valid %}Descriptor is present{% else %}Descriptor cannot be empty{% endif %}"
 

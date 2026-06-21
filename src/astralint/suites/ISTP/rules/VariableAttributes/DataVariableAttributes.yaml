@@ -24,7 +24,7 @@ assertions:
             - VALIDMAX
           message: "{% if valid %}{{ variable }} has all required data attributes{% else %}{{ variable }} missing required attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
         - check: any_of
-          message: "Data variable must have LABLAXIS or LABL_PTR_1"
+          message: "{% if valid %}Data variable has LABLAXIS or LABL_PTR_1{% else %}Data variable must have LABLAXIS or LABL_PTR_1{% endif %}"
           assertions:
             - path: "variables/{var}/attributes/LABLAXIS"
               check: exists
@@ -33,7 +33,7 @@ assertions:
               check: exists
               message: ""
         - check: any_of
-          message: "Data variable must have UNITS or UNIT_PTR"
+          message: "{% if valid %}Data variable has UNITS or UNIT_PTR{% else %}Data variable must have UNITS or UNIT_PTR{% endif %}"
           assertions:
             - path: "variables/{var}/attributes/UNITS"
               check: exists

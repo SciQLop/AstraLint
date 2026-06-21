@@ -10,4 +10,4 @@ assertions:
     check: matches
     error_if_no_match: false
     pattern: "^\\d{8}$"
-    message: "Generation_date must use yyyymmdd format"
+    message: "{% if valid %}Generation_date uses yyyymmdd format{% else %}Generation_date must use yyyymmdd format{% endif %}"

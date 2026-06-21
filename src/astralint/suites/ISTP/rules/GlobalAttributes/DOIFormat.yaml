@@ -10,4 +10,4 @@ assertions:
     check: matches
     error_if_no_match: false
     pattern: "^https://doi\\.org/.+/.+$"
-    message: "DOI must be of the form https://doi.org/PREFIX/SUFFIX"
+    message: "{% if valid %}DOI uses the https://doi.org/PREFIX/SUFFIX form{% else %}DOI must be of the form https://doi.org/PREFIX/SUFFIX{% endif %}"
