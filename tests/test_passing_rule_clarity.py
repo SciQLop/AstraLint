@@ -89,29 +89,46 @@ from astralint.reports._findings import display_children, is_internal_wrapper
 
 def test_display_children_flattens_stamps_reference_and_drops_noise():
     skipped = ValidationResult(
-        valid=True, reference="", severity=Severity.SKIPPED,
-        message="Condition not met, assertion skipped.", target="",
+        valid=True,
+        reference="",
+        severity=Severity.SKIPPED,
+        message="Condition not met, assertion skipped.",
+        target="",
     )
     not_required = ValidationResult(
-        valid=True, reference="", severity=Severity.INFO,
-        message="DOI did not match any values (not required)", target="DOI",
+        valid=True,
+        reference="",
+        severity=Severity.INFO,
+        message="DOI did not match any values (not required)",
+        target="DOI",
     )
     real = ValidationResult(
-        valid=True, reference="", severity=Severity.ERROR,
-        message="Data_type is valid", target="Data_type", value="L2>level 2",
+        valid=True,
+        reference="",
+        severity=Severity.ERROR,
+        message="Data_type is valid",
+        target="Data_type",
+        value="L2>level 2",
     )
     wrapper = ValidationResultGroup(
-        name="Matches", rule_reference="", severity=Severity.ERROR,
+        name="Matches",
+        rule_reference="",
+        severity=Severity.ERROR,
         results=[real, skipped, not_required],
     )
     rule = ValidationResultGroup(
-        name="DataTypeFormat", rule_reference="ISTP-GA-006", severity=Severity.ERROR,
-        results=[wrapper], url="http://example/doc",
+        name="DataTypeFormat",
+        rule_reference="ISTP-GA-006",
+        severity=Severity.ERROR,
+        results=[wrapper],
+        url="http://example/doc",
     )
     children = display_children(rule)
     assert all(isinstance(c, ValidationResult) for c in children)
     assert [c.message for c in children] == ["Data_type is valid"]
-    assert children[0].reference == "ISTP-GA-006"  # stamped from the rule group
+    leaf = children[0]
+    assert isinstance(leaf, ValidationResult)
+    assert leaf.reference == "ISTP-GA-006"  # stamped from the rule group
 
 
 def test_is_internal_wrapper():
@@ -130,19 +147,30 @@ from astralint.reports.html import generate_html_fragment
 
 def _passing_rule_tree() -> ValidationResultGroup:
     real = ValidationResult(
-        valid=True, reference="", severity=Severity.ERROR,
-        message="Data_type is valid", target="Data_type", value="L2>level 2",
+        valid=True,
+        reference="",
+        severity=Severity.ERROR,
+        message="Data_type is valid",
+        target="Data_type",
+        value="L2>level 2",
     )
     not_required = ValidationResult(
-        valid=True, reference="", severity=Severity.INFO,
-        message="DOI did not match any values (not required)", target="DOI",
+        valid=True,
+        reference="",
+        severity=Severity.INFO,
+        message="DOI did not match any values (not required)",
+        target="DOI",
     )
     wrapper = ValidationResultGroup(
-        name="Matches", rule_reference="", severity=Severity.ERROR,
+        name="Matches",
+        rule_reference="",
+        severity=Severity.ERROR,
         results=[real, not_required],
     )
     return ValidationResultGroup(
-        name="DataTypeFormat", rule_reference="ISTP-GA-006", severity=Severity.ERROR,
+        name="DataTypeFormat",
+        rule_reference="ISTP-GA-006",
+        severity=Severity.ERROR,
         results=[wrapper],
     )
 
