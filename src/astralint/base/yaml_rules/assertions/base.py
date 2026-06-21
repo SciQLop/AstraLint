@@ -1,13 +1,23 @@
 import re
+from functools import lru_cache
 from typing import Annotated, Any, Union
 
-from jinja2 import Environment, TemplateError
+from jinja2 import Environment, Template, TemplateError
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ...file import File
 from ...validation_result import Severity, ValidationResult, ValidationResultGroup
 
 _jinja_env = Environment()
+
+
+@lru_cache(maxsize=512)
+def _compiled_template(template: str) -> Template:
+    # Rule message templates come from a small fixed set; compiling each once
+    # (instead of on every match) avoids tens of thousands of Jinja compilations
+    # on large files.
+    return _jinja_env.from_string(template)
+
 
 _TARGET_PATTERN = re.compile(
     r"^variables/(?P<var>[^/]+)/attributes/(?P<attr>[^/]+)"
@@ -18,7 +28,7 @@ _TARGET_PATTERN = re.compile(
 
 def render_message(template: str, context: dict) -> str:
     try:
-        return _jinja_env.from_string(template).render(context)
+        return _compiled_template(template).render(context)
     except TemplateError as e:
         return f"[template error: {e}] template: {template}"
 
@@ -60,8 +70,21 @@ import weakref
 _FLATTEN_CACHE: dict[int, list[tuple[str, Any]]] = {}
 
 
+# Indexes of flattened entries bucketed by variable name and by attribute name, so
+# a rule targeting a specific variable or attribute (the common case) scans only the
+# relevant slice instead of the whole file. Keyed on id(obj) and invalidated by the
+# same weakref as the flatten cache.
+_Indexes = tuple[
+    dict[str | None, list[tuple[str, Any]]],  # by variable name
+    dict[str | None, list[tuple[str, Any]]],  # by attribute name
+    list[tuple[str, Any]],  # the full flattened list
+]
+_INDEX_CACHE: dict[int, _Indexes] = {}
+
+
 def clear_flatten_cache() -> None:
     _FLATTEN_CACHE.clear()
+    _INDEX_CACHE.clear()
 
 
 def flatten_object(obj: Any) -> list[tuple[str, Any]]:
@@ -100,11 +123,75 @@ def flatten_object(obj: Any) -> list[tuple[str, Any]]:
     return results
 
 
+# The flattened path grammar is fixed (variable/attribute names never contain '/'),
+# so the variable and attribute segments sit at known indices.
+def _var_of_path(flat_path: str) -> str | None:
+    parts = flat_path.split("/", 2)
+    return parts[1] if len(parts) >= 2 and parts[0] == "variables" else None
+
+
+def _attr_of_path(flat_path: str) -> str | None:
+    parts = flat_path.split("/", 4)
+    if len(parts) >= 2 and parts[0] == "attributes":
+        return parts[1]
+    if len(parts) >= 4 and parts[0] == "variables" and parts[2] == "attributes":
+        return parts[3]
+    return None
+
+
+def _indexes(obj: Any) -> _Indexes:
+    key = id(obj)
+    cached = _INDEX_CACHE.get(key)
+    if cached is not None:
+        return cached
+    flattened = flatten_object(obj)
+    by_var: dict[str | None, list[tuple[str, Any]]] = {}
+    by_attr: dict[str | None, list[tuple[str, Any]]] = {}
+    for entry in flattened:
+        by_var.setdefault(_var_of_path(entry[0]), []).append(entry)
+        by_attr.setdefault(_attr_of_path(entry[0]), []).append(entry)
+    result: _Indexes = (by_var, by_attr, flattened)
+    try:
+        weakref.finalize(obj, _INDEX_CACHE.pop, key, None)
+        _INDEX_CACHE[key] = result
+    except TypeError:
+        pass
+    return result
+
+
+_REGEX_SPECIAL = re.compile(r"[.*+?^$()\[\]{}|\\]")
+
+
+def _literal(segment: str | None) -> str | None:
+    return segment if segment is not None and not _REGEX_SPECIAL.search(segment) else None
+
+
+def _candidates(obj: Any, path: str) -> list[tuple[str, Any]]:
+    """Narrow the entries a rule path can match. Any literal variable or attribute
+    name it pins means every match lives under that variable/attribute, so we scan
+    only that bucket. Prefer the variable bucket (one variable's attributes) — it is
+    the most selective; fall back to the attribute bucket, then the whole file."""
+    by_var, by_attr, flattened = _indexes(obj)
+    parts = path.split("/", 4)
+    if len(parts) >= 2 and parts[0] == "variables" and (var := _literal(parts[1])) is not None:
+        return by_var.get(var, [])
+    attr: str | None = None
+    if len(parts) >= 2 and parts[0] == "attributes":
+        attr = _literal(parts[1])
+    elif len(parts) >= 4 and parts[0] == "variables" and parts[2] == "attributes":
+        attr = _literal(parts[3])
+    return by_attr.get(attr, []) if attr is not None else flattened
+
+
+@lru_cache(maxsize=1024)
+def _anchored_regex(pattern: str) -> re.Pattern:
+    return re.compile("^" + pattern + "$")
+
+
 def resolve_path(obj: Any, path: str) -> list[tuple[str, Any]]:
     """Returns matching (path, value) pairs for a '/' separated path with regex support."""
-    flattened = flatten_object(obj)
-    rx = re.compile("^" + path + "$")
-    return list(filter(lambda kv: rx.match(kv[0]), flattened))
+    rx = _anchored_regex(path)
+    return [kv for kv in _candidates(obj, path) if rx.match(kv[0])]
 
 
 _CAPTURE_RE = re.compile(r"\{(\w+)(?::([^}]+))?\}")
@@ -129,10 +216,9 @@ def parse_captures(path: str) -> tuple[str, list[str]]:
 def resolve_path_with_captures(obj: Any, path: str) -> list[tuple[str, Any, dict[str, str]]]:
     """Like resolve_path but extracts captured values from {name} placeholders."""
     pattern, capture_names = parse_captures(path)
-    flattened = flatten_object(obj)
-    rx = re.compile("^" + pattern + "$")
+    rx = _anchored_regex(pattern)
     results: list[tuple[str, Any, dict[str, str]]] = []
-    for flat_path, value in flattened:
+    for flat_path, value in _candidates(obj, path):
         m = rx.match(flat_path)
         if m:
             captured = {name: m.group(name) for name in capture_names}
