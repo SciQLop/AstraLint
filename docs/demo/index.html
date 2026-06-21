@@ -535,7 +535,9 @@
                 status.innerHTML = '<div class="spinner"></div><span>Installing AstraLint...</span>';
                 await pyodide.loadPackage('micropip');
                 const micropip = pyodide.pyimport('micropip');
-                await micropip.install('astralint');
+                // Require >=0.7.0 so the resolver-backed "Proposed fixes" preview is
+                // present (and so micropip can't silently resolve to an older release).
+                await micropip.install('astralint>=0.7.0');
 
                 status.innerHTML = '<div class="spinner"></div><span>Initializing...</span>';
 
