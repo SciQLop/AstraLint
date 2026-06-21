@@ -9,6 +9,7 @@ from rich.text import Text
 from rich.tree import Tree
 
 from ..base import Severity, ValidationResult, ValidationResultGroup
+from ._findings import display_children
 
 _SEVERITY_COLOR = {
     Severity.ERROR: "red",
@@ -41,7 +42,8 @@ def _render_result(res: ValidationResult) -> Text:
         else "blue"
     )
 
-    text = Text.from_markup(f"{icon} [bold]{res.reference}[/]: {escape(res.message)}")
+    label = f"{res.reference}: " if res.reference else ""
+    text = Text.from_markup(f"{icon} [bold]{label}[/]{escape(res.message)}")
 
     # Severity only muddies passing lines; surface it only when the check failed (#11).
     if not res.valid:
@@ -69,8 +71,7 @@ def _render_group(group: ValidationResultGroup) -> Tree:
         header.append(group.url, style=f"dim link {group.url}")
 
     tree = Tree(header)
-    for item in group.results:
-        # This recursive call handles the nesting automatically
+    for item in display_children(group):
         tree.add(_render(item))
     return tree
 

@@ -152,3 +152,22 @@ def test_html_passing_rule_shows_reference_and_drops_not_required():
     assert "ISTP-GA-006" in html
     assert "Data_type is valid" in html
     assert "not required" not in html
+
+
+from rich.console import Console
+
+from astralint.reports.console import console_report
+
+
+def _render_to_text(tree: ValidationResultGroup) -> str:
+    console = Console(width=200, record=True, color_system=None)
+    console_report(tree, console)
+    return console.export_text()
+
+
+def test_console_show_passed_stamps_reference_and_drops_noise():
+    out = _render_to_text(_passing_rule_tree())
+    assert "ISTP-GA-006" in out
+    assert "Data_type is valid" in out
+    assert "not required" not in out
+    assert "✔ :" not in out  # no empty-reference leaf
