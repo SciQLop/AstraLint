@@ -6,12 +6,15 @@ severity: ERROR
 suite: ISTP
 
 assertions:
-  # logical_source + date + version. The short names embedded in logical_source
-  # may contain hyphens (e.g. "psp_isois_l2-summary_20180928_v07").
+  # logical_source + Date[time] + v + Data_version, per the ISTP File_naming_convention:
+  # the date is yyyyMMdd, optionally followed by a time (HH/HHmm/HHmmss) with an
+  # optional "t" separator (sub-daily/burst files), and Data_version may be dotted
+  # (matching ISTP-GA-005), e.g. "psp_isois_l2-summary_20180928_v07" or
+  # "mms1_fpi_brst_l1b_des-moms-part_20170709104703_v3.3.0".
   - path: "attributes/Logical_file_id/values/[0-9]*"
     check: matches
-    pattern: "^[a-z0-9_-]+_\\d{8}(_v\\d+)?$"
-    message: "Logical_file_id should follow: logical_source_YYYYMMDD[_vN] format"
+    pattern: "^[a-z0-9_-]+_\\d{8}(t?\\d{2,6})?(_v\\d+(\\.\\d+)*)?$"
+    message: "Logical_file_id should follow: logical_source_Date[time][_vData_version] format"
 
   - path: "attributes/Logical_file_id/values/[0-9]*"
     check: not_empty
