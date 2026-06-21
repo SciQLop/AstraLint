@@ -545,6 +545,45 @@ from astralint.base import get_suite, list_all_suites
 from astralint.base.codec import load_file, Codec
 from astralint.reports.html import generate_html_fragment
 
+_FIX_LABELS = {"auto": "Auto-fixable", "staged": "Needs review", "user": "Needs your input"}
+_FIX_COLORS = {"auto": "#16a34a", "staged": "#d97706", "user": "#9333ea"}
+
+def _fix_preview(file, results) -> str:
+    """A read-only preview of what 'astralint fix' would propose (CDF only)."""
+    import html as _html
+    if getattr(file, "extension", "") != "cdf":
+        return ""
+    try:
+        from astralint.resolver.engine import resolve
+        fixes = resolve(file, results.failures_only())
+    except Exception:
+        return ""  # older astralint without the resolver, or nothing to do
+    if not fixes:
+        return ""
+    groups = {"auto": [], "staged": [], "user": []}
+    for fx in fixes:
+        groups[fx.disposition].append(fx)
+    keys = [k for k in ("auto", "staged", "user") if groups[k]]
+    summary = " &middot; ".join(
+        f'<b style="color:{_FIX_COLORS[k]}">{len(groups[k])}</b> {_FIX_LABELS[k].lower()}' for k in keys
+    )
+    out = ['<div style="margin-top:1.5rem;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;">']
+    out.append(f'<div style="font-weight:600;margin-bottom:.25rem;">Proposed fixes — {summary}</div>')
+    out.append('<div style="font-size:.8rem;color:#6b7280;margin-bottom:.75rem;">'
+               'Preview only — run <code>astralint fix &lt;file&gt;</code> in the CLI to apply.</div>')
+    for k in keys:
+        out.append(f'<div style="margin-top:.5rem;font-weight:600;color:{_FIX_COLORS[k]}">'
+                   f'{_FIX_LABELS[k]} ({len(groups[k])})</div>')
+        out.append('<ul style="margin:.25rem 0 0;padding-left:1.25rem;font-size:.85rem;">')
+        for fx in groups[k][:50]:
+            val = "" if fx.value is None else f' = <code>{_html.escape(repr(fx.value))}</code>'
+            out.append(f'<li><b>{_html.escape(fx.attribute)}</b> '
+                       f'<span style="color:#6b7280">{_html.escape(fx.target_path)}</span>{val} '
+                       f'&mdash; {_html.escape(fx.provenance_note)}</li>')
+        out.append('</ul>')
+    out.append('</div>')
+    return "".join(out)
+
 def validate_file_bytes(data: bytes, filename: str, suite_name: str = "ISTP") -> str:
     """Validate file from bytes (for local file uploads)."""
     try:
@@ -561,7 +600,7 @@ def validate_file_bytes(data: bytes, filename: str, suite_name: str = "ISTP") ->
             return f'<div class="status error">Suite "{suite_name}" not found. Available: {list_all_suites()}</div>'
 
         results = suite.run(file)
-        return generate_html_fragment(results)
+        return generate_html_fragment(results) + _fix_preview(file, results)
 
     except Exception as e:
         import traceback
@@ -582,7 +621,7 @@ def validate_file_url(url: str, suite_name: str = "ISTP") -> str:
             return f'<div class="status error">Suite "{suite_name}" not found. Available: {list_all_suites()}</div>'
 
         results = suite.run(file)
-        return generate_html_fragment(results)
+        return generate_html_fragment(results) + _fix_preview(file, results)
 
     except Exception as e:
         import traceback
