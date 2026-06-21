@@ -123,3 +123,32 @@ def test_is_internal_wrapper():
             name="r", rule_reference="ISTP-GA-006", severity=Severity.ERROR, results=[]
         )
     )
+
+
+from astralint.reports.html import generate_html_fragment
+
+
+def _passing_rule_tree() -> ValidationResultGroup:
+    real = ValidationResult(
+        valid=True, reference="", severity=Severity.ERROR,
+        message="Data_type is valid", target="Data_type", value="L2>level 2",
+    )
+    not_required = ValidationResult(
+        valid=True, reference="", severity=Severity.INFO,
+        message="DOI did not match any values (not required)", target="DOI",
+    )
+    wrapper = ValidationResultGroup(
+        name="Matches", rule_reference="", severity=Severity.ERROR,
+        results=[real, not_required],
+    )
+    return ValidationResultGroup(
+        name="DataTypeFormat", rule_reference="ISTP-GA-006", severity=Severity.ERROR,
+        results=[wrapper],
+    )
+
+
+def test_html_passing_rule_shows_reference_and_drops_not_required():
+    html = generate_html_fragment(_passing_rule_tree())
+    assert "ISTP-GA-006" in html
+    assert "Data_type is valid" in html
+    assert "not required" not in html
