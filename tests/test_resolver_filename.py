@@ -53,3 +53,15 @@ def test_no_version_token_still_derives_id_and_source():
     src = logical_source_from_filename(f, None, "Logical_source", None)
     assert fid is not None and fid.value == "solo_l2_rpw_20220221"
     assert src is not None and src.value == "solo_l2_rpw"
+
+
+def test_mms_burst_timestamp_and_semver_filename():
+    # ISTP File_naming_convention allows yyyyMMdd + time and a dotted Data_version
+    # (e.g. MMS burst files); the parser must derive all three.
+    f = _file("mms1_fpi_brst_l1b_des-moms-part_20170709104703_v3.3.0.cdf")
+    fid = logical_file_id_from_filename(f, None, "Logical_file_id", None)
+    src = logical_source_from_filename(f, None, "Logical_source", None)
+    ver = data_version_from_filename(f, None, "Data_version", None)
+    assert fid is not None and fid.value == "mms1_fpi_brst_l1b_des-moms-part_20170709104703_v3.3.0"
+    assert src is not None and src.value == "mms1_fpi_brst_l1b_des-moms-part"
+    assert ver is not None and ver.value == "3.3.0"

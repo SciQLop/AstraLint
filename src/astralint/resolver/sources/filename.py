@@ -4,9 +4,14 @@ from ...base.file import File
 from ...base.validation_result import ValidationResult
 from ..models import ResolverOutput
 
-# ISTP filename stem: <logical_source>_<YYYYMMDD>[_vN]. logical_source is greedy
-# so the trailing date (and optional version) anchor the match.
-_STEM_RE = re.compile(r"^(?P<logical_source>[a-z0-9_-]+)_(?P<date>\d{8})(?:_v(?P<version>\d+))?$")
+# ISTP filename stem: <logical_source>_<Date[time]>[_v<Data_version>]. Per the ISTP
+# File_naming_convention the date is yyyyMMdd, optionally followed by a time
+# (HH/HHmm/HHmmss, optional "t" separator) for sub-daily files, and Data_version
+# may be dotted. logical_source is greedy so the trailing date/version anchor it.
+_STEM_RE = re.compile(
+    r"^(?P<logical_source>[a-z0-9_-]+)_(?P<date>\d{8}(?:t?\d{2,6})?)"
+    r"(?:_v(?P<version>\d+(?:\.\d+)*))?$"
+)
 
 
 def _stem(filename: str) -> str:
