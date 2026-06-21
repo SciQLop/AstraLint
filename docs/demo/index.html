@@ -914,6 +914,15 @@ validate_file_url(file_url, selected_suite)
             }
         }
 
+        // Re-validate the file already loaded, against the currently-checked suite.
+        // Wired to the suite radios so changing the suite re-runs analysis without a
+        // re-upload; a no-op until a file has been loaded.
+        function revalidateCurrent() {
+            if (!pyodide) return;
+            if (lastBytes) { validateBytes(lastBytes, lastName); }
+            else if (lastUrl) { processFileFromUrl(lastUrl); }
+        }
+
         // Deep-link support: ?url=<file>&suite=<SUITE> prefills and auto-validates.
         // Lets other tools (e.g. the CDFpp WASM demo) hand a CDF off to AstraLint.
         function autoRunFromQuery() {
@@ -999,6 +1008,11 @@ validate_file_url(file_url, selected_suite)
                 if (e.key === 'Enter' && pyodide) {
                     processFileFromUrl(urlInput.value);
                 }
+            });
+
+            // Changing the suite re-runs the analysis on the loaded file automatically.
+            document.querySelectorAll('input[name="suite"]').forEach((radio) => {
+                radio.addEventListener('change', revalidateCurrent);
             });
 
             // Accept a CDF handed off via postMessage (e.g. from the CDFpp WASM demo
