@@ -22,7 +22,7 @@ assertions:
             - FIELDNAM
           message: "{% if valid %}{{ variable }} has required support_data attributes{% else %}{{ variable }} missing required attribute(s): {{ missing_keys | join(', ') }}{% endif %}"
         - check: any_of
-          message: "Support_data variable must have LABLAXIS or LABL_PTR_1"
+          message: "{% if valid %}Support_data variable has LABLAXIS or LABL_PTR_1{% else %}Support_data variable must have LABLAXIS or LABL_PTR_1{% endif %}"
           assertions:
             - path: "variables/{var}/attributes/LABLAXIS"
               check: exists
@@ -41,7 +41,7 @@ assertions:
               - CDFEPOCH16
           then:
             check: any_of
-            message: "Support_data variable must have FORMAT or FORM_PTR"
+            message: "{% if valid %}Support_data variable has FORMAT or FORM_PTR{% else %}Support_data variable must have FORMAT or FORM_PTR{% endif %}"
             assertions:
               - path: "variables/{var}/attributes/FORMAT"
                 check: exists
@@ -60,7 +60,7 @@ assertions:
               - CDFEPOCH16
           then:
             check: any_of
-            message: "Support_data variable must have UNITS or UNIT_PTR"
+            message: "{% if valid %}Support_data variable has UNITS or UNIT_PTR{% else %}Support_data variable must have UNITS or UNIT_PTR{% endif %}"
             assertions:
               - path: "variables/{var}/attributes/UNITS"
                 check: exists

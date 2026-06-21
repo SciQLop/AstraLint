@@ -10,5 +10,5 @@ assertions:
   # prescribe a minimum length, so only emptiness is enforced as an error.
   - path: "attributes/TEXT/values/[0-9]*"
     check: not_empty
-    message: "TEXT global attribute cannot be empty - must describe the data"
+    message: "{% if valid %}TEXT global attribute is present{% else %}TEXT global attribute cannot be empty - must describe the data{% endif %}"
 

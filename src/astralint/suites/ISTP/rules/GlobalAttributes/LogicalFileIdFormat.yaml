@@ -18,9 +18,9 @@ assertions:
   - path: "attributes/Logical_file_id/values/[0-9]*"
     check: matches
     pattern: "(?i)^[a-z0-9_-]+_\\d{8}([t]?\\d{2,6})?(_v\\d+(\\.\\d+)*)?$"
-    message: "Logical_file_id should follow: logical_source_Date[time][_vData_version] format"
+    message: "{% if valid %}Logical_file_id follows the logical_source_Date[time][_vData_version] format{% else %}Logical_file_id should follow: logical_source_Date[time][_vData_version] format{% endif %}"
 
   - path: "attributes/Logical_file_id/values/[0-9]*"
     check: not_empty
-    message: "Logical_file_id cannot be empty"
+    message: "{% if valid %}Logical_file_id is present{% else %}Logical_file_id cannot be empty{% endif %}"
 

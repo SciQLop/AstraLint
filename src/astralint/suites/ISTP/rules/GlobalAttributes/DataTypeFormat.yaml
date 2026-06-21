@@ -11,9 +11,9 @@ assertions:
   - path: "attributes/Data_type/values/[0-9]*"
     check: matches
     pattern: "^[A-Za-z0-9_-]+>.+$"
-    message: "Data_type must follow format: ABBREV>Full_description (e.g., 'L2-Summary>level 2 summary')"
+    message: "{% if valid %}Data_type follows the ABBREV>Full_description format{% else %}Data_type must follow format: ABBREV>Full_description (e.g., 'L2-Summary>level 2 summary'){% endif %}"
 
   - path: "attributes/Data_type/values/[0-9]*"
     check: not_empty
-    message: "Data_type cannot be empty"
+    message: "{% if valid %}Data_type is present{% else %}Data_type cannot be empty{% endif %}"
 

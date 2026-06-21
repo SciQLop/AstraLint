@@ -13,9 +13,9 @@ assertions:
   - path: "attributes/Source_name/values/[0-9]*"
     check: matches
     pattern: "^[A-Za-z0-9_-]+>.+$"
-    message: "Source_name must follow format: ABBREV>Full_Name (e.g., 'GEOTAIL>Geomagnetic Tail')"
+    message: "{% if valid %}Source_name follows the ABBREV>Full_Name format{% else %}Source_name must follow format: ABBREV>Full_Name (e.g., 'GEOTAIL>Geomagnetic Tail'){% endif %}"
 
   - path: "attributes/Source_name/values/[0-9]*"
     check: not_empty
-    message: "Source_name cannot be empty"
+    message: "{% if valid %}Source_name is present{% else %}Source_name cannot be empty{% endif %}"
 

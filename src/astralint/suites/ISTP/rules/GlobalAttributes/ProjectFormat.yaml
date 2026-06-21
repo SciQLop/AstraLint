@@ -13,10 +13,10 @@ assertions:
     check: matches
     error_if_no_match: false
     pattern: "^[A-Za-z0-9_ -]+>.+$"
-    message: "Project must follow format: ABBREV>Full_Name (e.g., 'ISTP>International Solar-Terrestrial Physics')"
+    message: "{% if valid %}Project follows the ABBREV>Full_Name format{% else %}Project must follow format: ABBREV>Full_Name (e.g., 'ISTP>International Solar-Terrestrial Physics'){% endif %}"
 
   - path: "attributes/Project/values/[0-9]*"
     check: not_empty
     error_if_no_match: false
-    message: "Project cannot be empty"
+    message: "{% if valid %}Project is present{% else %}Project cannot be empty{% endif %}"
 
