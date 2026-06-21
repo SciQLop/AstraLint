@@ -203,6 +203,40 @@
 
         .suite-select input { display: none; }
 
+        .advanced-rules {
+            margin: 1rem 0 1.5rem;
+            border: 1px solid var(--color-border, #e2e8f0);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+        }
+        .advanced-rules > summary {
+            cursor: pointer;
+            font-weight: 600;
+            user-select: none;
+        }
+        .advanced-rules .rule-count { color: #6b7280; font-weight: 400; font-size: 0.85rem; }
+        .rule-actions { display: flex; gap: 0.5rem; margin: 0.75rem 0 0.5rem; }
+        .rule-action {
+            font-size: 0.8rem; padding: 0.25rem 0.6rem; cursor: pointer;
+            border: 1px solid var(--color-border, #e2e8f0); border-radius: 6px;
+            background: var(--color-card, #fff); color: var(--color-text, #1e293b);
+        }
+        .rule-list { max-height: 320px; overflow-y: auto; }
+        .rule-loading { color: #6b7280; font-size: 0.85rem; padding: 0.5rem 0; }
+        .rule-row {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.25rem 0; font-size: 0.85rem;
+        }
+        .rule-row .rule-ref { font-family: monospace; color: #6b7280; white-space: nowrap; }
+        .rule-row .rule-name { flex: 1; min-width: 0; }
+        .rule-row .severity {
+            font-size: 0.625rem; padding: 0.1rem 0.4rem; border-radius: 4px;
+            font-weight: 600; text-transform: uppercase; flex-shrink: 0;
+        }
+        .rule-row .severity.ERROR { background: #fee2e2; color: #991b1b; }
+        .rule-row .severity.WARNING { background: #fef3c7; color: #92400e; }
+        .rule-row .severity.INFO { background: #dbeafe; color: #1e40af; }
+
         .explorer-button {
             margin: 1.5rem 0 0;
             padding: 0.6rem 1.2rem;
@@ -469,6 +503,15 @@
                     <small>Metadata Recommendations for Solar Observations</small>
                 </label>
             </div>
+
+            <details class="advanced-rules" id="advanced-rules">
+                <summary>Advanced — rule selection <span id="rule-select-count" class="rule-count"></span></summary>
+                <div class="rule-actions">
+                    <button type="button" id="rules-enable-all" class="rule-action">Enable all</button>
+                    <button type="button" id="rules-disable-all" class="rule-action">Disable all</button>
+                </div>
+                <div id="rule-list" class="rule-list"><div class="rule-loading">loading rules…</div></div>
+            </details>
 
             <div class="upload-zone" id="upload-zone">
                 <input type="file" id="file-input">
@@ -927,6 +970,50 @@ validate_file_url(file_url, selected_suite)
             } finally {
                 loadBtn.disabled = false;
             }
+        }
+
+        // The ignore set = the references of the unchecked rule rows. The DOM is
+        // the single source of truth; there is no parallel JS state to drift.
+        function currentIgnore() {
+            return [...document.querySelectorAll('#rule-list input[type="checkbox"]')]
+                .filter(cb => !cb.checked)
+                .map(cb => cb.value);
+        }
+
+        function updateRuleCount() {
+            const boxes = [...document.querySelectorAll('#rule-list input[type="checkbox"]')];
+            const el = document.getElementById('rule-select-count');
+            if (el) el.textContent = `(${boxes.filter(b => b.checked).length} of ${boxes.length} enabled)`;
+        }
+
+        // Fetch the selected suite's rules from Pyodide and render a checkbox per rule
+        // (all enabled). Called when Pyodide is ready and on every suite change.
+        async function populateRuleList(suiteName) {
+            const list = document.getElementById('rule-list');
+            if (!list || !pyodide) return;
+            list.innerHTML = '<div class="rule-loading">loading rules…</div>';
+            pyodide.globals.set('rules_suite', suiteName);
+            let rules;
+            try {
+                rules = JSON.parse(await pyodide.runPythonAsync('list_rules(rules_suite)'));
+            } catch (e) {
+                rules = [];
+            }
+            if (!Array.isArray(rules)) rules = [];  // {error: …} shape -> empty
+            list.innerHTML = '';
+            for (const r of rules) {
+                const row = document.createElement('label');
+                row.className = 'rule-row';
+                row.title = r.description || '';
+                const cb = document.createElement('input');
+                cb.type = 'checkbox'; cb.checked = true; cb.value = r.reference;
+                const ref = document.createElement('span'); ref.className = 'rule-ref'; ref.textContent = r.reference;
+                const name = document.createElement('span'); name.className = 'rule-name'; name.textContent = r.name;
+                const sev = document.createElement('span'); sev.className = 'severity ' + r.severity; sev.textContent = r.severity;
+                row.append(cb, ref, name, sev);
+                list.appendChild(row);
+            }
+            updateRuleCount();
         }
 
         // Re-validate the file already loaded, against the currently-checked suite.
