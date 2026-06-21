@@ -59,6 +59,57 @@ def test_parse_captures_inner_groups():
     assert m.group("var") == "LFR_test"
 
 
+def test_resolve_path_bucketing_equals_full_scan():
+    """The variable/attribute bucketing in resolve_path_with_captures must return
+    exactly what a brute-force regex scan over the whole flattened file would."""
+    from astralint.base.file import Attribute, DataType, File, Variable
+    from astralint.base.yaml_rules.assertions.base import flatten_object
+
+    def _attr(name: str, value: str) -> Attribute:
+        return Attribute(name=name, data_type=[DataType.CHAR], shape=[1], values=[value])
+
+    def _var(name: str) -> Variable:
+        return Variable(
+            name=name,
+            shape=[10],
+            compression="NONE",
+            data_type=DataType.FLOAT32,
+            record_variance=True,
+            attributes={"CATDESC": _attr("CATDESC", "desc"), "VAR_TYPE": _attr("VAR_TYPE", "data")},
+        )
+
+    file = File(
+        extension="cdf",
+        filename="x.cdf",
+        compression="NONE",
+        attributes={"Project": _attr("Project", "ISTP>x"), "CATDESC": _attr("CATDESC", "g")},
+        variables={"alpha": _var("alpha"), "beta": _var("beta")},
+    )
+
+    def brute(path: str):
+        pattern, names = parse_captures(path)
+        rx = re.compile("^" + pattern + "$")
+        out = []
+        for fp, v in flatten_object(file):
+            m = rx.match(fp)
+            if m:
+                out.append((fp, v, {n: m.group(n) for n in names}))
+        return out
+
+    for path in (
+        "variables/.*/attributes/CATDESC/values/[0-9]*",  # wildcard var, literal attr
+        "variables/alpha/attributes/VAR_TYPE/values/[0-9]*",  # literal var + attr
+        "variables/alpha/data_type",  # literal var, non-attribute field
+        "attributes/Project/values/[0-9]*",  # global attribute
+        "attributes/CATDESC/values/[0-9]*",  # global attr sharing a name with var attrs
+        "variables/{var}/attributes/CATDESC",  # capture var
+        "variables/.*/attributes/.*",  # wildcard var and attr (full scan)
+        "variables/.*",  # all variable sub-paths
+    ):
+        got = sorted(map(str, resolve_path_with_captures(file, path)))
+        assert got == sorted(map(str, brute(path))), path
+
+
 def test_resolve_path_with_captures_basic(mock_file):
     matches = resolve_path_with_captures(mock_file, "variables/{var}/data_type")
     assert len(matches) >= 1
