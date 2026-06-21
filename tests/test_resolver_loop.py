@@ -158,3 +158,31 @@ def test_converge_fixes_fillval_inside_range():
     fixed = pycdfpp.load(out)
     fill = np.ravel([x for x in fixed[tv].attributes["FILLVAL"]])[0]
     assert fill < vmin or fill > vmax  # VA-019 only requires outside the range
+
+
+def test_converge_ignore_all_rules_converges_immediately():
+    """ignore reaches suite.run inside converge: dropping every ISTP rule leaves
+    nothing to validate, so the file 'converges' with no fixes applied."""
+    suite = get_suite("ISTP")
+    assert suite is not None
+    with open(_CDF, "rb") as fh:
+        data = fh.read()
+    report, _ = converge(data, suite, ignore=["ISTP-.*"])
+    assert report.converged is True
+    assert report.applied == []
+    assert report.remaining_errors == 0
+
+
+def test_converge_ignore_none_matches_default():
+    """ignore=None is byte-identical to omitting it (backward compatibility)."""
+    suite = get_suite("ISTP")
+    assert suite is not None
+    with open(_CDF, "rb") as fh:
+        data = fh.read()
+    default, _ = converge(data, suite)
+    explicit_none, _ = converge(data, suite, ignore=None)
+    assert (len(default.applied), default.remaining_errors, default.converged) == (
+        len(explicit_none.applied),
+        explicit_none.remaining_errors,
+        explicit_none.converged,
+    )
