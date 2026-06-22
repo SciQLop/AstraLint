@@ -18,6 +18,7 @@ from .exists import ExistsAssertion, NotExistsAssertion
 from .is_type import IsTypeAssertion
 from .matches import MatchesAssertion
 from .relationship import ReferencesVariableAssertion
+from .version import VersionAtLeastAssertion
 
 __all__ = [
     "ContainsKeysAssertion",
@@ -43,4 +44,5 @@ __all__ = [
     "LengthAssertion",
     "NotEmptyAssertion",
     "ReferencesVariableAssertion",
+    "VersionAtLeastAssertion",
 ]

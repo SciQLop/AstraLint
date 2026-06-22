@@ -44,3 +44,6 @@ class File(BaseModel):
     compression: str
     attributes: dict[str, Attribute]
     variables: dict[str, Variable]
+    # Format-spec version of the source file, "major.minor.patch" (e.g. CDF "3.5.0").
+    # None when the codec does not expose one (e.g. FITS).
+    format_version: str | None = None

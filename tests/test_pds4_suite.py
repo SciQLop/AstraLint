@@ -27,6 +27,7 @@ def attr(name: str, values: list) -> Attribute:
 def make_file(
     *,
     compression: str = "no_compression",
+    format_version: str | None = "3.5.0",
     global_attrs: dict | None = None,
     variables: dict | None = None,
 ) -> File:
@@ -34,6 +35,7 @@ def make_file(
         extension="cdf",
         filename="test.cdf",
         compression=compression,
+        format_version=format_version,
         attributes=global_attrs or {},
         variables=variables or {},
     )
@@ -61,6 +63,7 @@ def test_pds4_inherits_all_istp_rules_and_adds_its_own():
     for ref in (
         "PDS4-CDFA-001",
         "PDS4-CDFA-002",
+        "PDS4-CDFA-003",
         "PDS4-GA-001",
         "PDS4-GA-002",
         "PDS4-GA-003",
@@ -89,6 +92,25 @@ def test_no_variable_compression_flags_compressed_variable():
     assert not rule.check(bad).valid
     good = make_file(variables={"v": make_var("v", compression="no_compression")})
     assert rule.check(good).valid
+
+
+def test_cdf_version_rule_requires_3_4_or_later():
+    rule = _rule("Structural/CdfVersion.yaml")
+    assert not rule.check(make_file(format_version="3.3.0")).valid
+    assert rule.check(make_file(format_version="3.4.0")).valid
+    assert rule.check(make_file(format_version="3.5.0")).valid
+    # numeric per-component comparison, not lexicographic: 3.10 > 3.4
+    assert rule.check(make_file(format_version="3.10.0")).valid
+    # absent version (e.g. non-CDF codec) is not applicable => passes
+    assert rule.check(make_file(format_version=None)).valid
+
+
+def test_real_resource_reports_its_cdf_version():
+    from astralint.codecs.cdf import CdfCodec
+
+    f = CdfCodec.load(str(RESOURCES / "mms1_asp2_srvy_l1b_stat_00000000_v01.cdf"))
+    assert f is not None and f.format_version == "3.5.0"
+    assert _rule("Structural/CdfVersion.yaml").check(f).valid
 
 
 def test_spase_dataset_resource_id_required():

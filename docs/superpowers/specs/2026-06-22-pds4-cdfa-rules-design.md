@@ -48,7 +48,9 @@ but **not** CDF version, single-vs-multi-file, fragmentation, or zVariable-vs-rV
 | `PDS4-GA-001` `spase_DatasetResourceID` present | CDF-A required | ERROR    | ✅ `contains_keys` on `attributes` |
 | `PDS4-GA-002` `spase_DatasetResourceID` format  | CDF-A          | ERROR    | ✅ `matches ^spase://[^/]+/.+$` |
 | `PDS4-GA-003` recommended SPASE attrs    | CDF-A optional      | INFO     | ✅ `contains_keys` (not required) |
-| version / single-file / contiguity / zVar | structural #1,2,4,5 | —      | ❌ needs codec + model fields |
+| `PDS4-CDFA-003` CDF version ≥ 3.4        | structural #1       | ERROR    | ✅ `format_version` + `version_at_least` |
+| contiguity / zVariables only             | structural #4,5     | —        | ❌ pycdfpp 0.10 doesn't expose it |
+| single-file                              | structural #2       | —        | ✅ satisfied by construction (loader is single-file only) |
 
 Compression surfaces as the pycdfpp `CompressionType` enum name — `no_compression` vs
 `gzip_compression`/etc. — at the `File` root and on each `Variable`.
@@ -60,6 +62,7 @@ mirroring ISTP layout):
 
 - `Structural/NoFileCompression.yaml`        → `PDS4-CDFA-001` (ERROR)
 - `Structural/NoVariableCompression.yaml`    → `PDS4-CDFA-002` (ERROR, per-variable)
+- `Structural/CdfVersion.yaml`               → `PDS4-CDFA-003` (ERROR; `version_at_least` on `File.format_version`)
 - `GlobalAttributes/SpaseDatasetResourceIdRequired.yaml` → `PDS4-GA-001` (ERROR)
 - `GlobalAttributes/SpaseDatasetResourceIdFormat.yaml`   → `PDS4-GA-002` (ERROR)
 - `GlobalAttributes/RecommendedSpaseAttributes.yaml`     → `PDS4-GA-003` (INFO)
@@ -76,13 +79,19 @@ branches (project convention since the readable-passing-rules work).
   compression) is a real future resolver entry but is out of scope here.
   `spase_DatasetResourceID` stays USER-only — never fabricated (identity/provenance).
 
-## Backlog: structural constraints needing a codec/model extension
+## Structural constraints — resolution
 
-The four structural constraints (#1 version, #2 single-file, #4 contiguity, #5 zVariables)
-are real PDS4 requirements but are not representable in the current `File` model. They are
-documented as a follow-up: extend the CDF codec + `File`/`Variable` models to carry
-`cdf_version`, `is_single_file`, per-variable `is_zvariable`, and a contiguity/fragmentation
-flag, then add `PDS4-CDFA-003..006`. Tracked in the README/PDS4 docs and issue #2.
+After inspecting pycdfpp 0.10.0:
+
+- **#1 version ≥ 3.4** — implemented. pycdfpp exposes `cdf.distribution_version` (a tuple);
+  the codec formats it onto `File.format_version` ("3.5.0") and a new `version_at_least`
+  assertion compares it numerically per component (so `3.10 > 3.9`, unlike a regex or string
+  compare). Rule `PDS4-CDFA-003`.
+- **#2 single-file** — satisfied by construction: AstraLint/pycdfpp only load single-file
+  CDFs, so any validated file is single-file. No rule needed.
+- **#4 contiguity / #5 zVariables** — pycdfpp does not surface the physical VVR layout or any
+  r/z distinction. These need new bindings upstream in pycdfpp, then a per-`Variable` flag and
+  `PDS4-CDFA-004/005`. Remaining backlog (issue #2).
 
 ## Testing
 

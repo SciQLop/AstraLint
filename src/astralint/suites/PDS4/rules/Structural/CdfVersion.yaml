@@ -1,0 +1,13 @@
+name: CdfVersion
+description: "A PDS4-archivable CDF must be written with CDF version 3.4 or later (CDF-A)"
+url: "https://pds.nasa.gov/datastandards/documents/archiving/Guide-to-Archiving-CDF-Files-in-PDS4-v7.pdf"
+reference: "PDS4-CDFA-003"
+severity: ERROR
+suite: PDS4
+
+assertions:
+  # "Requirements for Archivable CDF files" #1: Create CDF compliant with version 3.4 or later.
+  - path: "format_version"
+    check: version_at_least
+    minimum: "3.4"
+    message: "{% if valid %}the CDF was written with version {{ value }} (>= 3.4){% else %}PDS4 archiving requires CDF version 3.4 or later; this file is version {{ value }}{% endif %}"
