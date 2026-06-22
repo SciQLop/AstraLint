@@ -41,6 +41,12 @@ def _to_data_type(cdf_dtype: CDFDataType) -> DataType:
     return type_mapping.get(cdf_dtype, DataType.NONE)
 
 
+def _format_version(cdf) -> str | None:
+    """The CDF spec version as 'major.minor.patch' (pycdfpp exposes a tuple)."""
+    version = getattr(cdf, "distribution_version", None)
+    return ".".join(str(part) for part in version) if version else None
+
+
 def _compression_name(item) -> str:
     """The compression type name, tolerating an unknown CompressionType code.
 
@@ -113,6 +119,7 @@ class CdfCodec(Codec):
                 extension="cdf",
                 filename=fname,
                 compression=_compression_name(cdf),
+                format_version=_format_version(cdf),
                 attributes={name: _parse_attribute(attr) for name, attr in cdf.attributes.items()},
                 variables={name: _parse_variable(var) for name, var in cdf.items()},
             )
