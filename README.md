@@ -334,8 +334,21 @@ assertions:
 
 - **ISTP** - [ISTP Metadata Guidelines](https://istp-metadata.readthedocs.io/)
 - **CDAWeb** - [CDAWeb](https://cdaweb.gsfc.nasa.gov/) ingestion profile: inherits ISTP and promotes the CDAWeb-required attributes (`Instrument_type`, `Mission_group`) to errors, plus CDAWeb-specific entry limits
-- **PDS4** - [Planetary Data System v4](https://pds.nasa.gov/datastandards/documents/)
+- **PDS4** - PDS4 CDF archiving profile (CDF-A): inherits ISTP and adds the constraints from the [Guide to Archiving CDF Files in PDS4](https://pds.nasa.gov/datastandards/documents/archiving/Guide-to-Archiving-CDF-Files-in-PDS4-v7.pdf) — no file/variable compression, and a required `spase_DatasetResourceID`. Four further structural requirements (CDF version ≥ 3.4, single-file, contiguous variables, zVariables-only) are not yet checked because the `File` model does not carry that information; see the codec backlog below.
 - **SOLARNET** - [SOLARNET Metadata Recommendations](https://solarnet.readthedocs.io/en/stable/index.html)
+
+### PDS4 codec backlog
+
+The CDF-A specification lists structural requirements that AstraLint cannot yet check
+because the `File`/`Variable` model does not capture them. Implementing these means
+extending the CDF codec and model, then adding the corresponding `PDS4-CDFA-003..006` rules:
+
+- **CDF version ≥ 3.4** — needs `File.cdf_version`.
+- **Single-file CDF** (not multi-file) — needs `File.is_single_file`.
+- **Contiguous (non-fragmented) variables** — needs a per-variable fragmentation flag.
+- **zVariables only** (no rVariables) — needs a per-variable `is_zvariable` flag.
+
+(See [issue #2](https://github.com/SciQLop/AstraLint/issues/2).)
 
 ## Extending AstraLint
 

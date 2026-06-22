@@ -1,0 +1,14 @@
+name: SpaseDatasetResourceIdFormat
+description: "spase_DatasetResourceID must be a SPASE ResourceID: spase://<authority>/<id>"
+url: "https://pds.nasa.gov/datastandards/documents/archiving/Guide-to-Archiving-CDF-Files-in-PDS4-v7.pdf"
+reference: "PDS4-GA-002"
+severity: ERROR
+suite: PDS4
+
+assertions:
+  # SPASE ResourceID form: spase://<NAMING_AUTHORITY>/<UNIQUE_ID>.
+  - path: "attributes/spase_DatasetResourceID/values/[0-9]*"
+    check: matches
+    error_if_no_match: false
+    pattern: "^spase://[^/]+/.+$"
+    message: "{% if valid %}spase_DatasetResourceID is a well-formed SPASE ResourceID{% else %}spase_DatasetResourceID must be a SPASE ResourceID of the form spase://<naming_authority>/<unique_id>{% endif %}"

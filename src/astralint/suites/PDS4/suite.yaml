@@ -1,0 +1,6 @@
+name: PDS4
+url: "https://pds.nasa.gov/datastandards/documents/archiving/Guide-to-Archiving-CDF-Files-in-PDS4-v7.pdf"
+rules_lookup_dir: "rules"
+description: "PDS4 CDF archiving profile (CDF-A): ISTP plus the constraints from the 'Guide to Archiving CDF Files in PDS4'"
+inherit_from:
+  - ISTP

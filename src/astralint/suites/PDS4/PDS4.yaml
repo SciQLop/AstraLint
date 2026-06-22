@@ -1,4 +1,0 @@
-name: PDS4
-url: "https://pds.nasa.gov/datastandards/documents/"
-rules_lookup_dir: "rules"
-description: "PDS4 metadata validation suite"

@@ -1,0 +1,13 @@
+name: SpaseDatasetResourceIdRequired
+description: "CDF-A requires the spase_DatasetResourceID global attribute (ISTP only recommends it)"
+url: "https://pds.nasa.gov/datastandards/documents/archiving/Guide-to-Archiving-CDF-Files-in-PDS4-v7.pdf"
+reference: "PDS4-GA-001"
+severity: ERROR
+suite: PDS4
+
+assertions:
+  # CDF-A "defines the following required attributes: spase_DatasetResourceID".
+  - path: "attributes"
+    check: contains_keys
+    keys: [spase_DatasetResourceID]
+    message: "{% if valid %}spase_DatasetResourceID is present{% else %}CDF-A requires the spase_DatasetResourceID global attribute (the SPASE NumericalData ResourceID the file belongs to): missing {{ missing_keys | join(', ') }}{% endif %}"
