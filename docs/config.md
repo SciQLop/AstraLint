@@ -68,7 +68,8 @@ suite = "PDS4"
 
 **Available suites:**
 - `ISTP` - NASA ISTP Metadata Guidelines
-- `PDS4` - Planetary Data System v4
+- `CDAWeb` - CDAWeb ingestion profile (inherits ISTP)
+- `PDS4` - PDS4 CDF archiving profile / CDF-A (inherits ISTP)
 
 ---
 

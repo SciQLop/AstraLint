@@ -1,0 +1,15 @@
+name: NoFileCompression
+description: "A PDS4-archivable CDF must not be compressed at the file level (CDF-A)"
+url: "https://pds.nasa.gov/datastandards/documents/archiving/Guide-to-Archiving-CDF-Files-in-PDS4-v7.pdf"
+reference: "PDS4-CDFA-001"
+severity: ERROR
+suite: PDS4
+
+assertions:
+  # "Requirements for Archivable CDF files" #3: No compression (file or variable).
+  # The codec reports compression as the pycdfpp CompressionType name; uncompressed
+  # files report "no_compression".
+  - path: "compression"
+    check: in
+    values: [no_compression]
+    message: "{% if valid %}the CDF is uncompressed, as PDS4 archiving requires{% else %}PDS4 archiving forbids file compression; the CDF is compressed ({{ value }}). Re-save it uncompressed (e.g. cdfconvert -compression vars:none){% endif %}"

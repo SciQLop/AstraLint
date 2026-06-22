@@ -1,0 +1,13 @@
+name: NoVariableCompression
+description: "No variable in a PDS4-archivable CDF may be compressed (CDF-A)"
+url: "https://pds.nasa.gov/datastandards/documents/archiving/Guide-to-Archiving-CDF-Files-in-PDS4-v7.pdf"
+reference: "PDS4-CDFA-002"
+severity: ERROR
+suite: PDS4
+
+assertions:
+  # "Requirements for Archivable CDF files" #3: No compression (file or variable).
+  - path: "variables/.*/compression"
+    check: in
+    values: [no_compression]
+    message: "{% if valid %}{{ variable }} is uncompressed{% else %}PDS4 archiving forbids variable compression; {{ variable }} is compressed ({{ value }}){% endif %}"

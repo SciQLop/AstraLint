@@ -1,0 +1,17 @@
+name: RecommendedSpaseAttributes
+description: "CDF-A optional SPASE attributes that aid PDS4 metadata generation"
+url: "https://pds.nasa.gov/datastandards/documents/archiving/Guide-to-Archiving-CDF-Files-in-PDS4-v7.pdf"
+reference: "PDS4-GA-003"
+severity: INFO
+suite: PDS4
+
+assertions:
+  # CDF-A "defines the following optional attributes": the SPASE descriptions and
+  # the granule-level ResourceID. Informational only.
+  - path: "attributes"
+    check: contains_keys
+    keys:
+      - spase_DatasetResource
+      - spase_GranuleResourceID
+      - spase_GranuleResource
+    message: "{% if valid %}all recommended SPASE attributes are present{% else %}consider adding the optional CDF-A SPASE attribute(s) to aid PDS4 metadata generation: {{ missing_keys | join(', ') }}{% endif %}"
