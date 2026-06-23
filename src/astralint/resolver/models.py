@@ -15,6 +15,7 @@ class ReferenceSource(str, Enum):  # noqa: UP042
     GRAPH_RULE = "graph_rule"
     FILENAME = "filename_convention"
     FORMAT_RULE = "format_rule"  # deterministic reshaping of an existing value (length/format)
+    STRUCTURE = "structure"  # lossless physical-layout rewrite (decompress / defragment)
     USER = "user"
 
 
@@ -57,7 +58,9 @@ class Fix(BaseModel):
     variable: str | None
     attribute: str
     scope: Scope
-    action: Literal["add", "set"]  # add = missing attr; set = present-but-wrong
+    # add = missing attr; set = present-but-wrong; normalize = lossless structural
+    # rewrite of the whole file (store uncompressed + contiguous), attribute/value unused
+    action: Literal["add", "set", "normalize"]
     value: Any
     source: ReferenceSource
     confidence: float

@@ -108,7 +108,9 @@ Every proposed fix carries its **source**, **confidence**, and a one-line
   `FILLVAL` set to the ISTP default for the variable's type; `VAR_TYPE`/`DEPEND_0`
   inferred from the variable reference graph; `Logical_file_id`/`Logical_source`
   derived from an ISTP-conventional filename; an out-of-range `FILLVAL` reset to
-  the standard fill; `Generation_date` reformatted to `yyyymmdd`.
+  the standard fill; `Generation_date` reformatted to `yyyymmdd`. For the **PDS4**
+  suite, `astralint fix` also re-saves the CDF uncompressed and contiguous in one
+  lossless step, clearing the CDF-A compression and fragmentation requirements.
 - **staged** — computed but lossy or ambiguous, so it is *suggested* for review and
   never applied automatically. Examples: truncating an over-long
   `CATDESC`/`FIELDNAM`/`LABLAXIS`; a closest-name suggestion for a dangling
