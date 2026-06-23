@@ -36,6 +36,9 @@ class Variable(BaseModel):
     data_type: DataType
     record_variance: bool
     shape: list[int]
+    # Physical-layout facts the codec may expose; None when unknown.
+    is_zvariable: bool | None = None  # False = legacy rVariable
+    is_contiguous: bool | None = None  # False = record data fragmented across the file
 
 
 class File(BaseModel):
