@@ -49,7 +49,8 @@ but **not** CDF version, single-vs-multi-file, fragmentation, or zVariable-vs-rV
 | `PDS4-GA-002` `spase_DatasetResourceID` format  | CDF-A          | ERROR    | ✅ `matches ^spase://[^/]+/.+$` |
 | `PDS4-GA-003` recommended SPASE attrs    | CDF-A optional      | INFO     | ✅ `contains_keys` (not required) |
 | `PDS4-CDFA-003` CDF version ≥ 3.4        | structural #1       | ERROR    | ✅ `format_version` + `version_at_least` |
-| contiguity / zVariables only             | structural #4,5     | —        | ❌ pycdfpp 0.10 doesn't expose it |
+| `PDS4-CDFA-004` no fragmented variables  | structural #4       | ERROR    | ✅ `variables/.*/is_contiguous` + `is_true` (pycdfpp ≥ 0.11) |
+| `PDS4-CDFA-005` zVariables only          | structural #5       | ERROR    | ✅ `variables/.*/is_zvariable` + `is_true` (pycdfpp ≥ 0.11) |
 | single-file                              | structural #2       | —        | ✅ satisfied by construction (loader is single-file only) |
 
 Compression surfaces as the pycdfpp `CompressionType` enum name — `no_compression` vs
@@ -81,17 +82,19 @@ branches (project convention since the readable-passing-rules work).
 
 ## Structural constraints — resolution
 
-After inspecting pycdfpp 0.10.0:
+All four representable CDF-A structural constraints are now checked:
 
-- **#1 version ≥ 3.4** — implemented. pycdfpp exposes `cdf.distribution_version` (a tuple);
-  the codec formats it onto `File.format_version` ("3.5.0") and a new `version_at_least`
-  assertion compares it numerically per component (so `3.10 > 3.9`, unlike a regex or string
-  compare). Rule `PDS4-CDFA-003`.
+- **#1 version ≥ 3.4** — `cdf.distribution_version` (a tuple) → `File.format_version`
+  ("3.5.0"); the `version_at_least` assertion compares numerically per component (so
+  `3.10 > 3.9`). Rule `PDS4-CDFA-003`.
 - **#2 single-file** — satisfied by construction: AstraLint/pycdfpp only load single-file
-  CDFs, so any validated file is single-file. No rule needed.
-- **#4 contiguity / #5 zVariables** — pycdfpp does not surface the physical VVR layout or any
-  r/z distinction. These need new bindings upstream in pycdfpp, then a per-`Variable` flag and
-  `PDS4-CDFA-004/005`. Remaining backlog (issue #2).
+  CDFs. No rule needed.
+- **#4 contiguity / #5 zVariables** — pycdfpp **0.11.0** added `Variable.is_contiguous()`
+  (method) and `Variable.is_zvariable` (property). The codec maps both onto the `Variable`
+  model (`getattr` fallback → `None` when an older pycdfpp is present); a new `is_true`
+  assertion checks them per variable (True→pass, False→fail, None→not-applicable). Rules
+  `PDS4-CDFA-004` (no fragmented variables) and `PDS4-CDFA-005` (zVariables only). Floor
+  bumped to `pycdfpp>=0.11.0` (safe — 0.11.0 ships both Pyodide-ABI emscripten wheels).
 
 ## Testing
 

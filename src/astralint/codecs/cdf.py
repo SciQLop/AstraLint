@@ -87,6 +87,16 @@ def _(attr: CDFVariableAttribute) -> Attribute:
     )
 
 
+def _is_contiguous(var) -> bool | None:
+    """Whether the variable's record data is a single contiguous block.
+
+    pycdfpp >= 0.11 exposes this as a method; older versions don't expose it at all
+    (then it stays None — not applicable).
+    """
+    method = getattr(var, "is_contiguous", None)
+    return bool(method()) if callable(method) else None
+
+
 def _parse_variable(var: CDFVariable) -> Variable:
     return Variable(
         name=var.name,
@@ -95,6 +105,8 @@ def _parse_variable(var: CDFVariable) -> Variable:
         compression=_compression_name(var),
         record_variance=not var.is_nrv,
         data_type=_to_data_type(var.type),
+        is_zvariable=getattr(var, "is_zvariable", None),
+        is_contiguous=_is_contiguous(var),
     )
 
 

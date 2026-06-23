@@ -45,7 +45,9 @@ dependencies = [
     "astropy>=7.2.0; sys_platform != 'emscripten'",
     "cyclopts>=4.5.2",
     "jinja2>=3.1.0",
-    "pycdfpp>=0.8.5",
+    # 0.11.0 adds Variable.is_zvariable / is_contiguous (PDS4-CDFA-004/005) and ships
+    # emscripten wheels for both Pyodide ABIs (cp313/2025_0 + cp314/2026_0).
+    "pycdfpp>=0.11.0",
     "pydantic>=2.12.5",
     "pyyaml>=6.0",
     "requests>=2.32.5",

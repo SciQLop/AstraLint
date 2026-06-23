@@ -1,0 +1,13 @@
+name: NoFragmentedVariables
+description: "A PDS4-archivable CDF must store each variable's data contiguously (CDF-A)"
+url: "https://pds.nasa.gov/datastandards/documents/archiving/Guide-to-Archiving-CDF-Files-in-PDS4-v7.pdf"
+reference: "PDS4-CDFA-004"
+severity: ERROR
+suite: PDS4
+
+assertions:
+  # "Requirements for Archivable CDF files" #4: No fragmented variables (all data for a
+  # variable must be contiguous in the file). Re-save with cdfconvert to defragment.
+  - path: "variables/.*/is_contiguous"
+    check: is_true
+    message: "{% if valid %}{{ variable }} is stored contiguously{% else %}PDS4 archiving forbids fragmented variables; {{ variable }} is fragmented (records written across multiple blocks). Re-save with cdfconvert to defragment{% endif %}"

@@ -1,3 +1,4 @@
+from .boolean import IsTrueAssertion
 from .collections import ContainsAssertion, LengthAssertion, NotContainsAssertion, NotEmptyAssertion
 from .combinations import (
     AllOf,
@@ -45,4 +46,5 @@ __all__ = [
     "NotEmptyAssertion",
     "ReferencesVariableAssertion",
     "VersionAtLeastAssertion",
+    "IsTrueAssertion",
 ]

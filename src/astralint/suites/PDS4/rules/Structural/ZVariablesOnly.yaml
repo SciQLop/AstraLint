@@ -1,0 +1,12 @@
+name: ZVariablesOnly
+description: "A PDS4-archivable CDF must use only zVariables, not legacy rVariables (CDF-A)"
+url: "https://pds.nasa.gov/datastandards/documents/archiving/Guide-to-Archiving-CDF-Files-in-PDS4-v7.pdf"
+reference: "PDS4-CDFA-005"
+severity: ERROR
+suite: PDS4
+
+assertions:
+  # "Requirements for Archivable CDF files" #5: Use only zVariables.
+  - path: "variables/.*/is_zvariable"
+    check: is_true
+    message: "{% if valid %}{{ variable }} is a zVariable{% else %}PDS4 archiving requires zVariables only; {{ variable }} is a legacy rVariable{% endif %}"

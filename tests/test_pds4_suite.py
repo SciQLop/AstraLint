@@ -41,7 +41,13 @@ def make_file(
     )
 
 
-def make_var(name: str, *, compression: str = "no_compression") -> Variable:
+def make_var(
+    name: str,
+    *,
+    compression: str = "no_compression",
+    is_zvariable: bool | None = True,
+    is_contiguous: bool | None = True,
+) -> Variable:
     return Variable(
         name=name,
         attributes={},
@@ -49,6 +55,8 @@ def make_var(name: str, *, compression: str = "no_compression") -> Variable:
         data_type=DataType.FLOAT64,
         record_variance=True,
         shape=[1],
+        is_zvariable=is_zvariable,
+        is_contiguous=is_contiguous,
     )
 
 
@@ -64,11 +72,45 @@ def test_pds4_inherits_all_istp_rules_and_adds_its_own():
         "PDS4-CDFA-001",
         "PDS4-CDFA-002",
         "PDS4-CDFA-003",
+        "PDS4-CDFA-004",
+        "PDS4-CDFA-005",
         "PDS4-GA-001",
         "PDS4-GA-002",
         "PDS4-GA-003",
     ):
         assert ref in pds4_refs, f"PDS4 must add {ref}"
+
+
+def test_no_fragmented_variables_flags_fragmented():
+    rule = _rule("Structural/NoFragmentedVariables.yaml")
+    bad = make_file(variables={"v": make_var("v", is_contiguous=False)})
+    assert not rule.check(bad).valid
+    good = make_file(variables={"v": make_var("v", is_contiguous=True)})
+    assert rule.check(good).valid
+    # unknown (old pycdfpp) => not applicable, passes
+    unknown = make_file(variables={"v": make_var("v", is_contiguous=None)})
+    assert rule.check(unknown).valid
+
+
+def test_zvariables_only_flags_rvariable():
+    rule = _rule("Structural/ZVariablesOnly.yaml")
+    bad = make_file(variables={"v": make_var("v", is_zvariable=False)})
+    assert not rule.check(bad).valid
+    good = make_file(variables={"v": make_var("v", is_zvariable=True)})
+    assert rule.check(good).valid
+    unknown = make_file(variables={"v": make_var("v", is_zvariable=None)})
+    assert rule.check(unknown).valid
+
+
+def test_real_resource_is_all_z_and_contiguous():
+    from astralint.codecs.cdf import CdfCodec
+
+    f = CdfCodec.load(str(RESOURCES / "mms1_asp2_srvy_l1b_stat_00000000_v01.cdf"))
+    assert f is not None
+    assert all(v.is_zvariable for v in f.variables.values())
+    assert all(v.is_contiguous for v in f.variables.values())
+    assert _rule("Structural/ZVariablesOnly.yaml").check(f).valid
+    assert _rule("Structural/NoFragmentedVariables.yaml").check(f).valid
 
 
 def test_no_file_compression_flags_compressed_file():
