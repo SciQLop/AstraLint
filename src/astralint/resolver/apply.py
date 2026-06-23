@@ -39,7 +39,19 @@ def _abstract_type(var) -> DataType:
     return type_mapping.get(var.type, DataType.NONE)
 
 
+def _normalize_layout(cdf) -> None:
+    """Store the CDF uncompressed; re-serialization (pycdfpp.save) also writes each
+    variable's records contiguously, so this clears compression and fragmentation."""
+    cdf.compression = pycdfpp.CompressionType.no_compression
+    for _, var in cdf.items():
+        var.compression = pycdfpp.CompressionType.no_compression
+
+
 def _apply_one(cdf, fix: Fix) -> None:
+    if fix.action == "normalize":
+        _normalize_layout(cdf)
+        return
+
     if fix.scope == Scope.GLOBAL:
         # One CHAR entry: entries_values is a flat list of per-entry values.
         if fix.action == "add":

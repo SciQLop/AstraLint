@@ -76,9 +76,17 @@ branches (project convention since the readable-passing-rules work).
 - **No Epoch-name rule.** The CDF-A guide quotes ISTP's older "`DEPEND_0` must equal
   `'Epoch'` / Epoch first variable" text, but the ISTP suite was deliberately made
   name-agnostic (any CDF-time-typed variable is a valid epoch). We do not regress that.
-- **No compression auto-fix.** Producing an uncompressed copy (pycdfpp re-save without
-  compression) is a real future resolver entry but is out of scope here.
-  `spase_DatasetResourceID` stays USER-only — never fabricated (identity/provenance).
+- `spase_DatasetResourceID` stays USER-only — never fabricated (identity/provenance).
+
+### Auto-fix (added 2026-06-23)
+
+The structural failures are auto-fixable losslessly. The resolver emits a single `Fix`
+with `action="normalize"` (source `STRUCTURE`) whenever `PDS4-CDFA-001/002/004` fail;
+`apply._normalize_layout` sets `cdf.compression` + every `var.compression` to
+`no_compression`, and `pycdfpp.save` re-serialises contiguously — so one re-save clears
+compression *and* fragmentation. It is AUTO (lossless), so `astralint fix --suite PDS4`
+produces an archive-ready CDF. Version (CDFA-003) and `spase_DatasetResourceID` are not
+auto-fixed (the former is the writer's, the latter is USER identity).
 
 ## Structural constraints — resolution
 

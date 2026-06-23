@@ -1,7 +1,11 @@
 from ..base.file import File
 from ..base.validation_result import Severity, ValidationResultGroup
-from .models import ApplyPolicy, Fix, ResolverEntry, ResolverOutput, Scope
+from .models import ApplyPolicy, Fix, ReferenceSource, ResolverEntry, ResolverOutput, Scope
 from .registry import REGISTRY
+
+# PDS4/CDF-A structural failures all cleared by one lossless re-save (store the CDF
+# uncompressed; pycdfpp.save also writes variables contiguously).
+_NORMALIZE_TRIGGERS = {"PDS4-CDFA-001", "PDS4-CDFA-002", "PDS4-CDFA-004"}
 
 
 def _iter_failures(group: ValidationResultGroup, inherited_reference: str = ""):
@@ -83,6 +87,28 @@ def _build_fix(
     )
 
 
+def _structural_fix(failures: ValidationResultGroup) -> list[Fix]:
+    """A single lossless re-save that clears compression (CDFA-001/002) and
+    fragmentation (CDFA-004). Emitted once when any of those rules fail."""
+    references = {reference for reference, _ in _iter_failures(failures)}
+    if not references & _NORMALIZE_TRIGGERS:
+        return []
+    return [
+        Fix(
+            target_path="compression",
+            variable=None,
+            attribute="compression",
+            scope=Scope.GLOBAL,
+            action="normalize",
+            value="no_compression",
+            source=ReferenceSource.STRUCTURE,
+            confidence=1.0,
+            provenance_note="store the CDF uncompressed and contiguous (PDS4/CDF-A); lossless re-save",
+            auto=True,
+        )
+    ]
+
+
 def resolve(file: File, failures: ValidationResultGroup) -> list[Fix]:
     fixes: dict[str, Fix] = {}  # keyed on target_path for dedup
     for reference, leaf in _iter_failures(failures):
@@ -103,4 +129,4 @@ def resolve(file: File, failures: ValidationResultGroup) -> list[Fix]:
             existing = fixes.get(fix.target_path)
             if existing is None or fix.confidence > existing.confidence:
                 fixes[fix.target_path] = fix
-    return list(fixes.values())
+    return list(fixes.values()) + _structural_fix(failures)
