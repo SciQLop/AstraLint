@@ -33,6 +33,18 @@ def render_message(template: str, context: dict) -> str:
         return f"[template error: {e}] template: {template}"
 
 
+def unwrap_scalar(value: Any) -> Any:
+    """Unwrap a single-element sequence to its scalar. CDF numeric variable
+    attributes load nested (e.g. FILLVAL ``[[nan]]`` -> ``values/0`` is ``[nan]``),
+    so an assertion comparing such a value would otherwise compare lists: that
+    raises ``TypeError`` against a scalar bound (``[5.0] <= 10``) and defeats the
+    ``FILLVAL != FILLVAL`` NaN trick (``[nan] != [nan]`` is False). Comparing on the
+    unwrapped scalar matches the rule author's intent; a no-op on real scalars."""
+    while isinstance(value, (list, tuple)) and len(value) == 1:
+        value = value[0]
+    return value
+
+
 def build_context(target: str, raw_path: str, value: Any, **extra: Any) -> dict:
     ctx: dict = {"value": value, "path": raw_path, "variable": None, "attribute": None}
     parts = target.split("/")

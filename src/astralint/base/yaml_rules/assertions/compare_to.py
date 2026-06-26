@@ -11,6 +11,7 @@ from .base import (
     render_message,
     resolve_path,
     resolve_path_with_captures,
+    unwrap_scalar,
 )
 
 _operators = {
@@ -23,17 +24,6 @@ _operators = {
 }
 
 _NO_MATCH_TEMPLATE = "{% if valid %}{{ target or path }} did not match any values (not required){% else %}{{ target or path }} did not match any values{% endif %}"
-
-
-def _scalar(value: object) -> object:
-    """Unwrap a single-element sequence to its scalar. CDF numeric variable
-    attributes load nested (e.g. FILLVAL ``[[nan]]`` -> ``values/0`` is ``[nan]``),
-    and comparing the wrapping lists element-wise defeats the ``FILLVAL != FILLVAL``
-    NaN trick (``[nan] != [nan]`` is False because list equality short-circuits on
-    element identity, unlike scalar ``nan != nan`` which is True)."""
-    while isinstance(value, (list, tuple)) and len(value) == 1:
-        value = value[0]
-    return value
 
 
 class CompareToAssertion(BaseEvaluable):
@@ -101,7 +91,7 @@ class CompareToAssertion(BaseEvaluable):
             other_value = other_matches[0][1]
             ctx["other_value"] = other_value
             try:
-                passed = _operators[self.operator](_scalar(value), _scalar(other_value))
+                passed = _operators[self.operator](unwrap_scalar(value), unwrap_scalar(other_value))
             except TypeError:
                 passed = False
 

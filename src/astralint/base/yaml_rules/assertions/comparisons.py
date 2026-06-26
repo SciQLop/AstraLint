@@ -4,7 +4,7 @@ from pydantic import ConfigDict
 
 from ...file import File
 from ...validation_result import Severity, ValidationResult
-from .base import BaseAssertion, build_context, clean_target, render_message
+from .base import BaseAssertion, build_context, clean_target, render_message, unwrap_scalar
 
 _yaml_types = int | float | bool | list | str
 
@@ -35,7 +35,10 @@ class ComparisonAssertion(BaseAssertion):
         captures: dict[str, str] | None = None,
     ) -> ValidationResult:
         target = clean_target(path)
-        passed = _operators[self.operator](value, self.value)
+        try:
+            passed = _operators[self.operator](unwrap_scalar(value), self.value)
+        except TypeError:
+            passed = False
         ctx = build_context(
             target,
             path,
@@ -71,7 +74,11 @@ class RangeAssertion(BaseAssertion):
         captures: dict[str, str] | None = None,
     ) -> ValidationResult:
         target = clean_target(path)
-        passed = self.min <= value <= self.max
+        try:
+            scalar = unwrap_scalar(value)
+            passed = self.min <= scalar <= self.max
+        except TypeError:
+            passed = False
         ctx = build_context(
             target, path, value, valid=passed, min=self.min, max=self.max, **(captures or {})
         )
