@@ -1773,3 +1773,87 @@ def test_all_of_custom_message_on_success(mock_file):
     assert isinstance(result, ValidationResultGroup)
     assert result.name == "all_of"
     assert len(result.results) == 1
+
+
+# =============================================================================
+# comparison / range hardening: nested-value unwrap + TypeError guard
+# =============================================================================
+
+
+def _file_with_attr(values, dtype):
+    """A one-variable File whose only attribute holds ``values`` (matches the
+    CDF codec, which loads numeric variable attributes nested, e.g. ``[[5.0]]``)."""
+    from astralint.base.file import Attribute, File, Variable
+
+    return File(
+        extension="cdf",
+        filename="t.cdf",
+        compression="NONE",
+        attributes={},
+        variables={
+            "v": Variable(
+                name="v",
+                shape=[1],
+                data_type=dtype,
+                compression="NONE",
+                record_variance=True,
+                attributes={"A": Attribute(name="A", data_type=[dtype], shape=[1], values=values)},
+            )
+        },
+    )
+
+
+def _rule(check_block: str):
+    return YamlRule(
+        **safe_load(
+            f"""
+name: T
+description: d
+url: u
+reference: T-HARDEN
+severity: ERROR
+suite: TEST
+assertions:
+  - path: variables/v/attributes/A/values/0
+{check_block}
+"""
+        )
+    )
+
+
+def test_range_unwraps_nested_numeric_value():
+    """range must compare the scalar of a nested ``[[5.0]]`` value, not raise
+    TypeError on the wrapping list (``0 <= [5.0]`` errors before the unwrap)."""
+    from astralint.base.file import DataType
+
+    f = _file_with_attr([[5.0]], DataType.FLOAT64)
+    rule = _rule("    check: range\n    min: 0\n    max: 10")
+    assert rule.check(f).valid
+
+
+def test_comparison_unwraps_nested_numeric_value():
+    """comparison '=' against a literal must unwrap the nested value first
+    (``[5.0] == 5.0`` is False before the unwrap)."""
+    from astralint.base.file import DataType
+
+    f = _file_with_attr([[5.0]], DataType.FLOAT64)
+    rule = _rule('    check: comparison\n    operator: "="\n    value: 5.0')
+    assert rule.check(f).valid
+
+
+def test_range_does_not_crash_on_incompatible_type():
+    """An incompatible value type yields a graceful failure, not a TypeError that
+    aborts the whole validation run."""
+    from astralint.base.file import DataType
+
+    f = _file_with_attr(["abc"], DataType.CHAR)
+    rule = _rule("    check: range\n    min: 0\n    max: 10")
+    assert not rule.check(f).valid
+
+
+def test_comparison_does_not_crash_on_incompatible_type():
+    from astralint.base.file import DataType
+
+    f = _file_with_attr(["abc"], DataType.CHAR)
+    rule = _rule('    check: comparison\n    operator: "<"\n    value: 5')
+    assert not rule.check(f).valid
