@@ -352,6 +352,44 @@ def test_fillval_nan_is_allowed():
     assert rule.check(f).valid
 
 
+def test_fillval_nan_allowed_through_real_cdf_roundtrip():
+    """Regression: a NaN FILLVAL must pass VA-019 after a real CDF round-trip.
+
+    The codec loads numeric variable attributes nested (FILLVAL -> ``values/0``
+    is the 1-element list ``[nan]``, not the scalar ``nan``). That turned the
+    ``FILLVAL != FILLVAL`` NaN clause into a list comparison, and ``[nan] != [nan]``
+    is False (list equality short-circuits on element identity), so NaN was wrongly
+    flagged as inside the range. The flat-``values`` unit test above never produced
+    that shape, so it masked the bug; this one exercises the true codec output."""
+    import numpy as np
+    import pycdfpp
+
+    from astralint.codecs.cdf import CdfCodec
+
+    src = Path(__file__).parent / "resources" / "mms1_asp2_srvy_l1b_stat_00000000_v01.cdf"
+    cdf = pycdfpp.load(str(src))
+    target = next(
+        name for name, v in cdf.items() if v.type == pycdfpp.DataType.CDF_REAL4 and not v.is_nrv
+    )
+    for key, value in (("VALIDMIN", 0.0), ("VALIDMAX", 100.0), ("FILLVAL", float("nan"))):
+        arr = np.array([value], dtype=np.float32)
+        if key in cdf[target].attributes:
+            cdf[target].attributes[key].set_value(arr, pycdfpp.DataType.CDF_FLOAT)
+        else:
+            cdf[target].add_attribute(key, arr, pycdfpp.DataType.CDF_FLOAT)
+
+    loaded = CdfCodec.load(bytes(pycdfpp.save(cdf)))
+    assert loaded is not None
+    # the bug condition: values/0 is a nested list, not a scalar
+    assert isinstance(loaded.variables[target].attributes["FILLVAL"].values[0], list)
+
+    # isolate the target variable so an unrelated pre-existing finding
+    # (mms1_asp_stat's full-range UINT1 FILLVAL) doesn't mask the result
+    only_target = loaded.model_copy(update={"variables": {target: loaded.variables[target]}})
+    rule = load_rule("VariableAttributes", "FillvalOutsideRange")
+    assert rule.check(only_target).valid
+
+
 # --- Hard-vs-soft: CDAWeb-required globals ------------------------------------
 
 
