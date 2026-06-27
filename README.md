@@ -99,7 +99,16 @@ astralint fix myfile.cdf --apply none
 
 # Choose the output path
 astralint fix myfile.cdf --output corrected.cdf
+
+# Respects the same config as `lint`: ignored / deselected rules are not fixed
+astralint fix myfile.cdf --ignore "ISTP-VA-019"
+astralint fix data.cdf --config-file .astralint.prod.yaml
 ```
+
+`fix` reads the same configuration as `lint` (`.astralint.yaml`,
+`pyproject.toml [tool.astralint]`, and `--suite`/`--select`/`--ignore` overrides):
+a rule excluded via `ignore`/`select` or demoted below `ERROR` via
+`severity_overrides` is neither validated nor proposed for fixing.
 
 Every proposed fix carries its **source**, **confidence**, and a one-line
 **provenance note**, and falls into one of three dispositions:

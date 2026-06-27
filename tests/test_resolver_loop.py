@@ -186,3 +186,16 @@ def test_converge_ignore_none_matches_default():
         explicit_none.remaining_errors,
         explicit_none.converged,
     )
+
+
+def test_converge_select_reaches_suite_run():
+    """select reaches suite.run inside converge: selecting only a non-matching
+    pattern leaves no rules to validate, so the file converges with no fixes."""
+    suite = get_suite("ISTP")
+    assert suite is not None
+    with open(_CDF, "rb") as fh:
+        data = fh.read()
+    report, _ = converge(data, suite, select=["NONEXISTENT-.*"])
+    assert report.converged is True
+    assert report.applied == []
+    assert report.remaining_errors == 0

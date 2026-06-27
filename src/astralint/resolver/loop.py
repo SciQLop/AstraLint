@@ -44,6 +44,8 @@ def converge(
     max_iter: int = 10,
     filename: str | None = None,
     ignore: list[str] | None = None,
+    select: list[str] | None = None,
+    severity_overrides: dict | None = None,
 ) -> tuple[ConvergenceReport, bytes]:
     applied: list[Fix] = []
     iterations = 0
@@ -52,7 +54,9 @@ def converge(
 
     while iterations < max_iter:
         file = _load(cdf_bytes, filename)
-        results = suite.run(file, ignore=ignore)
+        results = suite.run(
+            file, select=select, ignore=ignore, severity_overrides=severity_overrides
+        )
         if not results.has_errors():
             stopped = "converged"
             break
@@ -75,7 +79,9 @@ def converge(
     # Recompute staged suggestions against the FINAL file state so they reflect
     # what still needs review after all auto-fixes (not a stale pre-mutation set).
     final_file = _load(cdf_bytes, filename)
-    final = suite.run(final_file, ignore=ignore)
+    final = suite.run(
+        final_file, select=select, ignore=ignore, severity_overrides=severity_overrides
+    )
     staged = [f for f in resolve(final_file, final.failures_only()) if not f.auto]
     report = ConvergenceReport(
         iterations=iterations,
