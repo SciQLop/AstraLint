@@ -301,19 +301,32 @@ def _user_line(fx: Fix) -> str:
 @app.command()
 def fix(
     path: Path,
-    suite: str = "ISTP",
+    suite: str | None = None,
+    select: list[str] | None = None,
+    ignore: list[str] | None = None,
+    config_file: Path | None = None,
     apply: str = "auto",
     output: Path | None = None,
     max_iter: int = 10,
 ):
-    """Propose and (optionally) apply deterministic ISTP fixes to a CDF.
+    """Propose and (optionally) apply deterministic fixes to a CDF.
+
+    Respects the same configuration as `lint` (.astralint.yaml / pyproject
+    [tool.astralint] / CLI overrides): a rule excluded via `ignore`/`select` or
+    demoted below ERROR via `severity_overrides` is neither validated nor fixed.
 
     Parameters
     ----------
     path : Path
         The CDF file to repair.
-    suite : str
-        Conformance suite to validate against. Default "ISTP".
+    suite : str, optional
+        Conformance suite to validate against. Overrides config (default "ISTP").
+    select : list[str], optional
+        Rule patterns to include. Overrides config file.
+    ignore : list[str], optional
+        Rule patterns to exclude from validation and fixing. Overrides config file.
+    config_file : Path, optional
+        Path to a specific config file to use.
     apply : str
         "auto" runs the convergence loop and writes a corrected CDF;
         "none" is a dry run that lists proposed fixes without writing.
@@ -326,15 +339,39 @@ def fix(
     if apply not in ("auto", "none"):
         console.print(f"[red]✗[/] Invalid --apply '{escape(apply)}'; expected 'auto' or 'none'")
         raise SystemExit(1)
-    checker = get_suite(suite)
+
+    cli_overrides: dict = {}
+    if suite:
+        cli_overrides["suite"] = suite
+    if select:
+        cli_overrides["select"] = select
+    if ignore:
+        cli_overrides["ignore"] = ignore
+    cfg = load_config(
+        config_file=config_file, cli_overrides=cli_overrides if cli_overrides else None
+    )
+
+    checker = get_suite(cfg.suite)
     if checker is None:
-        console.print(f"[red]✗[/] Unknown suite '{escape(suite)}'")
+        console.print(f"[red]✗[/] Unknown suite '{escape(cfg.suite)}'")
         raise SystemExit(1)
+
+    if cfg.extra_rules:
+        project_root = find_project_root()
+        load_extra_rules([p if p.is_absolute() else project_root / p for p in cfg.extra_rules])
 
     with open(path, "rb") as f:
         cdf_bytes = f.read()
 
-    convergence, fixed = converge(cdf_bytes, checker, max_iter=max_iter, filename=path.name)
+    convergence, fixed = converge(
+        cdf_bytes,
+        checker,
+        max_iter=max_iter,
+        filename=path.name,
+        select=cfg.select or None,
+        ignore=cfg.ignore or None,
+        severity_overrides=cfg.severity_overrides or None,
+    )
 
     if convergence.applied:
         console.print(f"[bold]Proposed/applied fixes ({len(convergence.applied)}):[/]")

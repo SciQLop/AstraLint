@@ -107,3 +107,30 @@ def test_fix_hint_counts_user_disposition():
     file.attributes.pop("DOI", None)
     hint = _fix_hint([(p, file, suite.run(file))])
     assert hint is not None
+
+
+def test_fix_baseline_finds_auto_fixes(capsys):
+    """Baseline: with no ignore, the resource CDF yields auto-applicable fixes."""
+    fix_command(Path(_CDF), apply="none")
+    out = capsys.readouterr().out
+    assert "Proposed/applied fixes" in out
+    assert "remaining_errors=0" not in out  # real errors remain to be fixed
+
+
+def test_fix_respects_ignore_from_cli(capsys):
+    """--ignore reaches the convergence loop: dropping every ISTP rule leaves
+    nothing to fix and nothing failing."""
+    fix_command(Path(_CDF), apply="none", ignore=["ISTP-.*"])
+    out = capsys.readouterr().out
+    assert "No auto-applicable fixes found." in out
+    assert "remaining_errors=0" in out
+
+
+def test_fix_respects_ignore_from_config_file(tmp_path, capsys):
+    """The config file's ignore list reaches `fix` (the config-ignore wiring)."""
+    cfg = tmp_path / ".astralint.yaml"
+    cfg.write_text("suite: ISTP\nignore:\n  - 'ISTP-.*'\n")
+    fix_command(Path(_CDF), apply="none", config_file=cfg)
+    out = capsys.readouterr().out
+    assert "No auto-applicable fixes found." in out
+    assert "remaining_errors=0" in out
